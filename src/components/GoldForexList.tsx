@@ -14,9 +14,9 @@ export function GoldForexList({ items, onSelectSymbol }: GoldForexListProps) {
   const forexItems = items.filter((i) => i.type === "forex");
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
       {/* Bảng Giá Vàng */}
-      <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-4 sm:p-5 backdrop-blur-md">
+      <div className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-4 sm:p-5 shadow-lg">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0">
@@ -84,7 +84,7 @@ export function GoldForexList({ items, onSelectSymbol }: GoldForexListProps) {
       </div>
 
       {/* Bảng Tỷ Giá Ngoại Tệ */}
-      <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-4 sm:p-5 backdrop-blur-md">
+      <div className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-4 sm:p-5 shadow-lg">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0">

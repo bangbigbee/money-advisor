@@ -13,6 +13,7 @@ import { GoldForexList } from "@/components/GoldForexList";
 import { TradingViewWidget } from "@/components/TradingViewWidget";
 import { PortfolioProvider } from "@/context/PortfolioContext";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 import {
   fetchTopCryptos,
   initialGoldForexData,
@@ -40,6 +41,7 @@ export default function Home() {
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
 
   const { role, remainingScans } = useAuth();
+  const { theme } = useTheme();
   const isUnlimited = role === "ADMIN" || role === "ULTRA";
 
   const loadCryptoData = async () => {
@@ -89,11 +91,11 @@ export default function Home() {
 
         {/* Main Content Area */}
         <main className="flex-1 max-w-[1720px] w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 md:pb-8 space-y-6">
-          {/* Market Status Ticker & Banner (Hidden on scan & admin tabs for clean workspace) */}
+          {/* Market Status Ticker & Banner */}
           {activeTab !== "scan" && activeTab !== "admin" && (
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-4 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-zinc-900/60 to-zinc-900/40 border border-emerald-500/20 shadow-lg">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-4 rounded-xl bg-zinc-900/80 border border-zinc-800 shadow-md">
               <div className="flex items-center gap-3">
-                <div className="p-2 sm:p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
+                <div className="p-2 sm:p-2.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
                   <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <div>
@@ -110,7 +112,6 @@ export default function Home() {
               </div>
 
               <div className="flex items-center gap-2 self-stretch sm:self-center justify-between sm:justify-end">
-                {/* Scan Trigger Button on Banner with Circular Quota Counter */}
                 <button
                   onClick={() => setActiveTab("scan")}
                   className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 bg-gradient-to-r from-cyan-500/20 via-emerald-500/20 to-teal-500/20 hover:from-cyan-500/30 hover:to-teal-500/30 text-cyan-300 text-xs font-bold rounded-lg border border-cyan-500/40 transition cursor-pointer shadow-sm whitespace-nowrap"
@@ -140,10 +141,10 @@ export default function Home() {
             </div>
           )}
 
-          {/* Tab: Admin Dashboard (Dedicated view for Admin) */}
+          {/* Tab: Admin Dashboard */}
           {activeTab === "admin" && <AdminDashboard />}
 
-          {/* Tab: Quét AI Chuyên sâu (Dedicated Full-screen Scanner View) */}
+          {/* Tab: Quét AI Chuyên sâu */}
           {activeTab === "scan" && (
             <ScannerPage
               cryptos={cryptos}
@@ -154,7 +155,7 @@ export default function Home() {
 
           {/* Tab 1: Tổng quan (Dashboard) */}
           {activeTab === "dashboard" && (
-            <div className="space-y-8">
+            <div className="space-y-6">
               {/* Portfolio Summary & Allocation */}
               <PortfolioOverview
                 onOpenAddModal={() => {
@@ -164,7 +165,7 @@ export default function Home() {
               />
 
               {/* TradingView Chart Section */}
-              <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-5 backdrop-blur-md space-y-4">
+              <div className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-5 shadow-lg space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <Activity className="w-5 h-5 text-emerald-400" />
@@ -199,7 +200,7 @@ export default function Home() {
                 </div>
 
                 {/* TradingView Chart */}
-                <TradingViewWidget symbol={selectedChartSymbol} theme="dark" />
+                <TradingViewWidget symbol={selectedChartSymbol} theme={theme === "light" ? "light" : "dark"} />
               </div>
 
               {/* User Asset Table */}
@@ -229,12 +230,12 @@ export default function Home() {
           {/* Tab 2: Crypto */}
           {activeTab === "crypto" && (
             <div className="space-y-6">
-              <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-5 backdrop-blur-md">
+              <div className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-5 shadow-lg">
                 <div className="mb-4">
                   <h2 className="text-lg font-bold text-zinc-100">Biểu đồ Phân tích Kỹ thuật Crypto</h2>
                   <p className="text-xs text-zinc-400">Chọn đồng coin để soi biểu đồ nến và chỉ báo</p>
                 </div>
-                <TradingViewWidget symbol={selectedChartSymbol} theme="dark" />
+                <TradingViewWidget symbol={selectedChartSymbol} theme={theme === "light" ? "light" : "dark"} />
               </div>
 
               <CryptoList
@@ -249,12 +250,12 @@ export default function Home() {
           {/* Tab 3: Vàng & Ngoại hối */}
           {activeTab === "forex-gold" && (
             <div className="space-y-6">
-              <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-5 backdrop-blur-md">
+              <div className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-5 shadow-lg">
                 <div className="mb-4">
-                  <h2 className="text-lg font-bold text-zinc-100">Biểu đồ Vàng & Tiền tệ Thế giới</h2>
-                  <p className="text-xs text-zinc-400">Theo dõi tỷ giá vàng giao ngay XAU/USD & DXY</p>
+                  <h2 className="text-lg font-bold text-zinc-100">Biểu đồ Vàng Thế Giới & Ngoại hối</h2>
+                  <p className="text-xs text-zinc-400">Xem diễn biến XAU/USD, DXY, EUR/USD thời gian thực</p>
                 </div>
-                <TradingViewWidget symbol="OANDA:XAUUSD" theme="dark" />
+                <TradingViewWidget symbol={selectedChartSymbol} theme={theme === "light" ? "light" : "dark"} />
               </div>
 
               <GoldForexList
@@ -264,7 +265,7 @@ export default function Home() {
             </div>
           )}
 
-          {/* Tab 4: Danh mục đầu tư */}
+          {/* Tab 4: Danh mục đầu tư cá nhân */}
           {activeTab === "portfolio" && (
             <div className="space-y-6">
               <PortfolioOverview
@@ -292,15 +293,11 @@ export default function Home() {
           }}
           initialData={addModalPrefill}
         />
+
         <UpgradeModal
           isOpen={isUpgradeModalOpen}
           onClose={() => setIsUpgradeModalOpen(false)}
         />
-
-        {/* Footer */}
-        <footer className="mt-auto border-t border-zinc-800/80 bg-zinc-950/90 py-6 text-center text-xs text-zinc-500">
-          <p>MoneyAdvisor © 2026 - Quản lý tài chính cá nhân & Thị trường thông minh.</p>
-        </footer>
       </div>
     </PortfolioProvider>
   );

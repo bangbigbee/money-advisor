@@ -38,13 +38,13 @@ export function PortfolioOverview({ onOpenAddModal }: PortfolioOverviewProps) {
     cryptoShare > 60 ? "text-rose-400" : cryptoShare > 25 ? "text-amber-400" : "text-emerald-400";
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
       {/* Cột 1: Thống kê tổng quan */}
-      <div className="lg:col-span-1 bg-gradient-to-br from-zinc-900/90 via-zinc-900/70 to-zinc-950/90 border border-zinc-800/80 rounded-2xl p-6 backdrop-blur-md flex flex-col justify-between">
+      <div className="lg:col-span-1 bg-zinc-900/80 border border-zinc-800 rounded-xl p-5 shadow-lg flex flex-col justify-between">
         <div>
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
-              <Wallet className="w-3.5 h-3.5 text-emerald-400" />
+              <Wallet className="w-4 h-4 text-emerald-400" />
               Tổng giá trị tài sản ròng
             </span>
             {user ? (
@@ -68,7 +68,7 @@ export function PortfolioOverview({ onOpenAddModal }: PortfolioOverviewProps) {
             </div>
           </div>
 
-          <div className="mt-6 pt-5 border-t border-zinc-800 space-y-2.5">
+          <div className="mt-5 pt-4 border-t border-zinc-800/80 space-y-2.5">
             <div className="flex items-center justify-between text-xs text-zinc-400">
               <span>Lợi nhuận ròng (All-time PnL):</span>
               <span
@@ -104,10 +104,10 @@ export function PortfolioOverview({ onOpenAddModal }: PortfolioOverviewProps) {
         </div>
 
         {onOpenAddModal && (
-          <div className="mt-6 pt-4 border-t border-zinc-800/60">
+          <div className="mt-5 pt-4 border-t border-zinc-800/60">
             <button
               onClick={onOpenAddModal}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-xl text-xs font-semibold transition border border-zinc-700/60 cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg text-xs font-semibold transition border border-zinc-700/60 cursor-pointer"
             >
               <Plus className="w-4 h-4 text-emerald-400" />
               Thêm tài sản vào danh mục
@@ -117,16 +117,16 @@ export function PortfolioOverview({ onOpenAddModal }: PortfolioOverviewProps) {
       </div>
 
       {/* Cột 2 & 3: Phân bổ tài sản & Biểu đồ tròn */}
-      <div className="lg:col-span-2 bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-6 backdrop-blur-md flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="w-full md:w-1/2 h-56 flex items-center justify-center">
+      <div className="lg:col-span-2 bg-zinc-900/80 border border-zinc-800 rounded-xl p-5 shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="w-full md:w-1/2 h-52 flex items-center justify-center">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={allocationData}
                 cx="50%"
                 cy="50%"
-                innerRadius={60}
-                outerRadius={85}
+                innerRadius={55}
+                outerRadius={80}
                 paddingAngle={4}
                 dataKey="value"
               >
@@ -144,7 +144,7 @@ export function PortfolioOverview({ onOpenAddModal }: PortfolioOverviewProps) {
                 contentStyle={{
                   backgroundColor: "#18181b",
                   borderColor: "#27272a",
-                  borderRadius: "0.75rem",
+                  borderRadius: "0.5rem",
                   color: "#f4f4f5",
                   fontSize: "12px",
                 }}
@@ -153,14 +153,14 @@ export function PortfolioOverview({ onOpenAddModal }: PortfolioOverviewProps) {
           </ResponsiveContainer>
         </div>
 
-        <div className="w-full md:w-1/2 space-y-2.5">
+        <div className="w-full md:w-1/2 space-y-2">
           <h3 className="text-sm font-semibold text-zinc-200 mb-2">
             Phân bổ danh mục thực tế
           </h3>
           {allocationData.map((item) => (
             <div
               key={item.name}
-              className="flex items-center justify-between p-2 rounded-xl bg-zinc-950/40 border border-zinc-800/40 text-xs"
+              className="flex items-center justify-between p-2 rounded-lg bg-zinc-950/40 border border-zinc-800/50 text-xs"
             >
               <div className="flex items-center gap-2.5">
                 <span

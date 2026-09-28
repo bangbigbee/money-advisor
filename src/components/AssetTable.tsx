@@ -39,7 +39,7 @@ export function AssetTable({ onOpenAddModal }: { onOpenAddModal: () => void }) {
   );
 
   return (
-    <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-4 sm:p-6 backdrop-blur-md space-y-4">
+    <div className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-4 sm:p-6 shadow-lg space-y-4">
       {/* Header & Filter Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

@@ -24,8 +24,14 @@ body {
   --font-mono: var(--font-geist-mono);
 }
 
+/* Moderate border radius throughout the application */
+.rounded-3xl,
+.rounded-2xl {
+  border-radius: 0.75rem !important; /* 12px clean subtle curve */
+}
+
 /* ===================================================
-   LIGHT MODE OVERRIDES - CLEAN, SOFT GRAY BORDERS & CRISP CONTRAST
+   LIGHT MODE OVERRIDES - PURE WHITE CARDS & CRISP SLATE-300 BORDERS
 =================================================== */
 
 html.light body,
@@ -38,7 +44,7 @@ html.light .bg-\[\#0b0d19\] {
   color: #0f172a !important;
 }
 
-/* Main Cards */
+/* Main Cards - Pure White with Crisp Border */
 html.light .bg-\[\#0f1225\],
 html.light .bg-\[\#13172d\],
 html.light .bg-zinc-900,
@@ -48,11 +54,13 @@ html.light .bg-zinc-900\/80,
 html.light .bg-zinc-900\/90,
 html.light .bg-zinc-900\/95 {
   background-color: #ffffff !important;
+  background-image: none !important;
   color: #0f172a !important;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  border-color: #cbd5e1 !important; /* Clear, visible gray border */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.08) !important;
 }
 
-/* Sub-cards, inner sections & Input backgrounds */
+/* Inner Sections, Sub-cards & Inputs */
 html.light .bg-\[\#141830\],
 html.light .bg-\[\#131a38\],
 html.light .bg-zinc-950\/40,
@@ -63,16 +71,20 @@ html.light .bg-zinc-800,
 html.light .bg-zinc-800\/80,
 html.light .bg-zinc-800\/90 {
   background-color: #f1f5f9 !important;
+  background-image: none !important;
   color: #0f172a !important;
+  border-color: #cbd5e1 !important;
 }
 
-/* Active / Selected table rows */
+/* Table Rows & Active states */
 html.light .bg-\[\#191f42\],
 html.light .bg-zinc-800\/90 {
   background-color: #e2e8f0 !important;
+  color: #0f172a !important;
 }
 
-/* Soft Light Gray Borders for all card containers */
+/* All Borders in Light Mode - Clearly Visible Gray */
+html.light .border,
 html.light .border-indigo-950,
 html.light .border-indigo-950\/80,
 html.light .border-indigo-950\/70,
@@ -83,12 +95,15 @@ html.light .border-indigo-800\/40,
 html.light .border-zinc-800,
 html.light .border-zinc-800\/80,
 html.light .border-zinc-800\/60,
+html.light .border-zinc-800\/50,
 html.light .border-zinc-800\/40,
 html.light .border-zinc-700,
+html.light .border-zinc-700\/80,
+html.light .border-zinc-700\/60,
 html.light .border-rose-950\/60,
 html.light .border-rose-950\/40,
 html.light .border-emerald-950\/40 {
-  border-color: #e2e8f0 !important;
+  border-color: #cbd5e1 !important; /* Defined soft gray */
 }
 
 html.light .divide-zinc-800\/50 > :not([hidden]) ~ :not([hidden]),
@@ -96,7 +111,7 @@ html.light .divide-zinc-800\/60 > :not([hidden]) ~ :not([hidden]),
 html.light .divide-indigo-950\/50 > :not([hidden]) ~ :not([hidden]),
 html.light .divide-indigo-950\/60 > :not([hidden]) ~ :not([hidden]),
 html.light .divide-indigo-950\/80 > :not([hidden]) ~ :not([hidden]) {
-  border-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
 }
 
 /* Typography in Light Mode */
@@ -110,26 +125,26 @@ html.light .text-zinc-200,
 html.light .text-zinc-300,
 html.light .text-slate-200,
 html.light .text-slate-300 {
-  color: #334155 !important;
+  color: #1e293b !important;
 }
 
 html.light .text-zinc-400,
 html.light .text-slate-400 {
-  color: #64748b !important;
+  color: #475569 !important;
 }
 
 html.light .text-zinc-500,
 html.light .text-slate-500 {
-  color: #94a3b8 !important;
+  color: #64748b !important;
 }
 
 /* Inputs, Selects & Textareas */
 html.light input,
 html.light select,
 html.light textarea {
-  background-color: #f8fafc !important;
+  background-color: #ffffff !important;
   color: #0f172a !important;
-  border-color: #e2e8f0 !important;
+  border-color: #cbd5e1 !important;
 }
 
 html.light input::placeholder {
@@ -142,29 +157,31 @@ html.light nav.fixed.bottom-0,
 html.light .bg-zinc-950\/85,
 html.light .bg-zinc-950\/95 {
   background-color: rgba(255, 255, 255, 0.95) !important;
-  border-color: #e2e8f0 !important;
+  border-color: #cbd5e1 !important;
 }
 
 /* Table Headers */
 html.light thead,
 html.light thead.bg-\[\#0f1225\],
 html.light thead.bg-zinc-950\/60 {
-  background-color: #f8fafc !important;
-  color: #64748b !important;
-  border-color: #e2e8f0 !important;
+  background-color: #f1f5f9 !important;
+  color: #475569 !important;
+  border-color: #cbd5e1 !important;
 }
 
-/* Gradients in Light Mode */
+/* Gradients on Top Banner in Light Mode */
 html.light .bg-gradient-to-r.from-cyan-950\/40,
 html.light .bg-gradient-to-r.from-rose-950\/40,
-html.light .bg-gradient-to-r.from-emerald-950\/40 {
+html.light .bg-gradient-to-r.from-emerald-950\/40,
+html.light .bg-gradient-to-br.from-zinc-900\/90 {
   background: #ffffff !important;
-  border-color: #e2e8f0 !important;
+  background-image: none !important;
+  border-color: #cbd5e1 !important;
 }
 
 html.light .from-\[\#0c2221\] {
   background: linear-gradient(to right, #ecfdf5, #f0fdf4, #ffffff) !important;
-  border-color: #a7f3d0 !important;
+  border-color: #6ee7b7 !important;
 }
 
 /* Hover States in Light Mode */
@@ -177,7 +194,7 @@ html.light .hover\:bg-zinc-800\/30:hover {
 /* Chart container tooltips */
 html.light .recharts-default-tooltip {
   background-color: #ffffff !important;
-  border-color: #e2e8f0 !important;
+  border-color: #cbd5e1 !important;
   color: #0f172a !important;
 }
 
