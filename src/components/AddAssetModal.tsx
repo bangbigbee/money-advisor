@@ -1,12 +1,19 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { X, Plus, Sparkles, Coins, TrendingUp, DollarSign, Building } from "lucide-react";
 import { usePortfolio, PortfolioAsset } from "@/context/PortfolioContext";
 
 interface AddAssetModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialData?: {
+    symbol?: string;
+    name?: string;
+    price?: number;
+    category?: PortfolioAsset["category"];
+    currency?: "USD" | "VND";
+  } | null;
 }
 
 const PRESET_OPTIONS = [
@@ -19,7 +26,7 @@ const PRESET_OPTIONS = [
   { symbol: "VND", name: "Tiết kiệm / Tiền mặt", category: "cash", currency: "VND", defaultPrice: 1 },
 ];
 
-export function AddAssetModal({ isOpen, onClose }: AddAssetModalProps) {
+export function AddAssetModal({ isOpen, onClose, initialData }: AddAssetModalProps) {
   const { addAsset } = usePortfolio();
 
   const [category, setCategory] = useState<PortfolioAsset["category"]>("crypto");
@@ -29,6 +36,16 @@ export function AddAssetModal({ isOpen, onClose }: AddAssetModalProps) {
   const [buyPrice, setBuyPrice] = useState<string>("94850");
   const [currency, setCurrency] = useState<"USD" | "VND">("USD");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (initialData && isOpen) {
+      if (initialData.symbol) setSymbol(initialData.symbol.toUpperCase());
+      if (initialData.name) setName(initialData.name);
+      if (initialData.price !== undefined) setBuyPrice(initialData.price.toString());
+      if (initialData.category) setCategory(initialData.category);
+      if (initialData.currency) setCurrency(initialData.currency);
+    }
+  }, [initialData, isOpen]);
 
   if (!isOpen) return null;
 
@@ -91,7 +108,7 @@ export function AddAssetModal({ isOpen, onClose }: AddAssetModalProps) {
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition"
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>

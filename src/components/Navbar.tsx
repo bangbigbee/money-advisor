@@ -13,6 +13,8 @@ import {
   Settings,
   ShieldCheck,
   ChevronDown,
+  Scan,
+  Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -21,6 +23,7 @@ interface NavbarProps {
   setActiveTab: (tab: string) => void;
   onOpenAddModal: () => void;
   onOpenGuideModal: () => void;
+  onOpenScanModal?: () => void;
 }
 
 export function Navbar({
@@ -28,6 +31,7 @@ export function Navbar({
   setActiveTab,
   onOpenAddModal,
   onOpenGuideModal,
+  onOpenScanModal,
 }: NavbarProps) {
   const { user, isLoading, isConfigured, signInWithGoogle, signOut } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -45,7 +49,7 @@ export function Navbar({
   return (
     <header className="sticky top-0 z-40 backdrop-blur-xl bg-zinc-950/80 border-b border-zinc-800/80 text-zinc-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 gap-4">
+        <div className="flex items-center justify-between h-16 gap-3 sm:gap-4">
           {/* Logo */}
           <div
             onClick={() => setActiveTab("dashboard")}
@@ -59,7 +63,7 @@ export function Navbar({
                 MoneyAdvisor
               </span>
               <span className="hidden sm:inline-block ml-2 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full">
-                Live & Cloud
+                AI & Cloud
               </span>
             </div>
           </div>
@@ -87,7 +91,19 @@ export function Navbar({
           </nav>
 
           {/* Actions & Auth */}
-          <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* AI Scan Button */}
+            {onOpenScanModal && (
+              <button
+                onClick={onOpenScanModal}
+                className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500/20 via-emerald-500/20 to-teal-500/20 hover:from-cyan-500/30 hover:to-teal-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-bold shadow-md shadow-cyan-500/10 transition cursor-pointer"
+              >
+                <Scan className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                <span className="hidden sm:inline">Quét AI</span>
+                <span className="sm:hidden">Scan</span>
+              </button>
+            )}
+
             {/* Quick Add Asset Button */}
             <button
               onClick={onOpenAddModal}

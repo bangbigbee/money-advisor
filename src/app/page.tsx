@@ -5,6 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { PortfolioOverview } from "@/components/PortfolioOverview";
 import { AssetTable } from "@/components/AssetTable";
 import { AddAssetModal } from "@/components/AddAssetModal";
+import { ScanModal } from "@/components/ScanModal";
 import { SupabaseConfigGuideModal } from "@/components/SupabaseConfigGuideModal";
 import { CryptoList } from "@/components/CryptoList";
 import { GoldForexList } from "@/components/GoldForexList";
@@ -21,10 +22,10 @@ import {
   Activity,
   RefreshCw,
   Sparkles,
-  Cloud,
-  CheckCircle2,
-  AlertCircle,
-  PlusCircle,
+  Scan,
+  TrendingUp,
+  Target,
+  ShieldCheck,
 } from "lucide-react";
 
 export default function Home() {
@@ -37,7 +38,10 @@ export default function Home() {
 
   // Modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [addModalPrefill, setAddModalPrefill] = useState<any>(null);
   const [isGuideModalOpen, setIsGuideModalOpen] = useState(false);
+  const [isScanModalOpen, setIsScanModalOpen] = useState(false);
+  const [selectedScanCoin, setSelectedScanCoin] = useState<CryptoItem | null>(null);
 
   const loadCryptoData = async () => {
     setIsLoading(true);
@@ -51,6 +55,26 @@ export default function Home() {
     loadCryptoData();
   }, []);
 
+  const handleOpenScanWithCoin = (coin: CryptoItem) => {
+    setSelectedScanCoin(coin);
+    setIsScanModalOpen(true);
+  };
+
+  const handleOpenAddWithPrefill = (prefill?: { symbol: string; name: string; price: number }) => {
+    if (prefill) {
+      setAddModalPrefill({
+        symbol: prefill.symbol,
+        name: prefill.name,
+        price: prefill.price,
+        category: "crypto",
+        currency: "USD",
+      });
+    } else {
+      setAddModalPrefill(null);
+    }
+    setIsAddModalOpen(true);
+  };
+
   return (
     <PortfolioProvider cryptos={cryptos} goldForex={goldForex}>
       <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
@@ -58,8 +82,15 @@ export default function Home() {
         <Navbar
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          onOpenAddModal={() => setIsAddModalOpen(true)}
+          onOpenAddModal={() => {
+            setAddModalPrefill(null);
+            setIsAddModalOpen(true);
+          }}
           onOpenGuideModal={() => setIsGuideModalOpen(true)}
+          onOpenScanModal={() => {
+            setSelectedScanCoin(null);
+            setIsScanModalOpen(true);
+          }}
         />
 
         {/* Main Content Area */}
@@ -74,21 +105,34 @@ export default function Home() {
                 <div className="text-sm font-semibold text-zinc-100 flex items-center gap-2">
                   MoneyAdvisor Pro
                   <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-mono">
-                    Google OAuth & Cloud Sync
+                    AI Scanner & Cloud Sync
                   </span>
                 </div>
                 <p className="text-xs text-zinc-400">
-                  Tự động định giá danh mục đầu tư từ dữ liệu trực tuyến CoinGecko, SJC Gold & Tỷ giá ngoại tệ
+                  Tự động định giá danh mục đầu tư từ CoinGecko, Vàng SJC & Tích hợp Quét AI phân tích kỹ thuật
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 self-end sm:self-center">
+            <div className="flex items-center gap-2.5 self-end sm:self-center">
+              {/* Scan Trigger Button on Banner */}
+              <button
+                onClick={() => {
+                  setSelectedScanCoin(null);
+                  setIsScanModalOpen(true);
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-cyan-500/20 via-emerald-500/20 to-teal-500/20 hover:from-cyan-500/30 hover:to-teal-500/30 text-cyan-300 text-xs font-bold rounded-lg border border-cyan-500/40 transition cursor-pointer shadow-sm"
+              >
+                <Scan className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Quét AI Kỹ thuật</span>
+              </button>
+
               {lastUpdated && (
-                <span className="text-xs text-zinc-400 font-mono">
+                <span className="text-xs text-zinc-400 font-mono hidden md:inline">
                   Cập nhật: {lastUpdated}
                 </span>
               )}
+
               <button
                 onClick={loadCryptoData}
                 disabled={isLoading}
@@ -104,7 +148,12 @@ export default function Home() {
           {activeTab === "dashboard" && (
             <div className="space-y-8">
               {/* Portfolio Summary & Allocation */}
-              <PortfolioOverview onOpenAddModal={() => setIsAddModalOpen(true)} />
+              <PortfolioOverview
+                onOpenAddModal={() => {
+                  setAddModalPrefill(null);
+                  setIsAddModalOpen(true);
+                }}
+              />
 
               {/* TradingView Chart Section */}
               <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-5 backdrop-blur-md space-y-4">
@@ -145,13 +194,23 @@ export default function Home() {
               </div>
 
               {/* User Asset Table */}
-              <AssetTable onOpenAddModal={() => setIsAddModalOpen(true)} />
+              <AssetTable
+                onOpenAddModal={() => {
+                  setAddModalPrefill(null);
+                  setIsAddModalOpen(true);
+                }}
+              />
 
               {/* Market Lists */}
               <div className="space-y-6">
                 <CryptoList
                   cryptos={cryptos}
                   onSelectSymbol={(sym) => setSelectedChartSymbol(sym)}
+                  onScanCoin={handleOpenScanWithCoin}
+                  onOpenScanModal={() => {
+                    setSelectedScanCoin(null);
+                    setIsScanModalOpen(true);
+                  }}
                 />
                 <GoldForexList
                   items={goldForex}
@@ -175,6 +234,11 @@ export default function Home() {
               <CryptoList
                 cryptos={cryptos}
                 onSelectSymbol={(sym) => setSelectedChartSymbol(sym)}
+                onScanCoin={handleOpenScanWithCoin}
+                onOpenScanModal={() => {
+                  setSelectedScanCoin(null);
+                  setIsScanModalOpen(true);
+                }}
               />
             </div>
           )}
@@ -200,8 +264,18 @@ export default function Home() {
           {/* Tab 4: Danh mục đầu tư */}
           {activeTab === "portfolio" && (
             <div className="space-y-6">
-              <PortfolioOverview onOpenAddModal={() => setIsAddModalOpen(true)} />
-              <AssetTable onOpenAddModal={() => setIsAddModalOpen(true)} />
+              <PortfolioOverview
+                onOpenAddModal={() => {
+                  setAddModalPrefill(null);
+                  setIsAddModalOpen(true);
+                }}
+              />
+              <AssetTable
+                onOpenAddModal={() => {
+                  setAddModalPrefill(null);
+                  setIsAddModalOpen(true);
+                }}
+              />
             </div>
           )}
         </main>
@@ -209,7 +283,18 @@ export default function Home() {
         {/* Modals */}
         <AddAssetModal
           isOpen={isAddModalOpen}
-          onClose={() => setIsAddModalOpen(false)}
+          onClose={() => {
+            setIsAddModalOpen(false);
+            setAddModalPrefill(null);
+          }}
+          initialData={addModalPrefill}
+        />
+        <ScanModal
+          isOpen={isScanModalOpen}
+          onClose={() => setIsScanModalOpen(false)}
+          cryptos={cryptos}
+          initialSelectedCoin={selectedScanCoin}
+          onOpenAddAssetModal={handleOpenAddWithPrefill}
         />
         <SupabaseConfigGuideModal
           isOpen={isGuideModalOpen}
