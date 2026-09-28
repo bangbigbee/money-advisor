@@ -178,6 +178,32 @@ export function ScannerPage({
     }
   };
 
+  const getVerdictStyle = (action: string = "") => {
+    const act = action.toUpperCase();
+    if (act.includes("MUA") || act.includes("LONG")) {
+      return {
+        bg: "bg-gradient-to-r from-emerald-950/50 via-zinc-900 to-zinc-950 border-emerald-500/40 shadow-emerald-500/10",
+        badge: "bg-gradient-to-r from-emerald-400 to-teal-400 text-zinc-950 font-black shadow-md shadow-emerald-500/30",
+        iconColor: "text-emerald-400",
+        title: "Tín hiệu Khuyến nghị: NÊN MUA / LONG",
+      };
+    }
+    if (act.includes("BÁN") || act.includes("SHORT")) {
+      return {
+        bg: "bg-gradient-to-r from-rose-950/50 via-zinc-900 to-zinc-950 border-rose-500/40 shadow-rose-500/10",
+        badge: "bg-gradient-to-r from-rose-500 to-pink-500 text-white font-black shadow-md shadow-rose-500/30",
+        iconColor: "text-rose-400",
+        title: "Tín hiệu Khuyến nghị: NÊN BÁN / SHORT",
+      };
+    }
+    return {
+      bg: "bg-gradient-to-r from-amber-950/50 via-zinc-900 to-zinc-950 border-amber-500/40 shadow-amber-500/10",
+      badge: "bg-gradient-to-r from-amber-400 to-orange-400 text-zinc-950 font-black shadow-md shadow-amber-400/30",
+      iconColor: "text-amber-400",
+      title: "Tín hiệu Khuyến nghị: QUAN SÁT",
+    };
+  };
+
   const getFuturePositionStyle = (position: string) => {
     if (position === "LONG") {
       return "bg-emerald-500/20 text-emerald-400 border-emerald-500/50 shadow-emerald-500/20";
@@ -763,6 +789,61 @@ export function ScannerPage({
                     </div>
                   </div>
 
+                  {/* Spot Final Action Verdict Card (NÊN MUA / NÊN BÁN / QUAN SÁT) */}
+                  {scanResult.spot.finalVerdict && (
+                    <div className={`p-5 sm:p-6 rounded-3xl border shadow-2xl space-y-4 ${getVerdictStyle(scanResult.spot.finalVerdict.action).bg}`}>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800/80 pb-4">
+                        <div className="flex items-center gap-2.5">
+                          <div className="p-2 rounded-xl bg-zinc-950 border border-zinc-800 text-white shrink-0">
+                            <Target className="w-5 h-5 text-emerald-400" />
+                          </div>
+                          <div>
+                            <span className="text-[10px] sm:text-[11px] font-bold text-zinc-400 uppercase tracking-wider block">
+                              Kết Luận Thời Điểm Hiện Tại (Spot):
+                            </span>
+                            <h3 className="text-base sm:text-lg font-black text-white">
+                              Khuyến Nghị Giao Dịch Nắm Giữ
+                            </h3>
+                          </div>
+                        </div>
+
+                        <div className={`px-4 sm:px-5 py-2 rounded-2xl text-xs sm:text-sm uppercase tracking-wider flex items-center gap-1.5 self-start sm:self-center ${getVerdictStyle(scanResult.spot.finalVerdict.action).badge}`}>
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>{scanResult.spot.finalVerdict.action}</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3 text-xs">
+                        <div className="p-3.5 rounded-2xl bg-zinc-950/80 border border-zinc-800/80 space-y-1">
+                          <span className="font-bold text-zinc-400 uppercase tracking-wider text-[10px]">Tóm Tắt Đánh Giá:</span>
+                          <p className="text-zinc-200 leading-relaxed text-xs sm:text-sm font-medium">
+                            {scanResult.spot.finalVerdict.summaryText}
+                          </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 space-y-1">
+                            <span className="font-bold text-cyan-400 text-[11px] flex items-center gap-1">
+                              <Activity className="w-3.5 h-3.5" /> Lý Do Chốt Hạ:
+                            </span>
+                            <p className="text-zinc-300 leading-relaxed">
+                              {scanResult.spot.finalVerdict.keyReason}
+                            </p>
+                          </div>
+
+                          <div className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 space-y-1">
+                            <span className="font-bold text-emerald-400 text-[11px] flex items-center gap-1">
+                              <CheckCircle2 className="w-3.5 h-3.5" /> Hành Động Khuyến Nghị Cụ Thể:
+                            </span>
+                            <p className="text-zinc-100 font-semibold leading-relaxed">
+                              {scanResult.spot.finalVerdict.recommendedAction}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Spot Capital Advice & Portfolio Button */}
                   <div className="p-5 rounded-3xl bg-gradient-to-r from-emerald-950/30 to-zinc-900 border border-emerald-500/20 space-y-3">
                     <h4 className="font-bold text-emerald-400 flex items-center gap-2">
@@ -1003,6 +1084,61 @@ export function ScannerPage({
                       </p>
                     </div>
                   </div>
+
+                  {/* Futures Final Action Verdict Card (NÊN LONG / NÊN SHORT / QUAN SÁT) */}
+                  {scanResult.future.finalVerdict && (
+                    <div className={`p-5 sm:p-6 rounded-3xl border shadow-2xl space-y-4 ${getVerdictStyle(scanResult.future.finalVerdict.action).bg}`}>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800/80 pb-4">
+                        <div className="flex items-center gap-2.5">
+                          <div className="p-2 rounded-xl bg-zinc-950 border border-zinc-800 text-white shrink-0">
+                            <Zap className="w-5 h-5 text-cyan-400" />
+                          </div>
+                          <div>
+                            <span className="text-[10px] sm:text-[11px] font-bold text-zinc-400 uppercase tracking-wider block">
+                              Kết Luận Thời Điểm Hiện Tại (Futures & Margin):
+                            </span>
+                            <h3 className="text-base sm:text-lg font-black text-white">
+                              Khuyến Nghị Vị Thế Phái Sinh
+                            </h3>
+                          </div>
+                        </div>
+
+                        <div className={`px-4 sm:px-5 py-2 rounded-2xl text-xs sm:text-sm uppercase tracking-wider flex items-center gap-1.5 self-start sm:self-center ${getVerdictStyle(scanResult.future.finalVerdict.action).badge}`}>
+                          <Zap className="w-4 h-4" />
+                          <span>{scanResult.future.finalVerdict.action}</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3 text-xs">
+                        <div className="p-3.5 rounded-2xl bg-zinc-950/80 border border-zinc-800/80 space-y-1">
+                          <span className="font-bold text-zinc-400 uppercase tracking-wider text-[10px]">Tóm Tắt Vị Thế:</span>
+                          <p className="text-zinc-200 leading-relaxed text-xs sm:text-sm font-medium">
+                            {scanResult.future.finalVerdict.summaryText}
+                          </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 space-y-1">
+                            <span className="font-bold text-cyan-400 text-[11px] flex items-center gap-1">
+                              <Scale className="w-3.5 h-3.5" /> Căn Cứ & Cụm Thanh Lý:
+                            </span>
+                            <p className="text-zinc-300 leading-relaxed">
+                              {scanResult.future.finalVerdict.keyReason}
+                            </p>
+                          </div>
+
+                          <div className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 space-y-1">
+                            <span className="font-bold text-emerald-400 text-[11px] flex items-center gap-1">
+                              <Target className="w-3.5 h-3.5" /> Hướng Dẫn Đi Lệnh Chi Tiết:
+                            </span>
+                            <p className="text-zinc-100 font-semibold leading-relaxed">
+                              {scanResult.future.finalVerdict.recommendedAction}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* 3 Golden Risk Management Rules */}
                   <div className="p-5 rounded-3xl bg-gradient-to-r from-rose-950/30 via-zinc-900 to-zinc-900 border border-rose-500/30 space-y-3">

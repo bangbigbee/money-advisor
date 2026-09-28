@@ -10,6 +10,22 @@ export interface ScanRequest {
   totalVolume?: number;
 }
 
+export interface SpotVerdict {
+  action: "NÊN MUA" | "NÊN BÁN" | "QUAN SÁT";
+  actionType: "BUY" | "SELL" | "WAIT";
+  summaryText: string;
+  keyReason: string;
+  recommendedAction: string;
+}
+
+export interface FutureVerdict {
+  action: "NÊN LONG" | "NÊN SHORT" | "QUAN SÁT";
+  actionType: "LONG" | "SHORT" | "WAIT";
+  summaryText: string;
+  keyReason: string;
+  recommendedAction: string;
+}
+
 export interface SpotAnalysis {
   signal: "STRONG_BUY" | "BUY" | "HOLD" | "TAKE_PROFIT" | "SELL";
   signalLabel: string;
@@ -42,6 +58,7 @@ export interface SpotAnalysis {
   };
   strategyAdvice: string;
   riskWarning: string;
+  finalVerdict: SpotVerdict;
 }
 
 export interface FutureAnalysis {
@@ -78,6 +95,7 @@ export interface FutureAnalysis {
     volatilityATR: string;
   };
   riskManagementRules: string[];
+  finalVerdict: FutureVerdict;
 }
 
 export interface ScanResult {
@@ -124,13 +142,15 @@ Nhiệm vụ của bạn là phân tích đồng crypto được yêu cầu và 
    - Phân tích chi tiết từng chỉ số kỹ thuật ở các section riêng (EMA Trends, RSI & Phân kỳ, MACD, Volume Profile, Hỗ trợ / Kháng cự).
    - Bản đồ thanh khoản: Vùng thanh khoản cao (High Liquidity Demand Zone), Vùng thanh khoản mỏng (Thin Liquidity / FVG), Vùng áp lực bán (Supply Zone).
    - Vùng Entry Gom Hàng, TP1, TP2, TP3 và Stop Loss bảo toàn vốn.
+   - THẺ KẾT LUẬN CUỐI CÙNG (finalVerdict): BẮT BUỘC chốt rõ hành động ở thời điểm hiện tại là: "NÊN MUA" (BUY) hoặc "NÊN BÁN" (SELL) hoặc "QUAN SÁT" (WAIT), kèm lý do chốt hạ và hành động cụ thể.
 
 2. LUỒNG GIAO DỊCH FUTURE / MARGIN (Phái sinh, có đòn bẩy):
    - Vị thế khuyến nghị (LONG hoặc SHORT), Mức đòn bẩy an toàn khuyến nghị (ví dụ: x5 - x10 hoặc x15), % Phân bổ vốn cho lệnh (ví dụ: 2% - 5% NAV).
    - Tỷ lệ Long / Short Ratio (ví dụ: 58% Long / 42% Short) và tâm lý đám đông.
    - Funding Rate & Xu hướng Hợp đồng mở Open Interest (OI).
-   - Bản đồ Vùng Thanh Lý (Liquidation Heatmap): Cụm thanh lý Short (Short Liquidation Pool), Cụm thanh lý Long (Long Liquidation Pool), Nguy cơ quét râu (Stop-hunt Risk).
-   - Kế hoạch Entry, TP1 (kèm % ROI đòn bẩy), TP2 (kèm % ROI đòn bẩy), TP3, Stop Loss và Giá ước tính thanh lý.
+   - Bản đồ Vùng Thanh Lý (Liquidation Heatmap): Cụm thanh lý Short, Cụm thanh lý Long, Nguy cơ quét râu (Stop-hunt Risk).
+   - Kế hoạch Entry, TP1 (kèm % ROI đòn bẩy), TP2, TP3, Stop Loss và Giá ước tính thanh lý.
+   - THẺ KẾT LUẬN CUỐI CÙNG (finalVerdict): BẮT BUỘC chốt rõ hành động ở thời điểm hiện tại là: "NÊN LONG" (LONG) hoặc "NÊN SHORT" (SHORT) hoặc "QUAN SÁT" (WAIT), kèm lý do chốt hạ và hành động cụ thể.
 
 Định dạng trả về BẮT BUỘC là 1 đối tượng JSON thuần túy (không kèm markdown \`\`\`json hoặc bất kỳ text mở đầu nào), theo đúng cấu trúc:
 {
@@ -165,7 +185,14 @@ Nhiệm vụ của bạn là phân tích đồng crypto được yêu cầu và 
       }
     },
     "strategyAdvice": string,
-    "riskWarning": string
+    "riskWarning": string,
+    "finalVerdict": {
+      "action": "NÊN MUA" | "NÊN BÁN" | "QUAN SÁT",
+      "actionType": "BUY" | "SELL" | "WAIT",
+      "summaryText": string (Tóm tắt kết luận ngắn gọn, súc tích 1-2 câu),
+      "keyReason": string (Lý do cốt lõi dẫn đến quyết định),
+      "recommendedAction": string (Hành động cụ thể: ví dụ "Giải ngân 30% vốn tại vùng $X-$Y, cài SL $Z")
+    }
   },
   "future": {
     "position": "LONG" | "SHORT" | "NO_TRADE",
@@ -204,11 +231,18 @@ Nhiệm vụ của bạn là phân tích đồng crypto được yêu cầu và 
       "Dời Stop Loss về Entry (Hòa vốn) ngay khi đạt TP1",
       "Tuyệt đối không nhồi thêm lệnh khi vị thế đang âm (Không DCA lệnh gồng lỗ)",
       "Cài đặt lệnh Stop Loss trực tiếp trên sàn, không chờ đợi thủ công"
-    ]
+    ],
+    "finalVerdict": {
+      "action": "NÊN LONG" | "NÊN SHORT" | "QUAN SÁT",
+      "actionType": "LONG" | "SHORT" | "WAIT",
+      "summaryText": string (Tóm tắt kết luận ngắn gọn, súc tích 1-2 câu),
+      "keyReason": string (Lý do cốt lõi dựa trên R:R, tỷ lệ Long/Short & cụm thanh lý),
+      "recommendedAction": string (Hành động đi lệnh cụ thể: ví dụ "Đặt Limit Long tại $X, đòn bẩy x8, Stop Loss tại $Y")
+    }
   }
 }
 
-Nội dung phân tích bằng tiếng Việt chuẩn xác, mang tính chuyên môn cao, chi tiết và thực tế.`;
+Nội dung phân tích bằng tiếng Việt chuẩn xác, mang tính chuyên môn cao, dứt khoát và thực tế.`;
 
     const userPrompt = `Phân tích toàn diện (Spot & Futures) cho đồng crypto:
 - Ký hiệu: ${symbol.toUpperCase()} (${name})
@@ -218,7 +252,7 @@ Nội dung phân tích bằng tiếng Việt chuẩn xác, mang tính chuyên m�
 - Khối lượng 24h: ${totalVolume ? "$" + totalVolume.toLocaleString("en-US") : "N/A"}
 - Khung thời gian: ${timeframeLabel}
 
-Hãy xuất đối tượng JSON phân tích đầy đủ theo cấu trúc.`;
+Hãy xuất đối tượng JSON phân tích đầy đủ theo cấu trúc, bao gồm cả thẻ kết luận finalVerdict cho mỗi luồng.`;
 
     const modelsToTry = [
       "llama-3.3-70b-versatile",
@@ -332,6 +366,19 @@ Hãy xuất đối tượng JSON phân tích đầy đủ theo cấu trúc.`;
           },
           strategyAdvice: `Chia vốn thành 3 đợt mua (30% - 40% - 30%) trong vùng $${entryLow} - $${entryHigh}. Khi giá chạm TP1, dời Stop Loss về giá hòa vốn để bảo toàn lợi nhuận.`,
           riskWarning: "Không fomo mua đuổi khi nến giá đang mở rộng ngoài dải Bollinger Bands.",
+          finalVerdict: {
+            action: isUp ? "NÊN MUA" : "QUAN SÁT",
+            actionType: isUp ? "BUY" : "WAIT",
+            summaryText: isUp
+              ? `Giá đang ở vùng hỗ trợ mạnh với tín hiệu cạn cung và dòng tiền gom hàng tích cực.`
+              : `Giá đang đi ngang tích lũy, cần chờ tín hiệu phá vỡ kháng cự rõ ràng trước khi giải ngân.`,
+            keyReason: isUp
+              ? `Cấu trúc giá nằm trên EMA 50/200 và RSI chưa chạm vùng quá mua.`
+              : `Khối lượng giao dịch ở mức trung bình, chưa có sự tham gia đột biến của dòng tiền lớn.`,
+            recommendedAction: isUp
+              ? `Giải ngân 30% vốn tại $${entryLow} - $${entryHigh}, đặt mục tiêu TP1 tại $${spotTp1} và Stop Loss tại $${spotSl}.`
+              : `Đứng ngoài quan sát, đặt thông báo giá khi vượt $${spotTp1} hoặc test về $${entryLow}.`,
+          },
         },
         future: {
           position: isLong ? "LONG" : "SHORT",
@@ -371,6 +418,19 @@ Hãy xuất đối tượng JSON phân tích đầy đủ theo cấu trúc.`;
             "Không bao giờ gồng lỗ hoặc nạp thêm tiền để DCA khi lệnh phái sinh vi phạm mốc SL",
             "Luôn đặt lệnh Stop Loss tự động trên sàn để chống trượt giá khi có tin tức bất ngờ",
           ],
+          finalVerdict: {
+            action: isLong ? "NÊN LONG" : "NÊN SHORT",
+            actionType: isLong ? "LONG" : "SHORT",
+            summaryText: isLong
+              ? `Tỷ lệ R:R thuận lợi (1:3.4), cụm thanh lý phe Short ở $${futTp1} đang là mục tiêu kéo giá của Market Maker.`
+              : `Áp lực bán chiếm ưu thế tại vùng cản, tỷ lệ Long/Short cho thấy phe Long suy yếu.`,
+            keyReason: isLong
+              ? `Hợp đồng mở OI tăng và cụm thanh lý Short tập trung dày đặc phía trên.`
+              : `Funding Rate cao bất thường và giá gặp cản cứng trên khung lớn.`,
+            recommendedAction: isLong
+              ? `Mở lệnh Limit LONG tại vùng $${futEntry}, đòn bẩy khuyến nghị x5 - x10, Stop Loss cố định tại $${futSl}.`
+              : `Mở lệnh Limit SHORT tại vùng $${futEntry}, đòn bẩy khuyến nghị x5 - x8, Stop Loss cố định tại $${futSl}.`,
+          },
         },
       };
     }
