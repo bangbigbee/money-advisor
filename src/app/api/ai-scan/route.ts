@@ -191,7 +191,7 @@ export interface ScanResult {
 }
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
-const GROQ_MODELS = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b"];
+const GROQ_MODELS = ["openai/gpt-oss-20b", "openai/gpt-oss-120b", "qwen/qwen3.8-27b"];
 
 export async function POST(req: Request) {
   try {
@@ -458,7 +458,7 @@ Hãy trả về JSON theo schema sau:
     }
 
     // Call Groq API with model fallback list
-    let parsedResult: ScanResult | null = null;
+    let parsedResult: any = null;
     let lastError = "";
 
     for (const model of GROQ_MODELS) {
@@ -476,16 +476,17 @@ Hãy trả về JSON theo schema sau:
               { role: "user", content: userPrompt },
             ],
             temperature: 0.2,
-            response_format: { type: "json_object" },
+            max_tokens: 4096,
           }),
+          signal: AbortSignal.timeout(20000), // Max 20s timeout per model to prevent page freeze
         });
 
         if (groqRes.ok) {
           const groqData = await groqRes.json();
           const content = groqData.choices?.[0]?.message?.content;
           if (content) {
-            parsedResult = JSON.parse(content);
-            break; // Success!
+            parsedResult = extractJson(content);
+            if (parsedResult) break; // Successfully parsed!
           }
         } else {
           lastError = await groqRes.text();
@@ -497,12 +498,16 @@ Hãy trả về JSON theo schema sau:
       }
     }
 
+    const fallbackResult = createAlgorithmicFallback(symbol, name, currentPrice, priceChange24h, timeframe);
+
     if (parsedResult) {
-      return NextResponse.json(parsedResult);
+      // Guaranteed deep merge so all nested fields and finalVerdicts ALWAYS exist
+      const mergedResult = deepMerge(fallbackResult, parsedResult);
+      return NextResponse.json(mergedResult);
     }
 
     console.warn("Tất cả models Groq thất bại, fallback sang thuật toán phân tích động:", lastError);
-    return NextResponse.json(createAlgorithmicFallback(symbol, name, currentPrice, priceChange24h, timeframe));
+    return NextResponse.json(fallbackResult);
   } catch (err: any) {
     console.error("Lỗi server /api/ai-scan:", err);
     return NextResponse.json(
@@ -510,6 +515,62 @@ Hãy trả về JSON theo schema sau:
       { status: 500 }
     );
   }
+}
+
+// Helper to safely extract JSON from LLM response (handling markdown code blocks & raw JSON)
+function extractJson(content: string): any {
+  try {
+    return JSON.parse(content);
+  } catch {
+    const markdownMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    if (markdownMatch) {
+      try {
+        return JSON.parse(markdownMatch[1].trim());
+      } catch {}
+    }
+    const firstBrace = content.indexOf("{");
+    const lastBrace = content.lastIndexOf("}");
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      try {
+        return JSON.parse(content.substring(firstBrace, lastBrace + 1));
+      } catch {}
+    }
+    return null;
+  }
+}
+
+// Deep merge helper to ensure fallback values fill any missing keys from AI
+function deepMerge<T>(fallback: T, incoming: any): T {
+  if (!incoming || typeof incoming !== "object") return fallback;
+  if (!fallback || typeof fallback !== "object") return incoming as T;
+
+  const result: any = Array.isArray(fallback) ? [...fallback] : { ...fallback };
+
+  for (const key of Object.keys(fallback as any)) {
+    const fallbackVal = (fallback as any)[key];
+    const incomingVal = incoming[key];
+
+    if (incomingVal === undefined || incomingVal === null) {
+      result[key] = fallbackVal;
+    } else if (
+      typeof fallbackVal === "object" &&
+      !Array.isArray(fallbackVal) &&
+      typeof incomingVal === "object" &&
+      !Array.isArray(incomingVal)
+    ) {
+      result[key] = deepMerge(fallbackVal, incomingVal);
+    } else {
+      result[key] = incomingVal;
+    }
+  }
+
+  for (const key of Object.keys(incoming)) {
+    if (!(key in (fallback as any))) {
+      result[key] = incoming[key];
+    }
+  }
+
+  return result as T;
 }
 
 // Dynamic Algorithmic Fallback that produces unbiased, realistic signals

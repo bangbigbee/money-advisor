@@ -13,16 +13,16 @@ export const TradingViewWidget: React.FC<TradingViewWidgetProps> = memo(
     const container = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-      if (!container.current) return;
+      const containerEl = container.current;
+      if (!containerEl) return;
 
-      // Clean up previous script if any
-      container.current.innerHTML = "";
+      containerEl.innerHTML = "";
 
       const widgetContainer = document.createElement("div");
       widgetContainer.className = "tradingview-widget-container__widget";
       widgetContainer.style.height = "100%";
       widgetContainer.style.width = "100%";
-      container.current.appendChild(widgetContainer);
+      containerEl.appendChild(widgetContainer);
 
       const script = document.createElement("script");
       script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
@@ -42,7 +42,15 @@ export const TradingViewWidget: React.FC<TradingViewWidgetProps> = memo(
         support_host: "https://www.tradingview.com",
       });
 
-      container.current.appendChild(script);
+      containerEl.appendChild(script);
+
+      return () => {
+        if (containerEl) {
+          try {
+            containerEl.innerHTML = "";
+          } catch {}
+        }
+      };
     }, [symbol, theme]);
 
     return (

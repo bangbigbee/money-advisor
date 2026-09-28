@@ -77,6 +77,39 @@ interface ScannerPageProps {
   onOpenUpgradeModal?: () => void;
 }
 
+function deepMerge<T>(fallback: T, incoming: any): T {
+  if (!incoming || typeof incoming !== "object") return fallback;
+  if (!fallback || typeof fallback !== "object") return incoming as T;
+
+  const result: any = Array.isArray(fallback) ? [...fallback] : { ...fallback };
+
+  for (const key of Object.keys(fallback as any)) {
+    const fallbackVal = (fallback as any)[key];
+    const incomingVal = incoming[key];
+
+    if (incomingVal === undefined || incomingVal === null) {
+      result[key] = fallbackVal;
+    } else if (
+      typeof fallbackVal === "object" &&
+      !Array.isArray(fallbackVal) &&
+      typeof incomingVal === "object" &&
+      !Array.isArray(incomingVal)
+    ) {
+      result[key] = deepMerge(fallbackVal, incomingVal);
+    } else {
+      result[key] = incomingVal;
+    }
+  }
+
+  for (const key of Object.keys(incoming)) {
+    if (!(key in (fallback as any))) {
+      result[key] = incoming[key];
+    }
+  }
+
+  return result as T;
+}
+
 export function ScannerPage({
   cryptos,
   onOpenAddAssetModal,
@@ -348,7 +381,7 @@ export function ScannerPage({
   const isWave1Current = !isWave4Current && !isWave3Current && !isWave5Current && !isWave2Current && (waveText.includes("wave 1") || waveText.includes("sóng 1"));
 
   // Coinglass Data
-  const coinglassData: CoinglassMetrics = scanResult?.coinglass || {
+  const defaultCoinglass: CoinglassMetrics = {
     topTradersLongRatio: isPositive ? 68 : 44,
     topTradersShortRatio: isPositive ? 32 : 56,
     retailLongRatio: isPositive ? 54 : 48,
@@ -370,9 +403,10 @@ export function ScannerPage({
       label: isPositive ? "Tham lam (Greed)" : "Trung lập (Neutral)",
     },
   };
+  const coinglassData: CoinglassMetrics = deepMerge(defaultCoinglass, scanResult?.coinglass);
 
   // Advanced Indicators Suite
-  const advancedData: AdvancedIndicators = scanResult?.spot?.advanced || {
+  const defaultAdvanced: AdvancedIndicators = {
     superTrend: {
       status: isPositive ? "BULLISH" : "BEARISH",
       value: `$${(currentCoinPrice * (isPositive ? 0.952 : 1.048)).toFixed(2)}`,
@@ -413,8 +447,9 @@ export function ScannerPage({
       val: `$${(currentCoinPrice * 0.938).toFixed(2)}`,
     },
   };
+  const advancedData: AdvancedIndicators = deepMerge(defaultAdvanced, scanResult?.spot?.advanced || scanResult?.future?.advanced);
 
-  const spotData = scanResult?.spot || {
+  const defaultSpot = {
     signal: isPositive ? "BUY" : "HOLD",
     signalLabel: isPositive ? "MUA GOM" : "QUAN SÁT",
     winRatePercent: 74,
@@ -454,8 +489,9 @@ export function ScannerPage({
       recommendedAction: "DCA mua gom theo vùng entry, hiện thực hóa lợi nhuận tại TP1 & TP2.",
     },
   };
+  const spotData = deepMerge(defaultSpot, scanResult?.spot);
 
-  const futureData = scanResult?.future || {
+  const defaultFuture = {
     position: isPositive ? "LONG" : "SHORT",
     positionLabel: isPositive ? "LONG" : "SHORT",
     recommendedLeverage: "3x - 5x (An Toàn)",
@@ -503,6 +539,7 @@ export function ScannerPage({
       recommendedAction: "Mở vị thế Long tại vùng Entry kỷ luật, cài Stoploss và chốt lời từng phần.",
     },
   };
+  const futureData = deepMerge(defaultFuture, scanResult?.future);
 
   const tradingViewSymbol = selectedCoin
     ? `BINANCE:${selectedCoin.symbol.toUpperCase()}USDT`
@@ -1684,7 +1721,7 @@ export function ScannerPage({
                           Khuyến Nghị Vị Thế Phái Sinh
                         </h3>
                         <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
-                          {futureData.finalVerdict.summaryText}
+                          {futureData?.finalVerdict?.summaryText || "Đang cập nhật nhận định vị thế phái sinh chuyên sâu..."}
                         </p>
                       </div>
                     </div>
@@ -1692,7 +1729,7 @@ export function ScannerPage({
                     <div className="shrink-0 self-start sm:self-center">
                       <button className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-600 text-white font-black text-xs sm:text-sm shadow-md tracking-wider uppercase cursor-default">
                         <TrendingUp className="w-4 h-4" />
-                        <span>{futureData.finalVerdict.action}</span>
+                        <span>{futureData?.finalVerdict?.action || futureData?.positionLabel || "LONG"}</span>
                       </button>
                     </div>
                   </div>
@@ -1872,7 +1909,7 @@ export function ScannerPage({
                           Khuyến Nghị Tích Lũy Spot
                         </h3>
                         <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
-                          {spotData.finalVerdict.summaryText}
+                          {spotData?.finalVerdict?.summaryText || "Đang cập nhật nhận định tích lũy Spot chuyên sâu..."}
                         </p>
                       </div>
                     </div>
@@ -1880,7 +1917,7 @@ export function ScannerPage({
                     <div className="shrink-0 self-start sm:self-center">
                       <button className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-600 text-white font-black text-xs sm:text-sm shadow-md tracking-wider uppercase cursor-default">
                         <TrendingUp className="w-4 h-4" />
-                        <span>{spotData.finalVerdict.action}</span>
+                        <span>{spotData?.finalVerdict?.action || spotData?.signalLabel || "NÊN MUA"}</span>
                       </button>
                     </div>
                   </div>
