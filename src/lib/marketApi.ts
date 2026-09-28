@@ -80,15 +80,37 @@ export const initialGoldForexData: GoldForexItem[] = [
   },
 ];
 
-export async function fetchTopCryptos(perPage: number = 100): Promise<CryptoItem[]> {
+export async function fetchTopCryptos(count: number = 250): Promise<CryptoItem[]> {
   try {
-    const res = await fetch(
-      `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=${perPage}&page=1&sparkline=true&price_change_percentage=24h`,
-      { next: { revalidate: 60 } }
+    const perPage = Math.min(250, count);
+    const numPages = Math.ceil(count / perPage);
+
+    // Fetch pages in parallel
+    const pagePromises = Array.from({ length: numPages }, (_, i) =>
+      fetch(
+        `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=${perPage}&page=${
+          i + 1
+        }&sparkline=true&price_change_percentage=24h`,
+        { next: { revalidate: 60 } }
+      )
+        .then((res) => {
+          if (!res.ok) throw new Error(`CoinGecko page ${i + 1} failed: ${res.status}`);
+          return res.json();
+        })
+        .catch((err) => {
+          console.warn(`Could not fetch page ${i + 1}:`, err);
+          return [];
+        })
     );
-    if (!res.ok) throw new Error("Failed to fetch CoinGecko API");
-    const rawData: any[] = await res.json();
-    const data: CryptoItem[] = rawData.map((c) => ({
+
+    const pagesData = await Promise.all(pagePromises);
+    const combinedRaw = pagesData.flat();
+
+    if (combinedRaw.length === 0) {
+      throw new Error("No data returned from CoinGecko");
+    }
+
+    const data: CryptoItem[] = combinedRaw.map((c: any) => ({
       id: c.id || "",
       symbol: c.symbol || "",
       name: c.name || "",
@@ -103,10 +125,11 @@ export async function fetchTopCryptos(perPage: number = 100): Promise<CryptoItem
       image: c.image || "",
       sparkline_in_7d: c.sparkline_in_7d,
     }));
+
     return data;
   } catch (err) {
-    console.warn("CoinGecko rate limit or offline, using extensive top coins fallback");
-    // Extensive fallback list of top 30 coins
+    console.warn("CoinGecko rate limit or offline, using fallback list");
+    // Comprehensive fallback
     return [
       {
         id: "bitcoin",
@@ -156,42 +179,42 @@ export async function fetchTopCryptos(perPage: number = 100): Promise<CryptoItem
         id: "ripple",
         symbol: "xrp",
         name: "XRP",
-        current_price: 1.88,
+        current_price: 1.48,
         price_change_percentage_24h: 8.92,
-        total_volume: 4500000000,
-        market_cap: 106000000000,
+        total_volume: 4900000000,
+        market_cap: 84000000000,
         market_cap_rank: 5,
         image: "https://assets.coingecko.com/coins/images/44/large/xrp-symbol-white-128.png",
-      },
-      {
-        id: "cardano",
-        symbol: "ada",
-        name: "Cardano",
-        current_price: 0.96,
-        price_change_percentage_24h: 4.15,
-        total_volume: 1400000000,
-        market_cap: 34000000000,
-        market_cap_rank: 6,
-        image: "https://assets.coingecko.com/coins/images/975/large/cardano.png",
       },
       {
         id: "dogecoin",
         symbol: "doge",
         name: "Dogecoin",
         current_price: 0.385,
-        price_change_percentage_24h: 6.72,
+        price_change_percentage_24h: -2.31,
         total_volume: 3200000000,
         market_cap: 56000000000,
-        market_cap_rank: 7,
+        market_cap_rank: 6,
         image: "https://assets.coingecko.com/coins/images/5/large/dogecoin.png",
+      },
+      {
+        id: "cardano",
+        symbol: "ada",
+        name: "Cardano",
+        current_price: 0.825,
+        price_change_percentage_24h: 4.15,
+        total_volume: 1400000000,
+        market_cap: 29500000000,
+        market_cap_rank: 7,
+        image: "https://assets.coingecko.com/coins/images/975/large/cardano.png",
       },
       {
         id: "sui",
         symbol: "sui",
         name: "Sui",
-        current_price: 3.48,
-        price_change_percentage_24h: 7.85,
-        total_volume: 1600000000,
+        current_price: 3.42,
+        price_change_percentage_24h: 7.21,
+        total_volume: 1950000000,
         market_cap: 9800000000,
         market_cap_rank: 8,
         image: "https://assets.coingecko.com/coins/images/26375/large/sui-ocean-square.png",
@@ -200,133 +223,89 @@ export async function fetchTopCryptos(perPage: number = 100): Promise<CryptoItem
         id: "avalanche-2",
         symbol: "avax",
         name: "Avalanche",
-        current_price: 42.5,
-        price_change_percentage_24h: 3.82,
+        current_price: 38.4,
+        price_change_percentage_24h: 1.85,
         total_volume: 850000000,
-        market_cap: 17200000000,
+        market_cap: 15600000000,
         market_cap_rank: 9,
         image: "https://assets.coingecko.com/coins/images/12559/large/Avalanche_Circle_RedWhite_Trans.png",
+      },
+      {
+        id: "chainlink",
+        symbol: "link",
+        name: "Chainlink",
+        current_price: 18.75,
+        price_change_percentage_24h: 3.12,
+        total_volume: 680000000,
+        market_cap: 11400000000,
+        market_cap_rank: 10,
+        image: "https://assets.coingecko.com/coins/images/877/large/chainlink-new-logo.png",
       },
       {
         id: "near",
         symbol: "near",
         name: "NEAR Protocol",
         current_price: 6.85,
-        price_change_percentage_24h: 4.65,
-        total_volume: 680000000,
-        market_cap: 8200000000,
-        market_cap_rank: 10,
+        price_change_percentage_24h: 4.62,
+        total_volume: 720000000,
+        market_cap: 8300000000,
+        market_cap_rank: 11,
         image: "https://assets.coingecko.com/coins/images/10365/large/near.png",
       },
       {
         id: "pepe",
         symbol: "pepe",
         name: "Pepe",
-        current_price: 0.0000195,
+        current_price: 0.0000215,
         price_change_percentage_24h: 12.4,
         total_volume: 2400000000,
-        market_cap: 8200000000,
-        market_cap_rank: 11,
-        image: "https://assets.coingecko.com/coins/images/29850/large/pepe-token.png",
-      },
-      {
-        id: "chainlink",
-        symbol: "link",
-        name: "Chainlink",
-        current_price: 22.4,
-        price_change_percentage_24h: 3.15,
-        total_volume: 750000000,
-        market_cap: 13800000000,
+        market_cap: 9100000000,
         market_cap_rank: 12,
-        image: "https://assets.coingecko.com/coins/images/877/large/chainlink-new-logo.png",
-      },
-      {
-        id: "render-token",
-        symbol: "render",
-        name: "Render",
-        current_price: 9.85,
-        price_change_percentage_24h: 8.42,
-        total_volume: 520000000,
-        market_cap: 5100000000,
-        market_cap_rank: 13,
-        image: "https://assets.coingecko.com/coins/images/11636/large/render.png",
+        image: "https://assets.coingecko.com/coins/images/29850/large/pepe-token.png",
       },
       {
         id: "shiba-inu",
         symbol: "shib",
         name: "Shiba Inu",
         current_price: 0.0000258,
-        price_change_percentage_24h: 4.75,
-        total_volume: 1200000000,
+        price_change_percentage_24h: -1.45,
+        total_volume: 1100000000,
         market_cap: 15200000000,
-        market_cap_rank: 14,
+        market_cap_rank: 13,
         image: "https://assets.coingecko.com/coins/images/11939/large/shiba.png",
       },
       {
         id: "polkadot",
         symbol: "dot",
         name: "Polkadot",
-        current_price: 8.65,
-        price_change_percentage_24h: 1.85,
-        total_volume: 410000000,
-        market_cap: 12400000000,
-        market_cap_rank: 15,
+        current_price: 8.92,
+        price_change_percentage_24h: 2.75,
+        total_volume: 480000000,
+        market_cap: 12800000000,
+        market_cap_rank: 14,
         image: "https://assets.coingecko.com/coins/images/12171/large/polkadot.png",
       },
       {
         id: "uniswap",
         symbol: "uni",
         name: "Uniswap",
-        current_price: 11.2,
-        price_change_percentage_24h: 3.65,
+        current_price: 11.45,
+        price_change_percentage_24h: 5.14,
         total_volume: 380000000,
-        market_cap: 6700000000,
-        market_cap_rank: 16,
+        market_cap: 6900000000,
+        market_cap_rank: 15,
         image: "https://assets.coingecko.com/coins/images/12504/large/uniswap-uni.png",
       },
       {
-        id: "aptos",
-        symbol: "apt",
-        name: "Aptos",
-        current_price: 13.4,
-        price_change_percentage_24h: 6.25,
-        total_volume: 480000000,
-        market_cap: 6800000000,
-        market_cap_rank: 17,
-        image: "https://assets.coingecko.com/coins/images/26455/large/aptos_round.png",
-      },
-      {
-        id: "bittensor",
-        symbol: "tao",
-        name: "Bittensor",
-        current_price: 540.2,
-        price_change_percentage_24h: 9.15,
-        total_volume: 290000000,
-        market_cap: 3900000000,
-        market_cap_rank: 18,
-        image: "https://assets.coingecko.com/coins/images/31802/large/bittensor.png",
-      },
-      {
-        id: "injective-protocol",
-        symbol: "inj",
-        name: "Injective",
-        current_price: 28.6,
-        price_change_percentage_24h: 5.4,
-        total_volume: 220000000,
-        market_cap: 2800000000,
-        market_cap_rank: 19,
-        image: "https://assets.coingecko.com/coins/images/12882/large/Secondary_Symbol.png",
-      },
-      {
-        id: "fetch-ai",
-        symbol: "fet",
-        name: "Artificial Superintelligence",
-        current_price: 1.65,
-        price_change_percentage_24h: 7.12,
-        total_volume: 310000000,
-        market_cap: 4200000000,
-        market_cap_rank: 20,
-        image: "https://assets.coingecko.com/coins/images/5681/large/Fetch.jpg",
+        id: "quant-network",
+        symbol: "qnt",
+        name: "Quant",
+        current_price: 264.51,
+        price_change_percentage_24h: 52.58,
+        total_volume: 1250000000,
+        market_cap: 3850000000,
+        market_cap_rank: 16,
+        image: "https://assets.coingecko.com/coins/images/3370/large/5F9Sn7Pp_400x400.jpg",
       },
     ];
   }

@@ -44,7 +44,7 @@ export default function Home() {
 
   const loadCryptoData = async () => {
     setIsLoading(true);
-    const data = await fetchTopCryptos(100);
+    const data = await fetchTopCryptos(250);
     setCryptos(data);
     setLastUpdated(new Date().toLocaleTimeString("vi-VN"));
     setIsLoading(false);

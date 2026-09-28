@@ -81,18 +81,62 @@ body {
   transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-/* Custom scrollbars */
+/* ===================================================
+   DARK & MODERN SCROLLBAR STYLES (Firefox + WebKit)
+=================================================== */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #27272a #0c0e18;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(161, 161, 170, 0.25);
+  background: #0c0e18;
   border-radius: 9999px;
 }
+
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 9999px;
+}
+
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(161, 161, 170, 0.45);
+  background: #3f3f46;
+}
+
+::-webkit-scrollbar-corner {
+  background: #0c0e18;
+}
+
+/* Light mode scrollbars */
+html.light * {
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+html.light ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+html.light ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+}
+
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }
