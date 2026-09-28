@@ -39,7 +39,7 @@ export function Navbar({
 
   const navItems = [
     { id: "dashboard", label: "Tổng quan", icon: Wallet },
-    { id: "scan", label: "Quét AI", icon: Scan, isSpecial: true },
+    { id: "scan", label: "Phân tích", icon: Scan, isSpecial: true },
     { id: "crypto", label: "Crypto Market", icon: Coins },
     { id: "forex-gold", label: "Vàng & Ngoại hối", icon: TrendingUp },
     { id: "portfolio", label: "Danh mục đầu tư", icon: Layers },
@@ -263,7 +263,7 @@ export function Navbar({
                         className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-zinc-800 text-zinc-300 transition text-left cursor-pointer"
                       >
                         <Scan className="w-4 h-4 text-cyan-400" />
-                        <span>Trang Quét AI</span>
+                        <span>Trang Phân tích</span>
                       </button>
 
                       <button
@@ -353,7 +353,7 @@ export function Navbar({
                       isActive ? "text-cyan-300" : "text-cyan-400/80"
                     }`}
                   >
-                    Quét AI
+                    Phân tích
                   </span>
                 </button>
               );

@@ -116,7 +116,7 @@ export function CryptoList({
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-cyan-500/20 hover:from-emerald-500/30 hover:to-cyan-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-semibold shadow-sm transition cursor-pointer whitespace-nowrap"
             >
               <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Quét AI chuyên sâu</span>
+              <span>Phân tích chuyên sâu</span>
             </button>
           )}
 
@@ -278,10 +278,10 @@ export function CryptoList({
                           <button
                             onClick={() => onScanCoin(coin)}
                             className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 text-xs font-semibold border border-emerald-500/30 transition cursor-pointer"
-                            title={`Quét AI phân tích kỹ thuật ${coin.name}`}
+                            title={`Phân tích kỹ thuật ${coin.name}`}
                           >
                             <Scan className="w-3.5 h-3.5" />
-                            <span className="hidden md:inline">Scan AI</span>
+                            <span className="hidden md:inline">Phân tích</span>
                           </button>
                         )}
 

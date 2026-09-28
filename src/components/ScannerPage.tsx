@@ -569,52 +569,19 @@ export function ScannerPage({
                 </svg>
               </div>
 
-              {/* Timeframe selector & Trigger Scan button */}
-              <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
-                <div className="flex items-center bg-[#141830] p-1 rounded-xl border border-indigo-900/50 text-xs">
-                  <button
-                    onClick={() => setTimeframe("short")}
-                    className={`px-2.5 py-1 rounded-lg font-medium transition cursor-pointer ${
-                      timeframe === "short"
-                        ? "bg-indigo-600 text-white font-bold"
-                        : "text-slate-400 hover:text-white"
-                    }`}
-                  >
-                    Lướt sóng
-                  </button>
-                  <button
-                    onClick={() => setTimeframe("medium")}
-                    className={`px-2.5 py-1 rounded-lg font-medium transition cursor-pointer ${
-                      timeframe === "medium"
-                        ? "bg-indigo-600 text-white font-bold"
-                        : "text-slate-400 hover:text-white"
-                    }`}
-                  >
-                    Trung hạn
-                  </button>
-                  <button
-                    onClick={() => setTimeframe("long")}
-                    className={`px-2.5 py-1 rounded-lg font-medium transition cursor-pointer ${
-                      timeframe === "long"
-                        ? "bg-indigo-600 text-white font-bold"
-                        : "text-slate-400 hover:text-white"
-                    }`}
-                  >
-                    Hold / DCA
-                  </button>
-                </div>
-
+              {/* Trigger Analysis button */}
+              <div className="flex items-center gap-2.5">
                 <button
                   onClick={() => handleStartScan(selectedCoin)}
                   disabled={isScanning}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs shadow-lg shadow-emerald-500/20 transition cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs shadow-lg shadow-emerald-500/20 transition cursor-pointer disabled:opacity-50 whitespace-nowrap"
                 >
                   {isScanning ? (
                     <RefreshCw className="w-4 h-4 animate-spin text-white" />
                   ) : (
                     <Sparkles className="w-4 h-4 text-white" />
                   )}
-                  <span>{isScanning ? "Đang quét AI..." : `Quét AI ${selectedCoin.symbol.toUpperCase()}`}</span>
+                  <span>{isScanning ? "Đang phân tích..." : "Phân tích"}</span>
                 </button>
               </div>
             </div>
@@ -919,7 +886,7 @@ export function ScannerPage({
                   }`}
                 />
                 <span className="font-bold text-xs sm:text-sm text-white">
-                  Luồng 1: Giao Dịch SPOT (Nắm Giữ)
+                  GIAO DỊCH SPOT
                 </span>
               </div>
               <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase font-mono bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
@@ -944,7 +911,7 @@ export function ScannerPage({
                   }`}
                 />
                 <span className="font-bold text-xs sm:text-sm text-white">
-                  Luồng 2: FUTURE / MARGIN (Đòn Bẩy)
+                  GIAO DỊCH FUTURE
                 </span>
               </div>
               <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">

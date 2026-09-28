@@ -106,7 +106,7 @@ export default function Home() {
                     </span>
                   </div>
                   <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5">
-                    Tự động định giá danh mục từ CoinGecko ({cryptos.length} coins), Vàng SJC & Quét AI
+                    Tự động định giá danh mục từ CoinGecko ({cryptos.length} coins), Vàng SJC & Phân tích chuyên sâu
                   </p>
                 </div>
               </div>
@@ -117,7 +117,7 @@ export default function Home() {
                   className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 bg-gradient-to-r from-cyan-500/20 via-emerald-500/20 to-teal-500/20 hover:from-cyan-500/30 hover:to-teal-500/30 text-cyan-300 text-xs font-bold rounded-lg border border-cyan-500/40 transition cursor-pointer shadow-sm whitespace-nowrap"
                 >
                   <Scan className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Quét AI</span>
+                  <span>Phân tích</span>
                   <span className="flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-cyan-400 text-zinc-950 text-[9px] sm:text-[10px] font-black font-mono">
                     {isUnlimited ? "∞" : remainingScans}
                   </span>
