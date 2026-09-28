@@ -25,11 +25,19 @@ import {
   ArrowUpRight,
   Shield,
   Gauge,
+  Star,
+  SlidersHorizontal,
+  ChevronRight,
+  ExternalLink,
+  Coins,
+  Wallet,
+  Check,
+  TrendingDown as TrendDownIcon,
+  HelpCircle,
 } from "lucide-react";
 import { CryptoItem } from "@/lib/marketApi";
 import { ScanResult } from "@/app/api/ai-scan/route";
 import { useAuth } from "@/context/AuthContext";
-import { TradingViewWidget } from "@/components/TradingViewWidget";
 
 interface ScannerPageProps {
   cryptos: CryptoItem[];
@@ -37,12 +45,11 @@ interface ScannerPageProps {
   onOpenUpgradeModal?: () => void;
 }
 
-const CATEGORIES = [
+const DEFAULT_CATEGORIES = [
   { id: "all", label: "Tất cả" },
-  { id: "l1", label: "Layer 1 / L2", symbols: ["BTC", "ETH", "SOL", "BNB", "ADA", "AVAX", "SUI", "NEAR", "APT", "DOT", "MATIC", "XRP"] },
-  { id: "ai", label: "AI & Big Data", symbols: ["TAO", "FET", "RENDER", "NEAR", "ICP", "GRT", "AGIX", "OCEAN"] },
-  { id: "meme", label: "Meme Coins", symbols: ["DOGE", "SHIB", "PEPE", "BONK", "FLOKI", "WIF", "BOME"] },
-  { id: "defi", label: "DeFi & DEX", symbols: ["UNI", "LINK", "INJ", "AAVE", "MKR", "CRV", "SNX", "LDO"] },
+  { id: "gainers", label: "Top Gainer" },
+  { id: "losers", label: "Top Loser" },
+  { id: "watchlist", label: "Watchlist +" },
 ];
 
 export function ScannerPage({
@@ -54,11 +61,11 @@ export function ScannerPage({
 
   const [selectedCoin, setSelectedCoin] = useState<CryptoItem | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [sortBy, setSortBy] = useState<"market_cap" | "gainers" | "losers" | "volume">("market_cap");
+  const [activeFilter, setActiveFilter] = useState<string>("all");
   const [timeframe, setTimeframe] = useState<"short" | "medium" | "long">("medium");
+  const [tradingMode, setTradingMode] = useState<"spot" | "future">("future");
+  const [watchlist, setWatchlist] = useState<string[]>(["BTC", "ETH", "SOL"]);
   const [mobileView, setMobileView] = useState<"analysis" | "coins">("analysis");
-  const [tradingMode, setTradingMode] = useState<"spot" | "future">("spot");
 
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
@@ -72,16 +79,31 @@ export function ScannerPage({
     }
   }, [cryptos, selectedCoin]);
 
+  // Toggle watchlist
+  const toggleWatchlist = (symbol: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setWatchlist((prev) =>
+      prev.includes(symbol.toUpperCase())
+        ? prev.filter((s) => s !== symbol.toUpperCase())
+        : [...prev, symbol.toUpperCase()]
+    );
+  };
+
   // Filter & sort coins list
   const filteredCoins = useMemo(() => {
     let list = [...cryptos];
 
-    // Category filter
-    if (selectedCategory !== "all") {
-      const cat = CATEGORIES.find((c) => c.id === selectedCategory);
-      if (cat?.symbols) {
-        list = list.filter((c) => cat.symbols.includes(c.symbol.toUpperCase()));
-      }
+    // Quick tab filters
+    if (activeFilter === "gainers") {
+      list = list.filter((c) => (c.price_change_percentage_24h ?? 0) > 0);
+      list.sort((a, b) => (b.price_change_percentage_24h ?? 0) - (a.price_change_percentage_24h ?? 0));
+    } else if (activeFilter === "losers") {
+      list = list.filter((c) => (c.price_change_percentage_24h ?? 0) < 0);
+      list.sort((a, b) => (a.price_change_percentage_24h ?? 0) - (b.price_change_percentage_24h ?? 0));
+    } else if (activeFilter === "watchlist") {
+      list = list.filter((c) => watchlist.includes(c.symbol.toUpperCase()));
+    } else {
+      list.sort((a, b) => (b.market_cap ?? 0) - (a.market_cap ?? 0));
     }
 
     // Search filter
@@ -94,26 +116,10 @@ export function ScannerPage({
       );
     }
 
-    // Sort
-    if (sortBy === "gainers") {
-      list.sort(
-        (a, b) =>
-          (b.price_change_percentage_24h ?? 0) - (a.price_change_percentage_24h ?? 0)
-      );
-    } else if (sortBy === "losers") {
-      list.sort(
-        (a, b) =>
-          (a.price_change_percentage_24h ?? 0) - (b.price_change_percentage_24h ?? 0)
-      );
-    } else if (sortBy === "volume") {
-      list.sort((a, b) => (b.total_volume ?? 0) - (a.total_volume ?? 0));
-    } else {
-      list.sort((a, b) => (b.market_cap ?? 0) - (a.market_cap ?? 0));
-    }
-
     return list;
-  }, [cryptos, selectedCategory, searchTerm, sortBy]);
+  }, [cryptos, activeFilter, searchTerm, watchlist]);
 
+  // Execute AI Scan
   const handleStartScan = async (coinToScan = selectedCoin) => {
     if (!coinToScan) return;
 
@@ -125,7 +131,6 @@ export function ScannerPage({
     setIsScanning(true);
     setErrorMessage("");
     setShowLimitReached(false);
-    setScanResult(null);
 
     const price = coinToScan.current_price ?? 0;
     const change24h = coinToScan.price_change_percentage_24h ?? 0;
@@ -164,1018 +169,934 @@ export function ScannerPage({
 
   const isUnlimited = role === "ADMIN" || role === "ULTRA";
 
-  const getSpotSignalBadgeStyle = (signal: string) => {
-    switch (signal) {
-      case "STRONG_BUY":
-      case "BUY":
-        return "bg-emerald-500/20 text-emerald-400 border-emerald-500/50 shadow-emerald-500/20";
-      case "TAKE_PROFIT":
-        return "bg-cyan-500/20 text-cyan-400 border-cyan-500/50 shadow-cyan-500/20";
-      case "SELL":
-        return "bg-rose-500/20 text-rose-400 border-rose-500/50 shadow-rose-500/20";
-      default:
-        return "bg-amber-500/20 text-amber-400 border-amber-500/50 shadow-amber-500/20";
-    }
+  // Dynamic fallback calculation if not scanned yet
+  const currentCoinPrice = selectedCoin?.current_price ?? 0;
+  const currentCoinChange = selectedCoin?.price_change_percentage_24h ?? 0;
+  const isPositive = currentCoinChange >= 0;
+
+  // Render mock or real scan data
+  const spotData = scanResult?.spot || {
+    signal: isPositive ? "BUY" : "HOLD",
+    signalLabel: isPositive ? "MUA GOM" : "QUAN SÁT",
+    winRatePercent: 72,
+    overallScore: 8.2,
+    riskRewardRatio: "1 : 2.8",
+    trend: isPositive ? "Tăng trưởng Bullish" : "Tích lũy Sideway",
+    entryZone: `$${(currentCoinPrice * 0.97).toLocaleString("en-US", { maximumFractionDigits: 4 })} - $${(currentCoinPrice * 0.99).toLocaleString("en-US", { maximumFractionDigits: 4 })}`,
+    targetPrice1: `$${(currentCoinPrice * 1.06).toLocaleString("en-US", { maximumFractionDigits: 4 })}`,
+    targetPrice2: `$${(currentCoinPrice * 1.15).toLocaleString("en-US", { maximumFractionDigits: 4 })}`,
+    targetPrice3: `$${(currentCoinPrice * 1.25).toLocaleString("en-US", { maximumFractionDigits: 4 })}`,
+    stopLoss: `$${(currentCoinPrice * 0.92).toLocaleString("en-US", { maximumFractionDigits: 4 })}`,
+    liquidity: {
+      highLiquidityZone: `$${(currentCoinPrice * 0.95).toLocaleString("en-US", { maximumFractionDigits: 2 })} (Order Block Mua)`,
+      thinLiquidityZone: `$${(currentCoinPrice * 1.08).toLocaleString("en-US", { maximumFractionDigits: 2 })}`,
+      supplyZone: `$${(currentCoinPrice * 1.18).toLocaleString("en-US", { maximumFractionDigits: 2 })} (Vùng Chốt Lời Kháng Cự)`,
+    },
+    indicators: {
+      emaTrend: "Nằm trên EMA 50 & 200",
+      rsi: { value: 58, status: "Vùng Tích Lũy Lành Mạnh" },
+      macd: "Giao cắt MACD hướng lên (Bullish Cross)",
+      volumeProfile: "Khối lượng mua chủ động tăng 28%",
+      supportResistance: {
+        support: `$${(currentCoinPrice * 0.94).toFixed(2)}`,
+        resistance: `$${(currentCoinPrice * 1.12).toFixed(2)}`,
+      },
+    },
+    strategyAdvice: "Chiến lược Spot: Phân bổ vốn DCA 3 đợt tại vùng hỗ trợ. Giữ kỷ luật chốt lời từng phần khi giá tiệm cận kháng cự.",
+    riskWarning: "Không dồn toàn bộ vốn all-in một điểm; đặt Stoploss bảo vệ danh mục.",
+    finalVerdict: {
+      action: isPositive ? "NÊN MUA" : "QUAN SÁT",
+      actionType: isPositive ? "BUY" : "WAIT",
+      summaryText: isPositive
+        ? "Cấu trúc thị trường Spot duy trì đà tăng trưởng ổn định. Dòng tiền tích lũy tốt tại các vùng giá hỗ trợ cứng."
+        : "Thị trường đang tích lũy đi ngang. Nên quan sát thêm tín hiệu xác nhận dòng tiền trước khi giải ngân lớn.",
+      keyReason: "Chỉ báo RSI & EMA đồng thuận hỗ trợ xu hướng tăng trung hạn.",
+      recommendedAction: "DCA vùng entry, chia chốt lời tại TP1 & TP2.",
+    },
   };
 
-  const getVerdictStyle = (action: string = "") => {
-    const act = action.toUpperCase();
-    if (act.includes("MUA") || act.includes("LONG")) {
-      return {
-        bg: "bg-gradient-to-r from-emerald-950/50 via-zinc-900 to-zinc-950 border-emerald-500/40 shadow-emerald-500/10",
-        badge: "bg-gradient-to-r from-emerald-400 to-teal-400 text-zinc-950 font-black shadow-md shadow-emerald-500/30",
-        iconColor: "text-emerald-400",
-        title: "Tín hiệu Khuyến nghị: NÊN MUA / LONG",
-      };
-    }
-    if (act.includes("BÁN") || act.includes("SHORT")) {
-      return {
-        bg: "bg-gradient-to-r from-rose-950/50 via-zinc-900 to-zinc-950 border-rose-500/40 shadow-rose-500/10",
-        badge: "bg-gradient-to-r from-rose-500 to-pink-500 text-white font-black shadow-md shadow-rose-500/30",
-        iconColor: "text-rose-400",
-        title: "Tín hiệu Khuyến nghị: NÊN BÁN / SHORT",
-      };
-    }
-    return {
-      bg: "bg-gradient-to-r from-amber-950/50 via-zinc-900 to-zinc-950 border-amber-500/40 shadow-amber-500/10",
-      badge: "bg-gradient-to-r from-amber-400 to-orange-400 text-zinc-950 font-black shadow-md shadow-amber-400/30",
-      iconColor: "text-amber-400",
-      title: "Tín hiệu Khuyến nghị: QUAN SÁT",
-    };
+  const futureData = scanResult?.future || {
+    position: isPositive ? "LONG" : "SHORT",
+    positionLabel: isPositive ? "LONG" : "SHORT",
+    recommendedLeverage: "3x - 5x (An Toàn)",
+    capitalRiskPercent: "3%",
+    winRatePercent: 65,
+    overallScore: 8.5,
+    riskRewardRatio: "1 : 3",
+    entryZone: `$${(currentCoinPrice * 0.985).toLocaleString("en-US", { maximumFractionDigits: 4 })} - $${currentCoinPrice.toLocaleString("en-US", { maximumFractionDigits: 4 })}`,
+    targetPrice1: `$${(currentCoinPrice * 1.058).toLocaleString("en-US", { maximumFractionDigits: 4 })}`,
+    targetPrice2: `$${(currentCoinPrice * 1.134).toLocaleString("en-US", { maximumFractionDigits: 4 })}`,
+    targetPrice3: `$${(currentCoinPrice * 1.248).toLocaleString("en-US", { maximumFractionDigits: 4 })}`,
+    stopLoss: `$${(currentCoinPrice * 0.945).toLocaleString("en-US", { maximumFractionDigits: 4 })}`,
+    estLiquidationPrice: `$${(currentCoinPrice * 0.82).toLocaleString("en-US", { maximumFractionDigits: 4 })}`,
+    metrics: {
+      longShortRatio: {
+        longPercent: 62,
+        shortPercent: 38,
+        ratioText: "1.63",
+        sentiment: "Bullish",
+      },
+      fundingRate: {
+        rate: "+0.016%",
+        status: "Longs trả phí cho Shorts",
+      },
+      openInterest: "Tăng 18%",
+      liquidationHeatmap: {
+        shortLiquidationPool: `$${(currentCoinPrice * 1.04).toFixed(1)} - $${(currentCoinPrice * 1.07).toFixed(1)}`,
+        longLiquidationPool: `$${(currentCoinPrice * 0.93).toFixed(1)} - $${(currentCoinPrice * 0.96).toFixed(1)}`,
+        stopHuntRisk: "Thấp",
+      },
+      volatilityATR: "12.4",
+    },
+    riskManagementRules: [
+      "Quản lý vốn tối đa 2-3% NAV trên mỗi vị thế.",
+      "Luôn cài Stoploss trước khi vào lệnh, dời SL về Entry khi đạt TP1.",
+      "Đòn bẩy khuyến nghị không vượt quá 5x trong giai đoạn biến động mạnh.",
+    ],
+    finalVerdict: {
+      action: isPositive ? "NÊN LONG" : "QUAN SÁT",
+      actionType: isPositive ? "LONG" : "WAIT",
+      summaryText: isPositive
+        ? "Cấu trúc thị trường futures cho thấy áp lực mua mạnh và tỷ lệ long vượt trội. Ưu tiên canh các nhịp điều chỉnh để vào lệnh theo xu hướng."
+        : "Lực bán ngắn hạn đang chiếm ưu thế nhẹ. Thận trọng với các bẫy quét thanh lý hai đầu.",
+      keyReason: "Tỷ lệ Long/Short 62% kết hợp Funding Rate dương nhẹ và Open Interest tăng trưởng vững chắc.",
+      recommendedAction: "Vào vị thế Long theo vùng Entry, đặt SL bảo toàn vốn.",
+    },
   };
-
-  const getFuturePositionStyle = (position: string) => {
-    if (position === "LONG") {
-      return "bg-emerald-500/20 text-emerald-400 border-emerald-500/50 shadow-emerald-500/20";
-    }
-    if (position === "SHORT") {
-      return "bg-rose-500/20 text-rose-400 border-rose-500/50 shadow-rose-500/20";
-    }
-    return "bg-zinc-800 text-zinc-300 border-zinc-700";
-  };
-
-  const chartSymbol = selectedCoin ? `BINANCE:${selectedCoin.symbol.toUpperCase()}USDT` : "BINANCE:BTCUSDT";
 
   return (
-    <div className="space-y-6">
-      {/* Top Banner Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-cyan-950/40 via-emerald-950/30 to-zinc-900/60 border border-cyan-500/30 shadow-2xl">
+    <div className="space-y-5 bg-[#090b14] min-h-screen text-slate-100 p-2 sm:p-4 rounded-3xl">
+      {/* Top Header Banner */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-[#0f1225] border border-indigo-950/80 shadow-2xl">
         <div className="flex items-center gap-3.5">
-          <div className="relative p-3 rounded-2xl bg-gradient-to-tr from-cyan-500/20 via-emerald-500/20 to-teal-500/20 text-cyan-400 border border-cyan-500/40 shadow-lg shrink-0">
-            <Scan className="w-6 h-6 animate-pulse" />
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full animate-ping" />
+          <div className="p-3 rounded-2xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shadow-lg shrink-0">
+            <BarChart2 className="w-6 h-6 text-indigo-400" />
           </div>
           <div>
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className="text-lg sm:text-xl font-black text-white tracking-tight">
-                AI Crypto Scanner 2.0 (Spot & Phái Sinh)
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-base sm:text-lg font-black text-white tracking-tight">
+                AI Crypto Scanner 2.0
               </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-mono">
-                Dual Engine Pro
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                Spot & Phái Sinh
               </span>
             </div>
-            <p className="text-xs text-zinc-400 mt-1">
+            <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
               Phân tích đa chiều: Tín hiệu Mua/Bán Spot, Vùng thanh khoản Order Block, Tỷ lệ Long/Short & Bản đồ Thanh lý Futures
             </p>
           </div>
         </div>
 
-        {/* User Quota & Role Badge */}
-        <div className="flex items-center gap-3 self-start lg:self-center">
-          <div className="flex items-center gap-2.5 bg-zinc-950/80 px-4 py-2 rounded-2xl border border-zinc-800 shadow-inner">
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-400 to-emerald-400 text-zinc-950 font-mono font-black text-sm shadow-md">
-              {isUnlimited ? "∞" : remainingScans}
+        {/* User Account / Role Pill Badge */}
+        <div className="flex items-center gap-2.5 self-start lg:self-center">
+          <div className="flex items-center gap-3 bg-[#141830] px-3.5 py-2 rounded-2xl border border-indigo-900/40">
+            <div className="w-7 h-7 rounded-full bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-xs border border-indigo-500/30">
+              {role === "ADMIN" ? "👑" : "👤"}
             </div>
-            <div className="text-xs leading-tight">
-              <div className="font-bold text-zinc-100 flex items-center gap-1.5">
+            <div className="text-xs">
+              <div className="flex items-center gap-1.5 font-bold text-white">
                 <span>{isUnlimited ? "Không giới hạn" : `Còn ${remainingScans}/${scansLimit} lượt`}</span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded bg-zinc-800 text-amber-400 font-mono font-black">
-                  {role === "ADMIN" ? "👑 ADMIN" : role}
+                <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-black bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  {role === "ADMIN" ? "+ ADMIN" : role}
                 </span>
               </div>
-              <div className="text-[10px] text-zinc-400">
-                {role === "STARTER" ? "Gói STARTER (3 lượt quét)" : "Đã kích hoạt"}
-              </div>
+              <div className="text-[10px] text-slate-400">Đã kích hoạt</div>
             </div>
           </div>
-
-          {onOpenUpgradeModal && role === "STARTER" && (
-            <button
-              onClick={onOpenUpgradeModal}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-zinc-950 text-xs font-bold shadow-md shadow-amber-500/20 transition cursor-pointer"
-            >
-              <Crown className="w-4 h-4" />
-              <span className="hidden sm:inline">Nâng cấp PRO</span>
-            </button>
-          )}
         </div>
       </div>
 
-      {/* Mobile Mode Switcher (Visible only on lg:hidden) */}
-      <div className="lg:hidden flex items-center p-1 bg-zinc-900 border border-zinc-800 rounded-2xl">
-        <button
-          onClick={() => setMobileView("analysis")}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-            mobileView === "analysis"
-              ? "bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm"
-              : "text-zinc-400 hover:text-zinc-200"
-          }`}
-        >
-          <BarChart2 className="w-4 h-4 text-cyan-400" />
-          <span>Biểu đồ & AI ({selectedCoin?.symbol.toUpperCase() || "BTC"})</span>
-        </button>
+      {/* Main Grid: Left Column (Coins List) & Right Column (Analysis & Engine) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        {/* ================= LEFT COLUMN: COIN WATCHLIST & SELECTOR (4 Cols) ================= */}
+        <div className="lg:col-span-4 bg-[#0f1225] border border-indigo-950/80 rounded-2xl p-4 space-y-3.5 shadow-xl">
+          {/* Search Box */}
+          <div className="relative flex items-center">
+            <Search className="absolute left-3.5 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Tìm mã coin (BTC, ETH, SOL...)"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-9 pr-9 py-2 bg-[#141830] border border-indigo-900/40 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/60"
+            />
+            <SlidersHorizontal className="absolute right-3.5 w-3.5 h-3.5 text-slate-400 cursor-pointer hover:text-white" />
+          </div>
 
-        <button
-          onClick={() => setMobileView("coins")}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-            mobileView === "coins"
-              ? "bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm"
-              : "text-zinc-400 hover:text-zinc-200"
-          }`}
-        >
-          <Layers className="w-4 h-4 text-emerald-400" />
-          <span>Chọn Coin ({filteredCoins.length})</span>
-        </button>
-      </div>
+          {/* Quick Filter Pill Buttons */}
+          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1">
+            <button
+              onClick={() => setActiveFilter("all")}
+              className={`px-3 py-1 rounded-xl text-[11px] font-bold transition whitespace-nowrap cursor-pointer ${
+                activeFilter === "all"
+                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                  : "bg-[#141830] text-slate-400 hover:text-white border border-indigo-950"
+              }`}
+            >
+              Tất cả ({cryptos.length})
+            </button>
+            <button
+              onClick={() => setActiveFilter("gainers")}
+              className={`px-3 py-1 rounded-xl text-[11px] font-bold transition whitespace-nowrap cursor-pointer ${
+                activeFilter === "gainers"
+                  ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/30"
+                  : "bg-[#141830] text-slate-400 hover:text-white border border-indigo-950"
+              }`}
+            >
+              Top Gainer
+            </button>
+            <button
+              onClick={() => setActiveFilter("losers")}
+              className={`px-3 py-1 rounded-xl text-[11px] font-bold transition whitespace-nowrap cursor-pointer ${
+                activeFilter === "losers"
+                  ? "bg-rose-600 text-white shadow-md shadow-rose-600/30"
+                  : "bg-[#141830] text-slate-400 hover:text-white border border-indigo-950"
+              }`}
+            >
+              Top Loser
+            </button>
+            <button
+              onClick={() => setActiveFilter("watchlist")}
+              className={`px-3 py-1 rounded-xl text-[11px] font-bold transition whitespace-nowrap cursor-pointer ${
+                activeFilter === "watchlist"
+                  ? "bg-amber-600 text-white shadow-md shadow-amber-600/30"
+                  : "bg-[#141830] text-slate-400 hover:text-white border border-indigo-950"
+              }`}
+            >
+              Watchlist +
+            </button>
+          </div>
 
-      {/* Main Scanner Layout: Left Sidebar (Coins) + Right Canvas (Chart & AI Result) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Crypto Selector (4 cols on lg) */}
-        <div className={`lg:col-span-4 space-y-4 ${mobileView === "coins" ? "block" : "hidden lg:block"}`}>
-          <div className="bg-zinc-900/70 border border-zinc-800/90 rounded-3xl p-4 sm:p-5 backdrop-blur-md space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-zinc-100 flex items-center gap-2">
-                <Layers className="w-4 h-4 text-emerald-400" />
-                Danh sách Tiền mã hóa ({filteredCoins.length})
-              </h3>
-              <span className="text-[10px] text-emerald-400 font-mono bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                Live Data
-              </span>
-            </div>
+          {/* Table Header */}
+          <div className="grid grid-cols-12 text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-2 py-1 border-b border-indigo-950/60">
+            <span className="col-span-1">#</span>
+            <span className="col-span-5 flex items-center gap-1">Coin ▾</span>
+            <span className="col-span-3 text-right">Giá (USD)</span>
+            <span className="col-span-3 text-right">24h %</span>
+          </div>
 
-            {/* Search Input */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-              <input
-                type="text"
-                placeholder="Tìm mã coin (BTC, SOL, SUI, NEAR,...)"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-500/60"
-              />
-            </div>
-
-            {/* Category Filter Tabs */}
-            <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-thin">
-              {CATEGORIES.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition cursor-pointer ${
-                    selectedCategory === cat.id
-                      ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-bold"
-                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Sort Controls */}
-            <div className="flex items-center justify-between text-[11px] text-zinc-400 pt-1 border-t border-zinc-800/60">
-              <span>Sắp xếp theo:</span>
-              <div className="flex items-center gap-1">
-                {[
-                  { id: "market_cap", label: "Vốn hóa" },
-                  { id: "gainers", label: "Tăng mạnh" },
-                  { id: "volume", label: "Volume" },
-                ].map((s) => (
-                  <button
-                    key={s.id}
-                    onClick={() => setSortBy(s.id as any)}
-                    className={`px-2 py-0.5 rounded-md transition cursor-pointer ${
-                      sortBy === s.id
-                        ? "bg-zinc-800 text-cyan-400 font-bold"
-                        : "text-zinc-400 hover:text-zinc-200"
-                    }`}
-                  >
-                    {s.label}
-                  </button>
-                ))}
+          {/* Coins List Table Body */}
+          <div className="space-y-1 max-h-[560px] overflow-y-auto scrollbar-thin pr-1">
+            {filteredCoins.length === 0 ? (
+              <div className="py-8 text-center text-xs text-slate-500">
+                Không tìm thấy coin phù hợp
               </div>
-            </div>
-
-            {/* Scrollable Coin List */}
-            <div className="space-y-1.5 max-h-[620px] overflow-y-auto pr-1 scrollbar-thin">
-              {filteredCoins.map((coin) => {
-                const isSelected = selectedCoin?.symbol.toUpperCase() === coin.symbol.toUpperCase();
-                const change24h = coin.price_change_percentage_24h ?? 0;
-                const isPositive = change24h >= 0;
-                const price = coin.current_price ?? 0;
+            ) : (
+              filteredCoins.map((coin, index) => {
+                const isSelected = selectedCoin?.id === coin.id;
+                const change = coin.price_change_percentage_24h ?? 0;
+                const isGain = change >= 0;
+                const isStarred = watchlist.includes(coin.symbol.toUpperCase());
 
                 return (
                   <div
                     key={coin.id}
-                    onClick={() => {
-                      setSelectedCoin(coin);
-                      setScanResult(null);
-                      setShowLimitReached(false);
-                      setMobileView("analysis");
-                    }}
-                    className={`flex items-center justify-between p-2.5 rounded-2xl border transition-all cursor-pointer ${
+                    onClick={() => setSelectedCoin(coin)}
+                    className={`grid grid-cols-12 items-center px-2 py-2.5 rounded-xl cursor-pointer transition-all ${
                       isSelected
-                        ? "bg-gradient-to-r from-emerald-500/20 via-teal-500/10 to-zinc-900 border-emerald-500/50 shadow-md shadow-emerald-500/10"
-                        : "bg-zinc-950/50 border-zinc-800/60 hover:bg-zinc-800/60 hover:border-zinc-700"
+                        ? "bg-[#191f42] border border-indigo-500/40 shadow-inner"
+                        : "hover:bg-[#141830]/80 border border-transparent"
                     }`}
                   >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      {coin.image ? (
-                        <img src={coin.image} alt={coin.name} className="w-7 h-7 rounded-full shrink-0" />
-                      ) : (
-                        <div className="w-7 h-7 rounded-full bg-zinc-800 flex items-center justify-center text-[10px] font-bold text-emerald-400">
-                          {coin.symbol.slice(0, 2).toUpperCase()}
-                        </div>
-                      )}
+                    {/* Index */}
+                    <span className="col-span-1 text-[11px] font-mono text-slate-500">
+                      {index + 1}
+                    </span>
+
+                    {/* Coin Icon & Info */}
+                    <div className="col-span-5 flex items-center gap-2">
+                      <img
+                        src={coin.image}
+                        alt={coin.name}
+                        className="w-5 h-5 rounded-full shrink-0"
+                      />
                       <div className="truncate">
-                        <div className="font-bold text-xs text-white flex items-center gap-1.5">
-                          <span>{coin.symbol.toUpperCase()}</span>
-                          {coin.market_cap_rank && (
-                            <span className="text-[9px] text-zinc-400 font-normal">
-                              #{coin.market_cap_rank}
-                            </span>
-                          )}
+                        <div className="font-bold text-xs text-white leading-tight">
+                          {coin.symbol.toUpperCase()}
                         </div>
-                        <div className="text-[11px] text-zinc-400 truncate">{coin.name}</div>
+                        <div className="text-[10px] text-slate-400 truncate leading-tight">
+                          {coin.name}
+                        </div>
                       </div>
                     </div>
 
-                    <div className="text-right shrink-0">
-                      <div className="font-bold text-xs text-zinc-100 font-mono">
-                        ${price.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                      </div>
-                      <div
-                        className={`text-[10px] font-semibold font-mono flex items-center justify-end gap-0.5 ${
-                          isPositive ? "text-emerald-400" : "text-rose-400"
+                    {/* Price */}
+                    <div className="col-span-3 text-right font-mono text-xs font-semibold text-white">
+                      ${coin.current_price?.toLocaleString("en-US", {
+                        maximumFractionDigits: coin.current_price < 1 ? 4 : 2,
+                      })}
+                    </div>
+
+                    {/* 24h Change & Star */}
+                    <div className="col-span-3 flex items-center justify-end gap-1.5">
+                      <span
+                        className={`font-mono text-xs font-bold ${
+                          isGain ? "text-emerald-400" : "text-rose-400"
                         }`}
                       >
-                        {isPositive ? "+" : ""}
-                        {change24h.toFixed(2)}%
-                      </div>
+                        {isGain ? `+${change.toFixed(2)}%` : `${change.toFixed(2)}%`}
+                      </span>
+                      <button
+                        onClick={(e) => toggleWatchlist(coin.symbol, e)}
+                        className="text-slate-600 hover:text-amber-400 transition"
+                      >
+                        <Star
+                          className={`w-3.5 h-3.5 ${
+                            isStarred ? "text-amber-400 fill-amber-400" : ""
+                          }`}
+                        />
+                      </button>
                     </div>
                   </div>
                 );
-              })}
+              })
+            )}
+          </div>
+
+          {/* Bottom Summary Bar */}
+          <div className="flex items-center justify-between pt-3 border-t border-indigo-950/80 px-1">
+            <div className="flex items-center gap-2 text-xs">
+              <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-400">
+                <Coins className="w-4 h-4" />
+              </div>
+              <span className="text-slate-400 text-[11px]">Tổng số coin theo dõi</span>
+              <span className="font-mono font-bold text-white text-xs">
+                {cryptos.length}
+              </span>
             </div>
+            <button
+              onClick={() => setActiveFilter("watchlist")}
+              className="px-3 py-1 rounded-xl bg-[#141830] hover:bg-[#1a2040] text-indigo-300 text-xs font-semibold border border-indigo-900/50 transition cursor-pointer"
+            >
+              Quản lý
+            </button>
           </div>
         </div>
 
-        {/* Right Column: Main Canvas with Chart & AI Analysis Result (8 cols on lg) */}
-        <div className={`lg:col-span-8 space-y-6 ${mobileView === "analysis" ? "block" : "hidden lg:block"}`}>
-          {/* Selected Coin Action Header */}
+        {/* ================= RIGHT COLUMN: MAIN ANALYSIS ENGINE (8 Cols) ================= */}
+        <div className="lg:col-span-8 space-y-4">
+          {/* Top Coin Header Card with Sparkline & Scan Button */}
           {selectedCoin && (
-            <div className="bg-zinc-900/80 border border-zinc-800/90 rounded-3xl p-5 backdrop-blur-md space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                {/* Coin Info */}
-                <div className="flex items-center gap-3.5">
-                  {selectedCoin.image && (
-                    <img src={selectedCoin.image} alt={selectedCoin.name} className="w-11 h-11 rounded-full shadow-md" />
-                  )}
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-xl font-extrabold text-white">
-                        {selectedCoin.name}
-                      </h2>
-                      <span className="px-2 py-0.5 rounded-lg text-xs font-bold bg-zinc-800 text-zinc-300 uppercase font-mono">
-                        {selectedCoin.symbol}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3 mt-1 text-xs">
-                      <span className="text-xl font-black text-white font-mono">
-                        ${(selectedCoin.current_price ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                      </span>
-                      <span
-                        className={`font-bold font-mono px-2 py-0.5 rounded-md ${
-                          (selectedCoin.price_change_percentage_24h ?? 0) >= 0
-                            ? "bg-emerald-500/10 text-emerald-400"
-                            : "bg-rose-500/10 text-rose-400"
-                        }`}
-                      >
-                        {(selectedCoin.price_change_percentage_24h ?? 0) >= 0 ? "+" : ""}
-                        {(selectedCoin.price_change_percentage_24h ?? 0).toFixed(2)}% (24h)
-                      </span>
-                    </div>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-[#0f1225] border border-indigo-950/80 shadow-xl">
+              {/* Coin identity & price */}
+              <div className="flex items-center gap-3.5">
+                <img
+                  src={selectedCoin.image}
+                  alt={selectedCoin.name}
+                  className="w-11 h-11 rounded-full border border-indigo-800/40 p-0.5 bg-black"
+                />
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xl font-black text-white tracking-tight">
+                      {selectedCoin.name}
+                    </h2>
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold font-mono bg-indigo-900/60 text-indigo-300 border border-indigo-700/40 uppercase">
+                      {selectedCoin.symbol}
+                    </span>
                   </div>
-                </div>
-
-                {/* Strategy Timeframe & Scan Button */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                  <div className="flex items-center bg-zinc-950 p-1 rounded-xl border border-zinc-800 text-xs">
-                    {[
-                      { id: "short", label: "Lướt sóng" },
-                      { id: "medium", label: "Trung hạn" },
-                      { id: "long", label: "Hold / DCA" },
-                    ].map((tf) => (
-                      <button
-                        key={tf.id}
-                        onClick={() => setTimeframe(tf.id as any)}
-                        className={`px-3 py-1.5 rounded-lg font-medium transition cursor-pointer ${
-                          timeframe === tf.id
-                            ? "bg-zinc-800 text-cyan-400 font-bold shadow-sm"
-                            : "text-zinc-400 hover:text-zinc-200"
-                        }`}
-                      >
-                        {tf.label}
-                      </button>
-                    ))}
+                  <div className="flex items-center gap-2.5 mt-0.5">
+                    <span className="text-2xl font-black text-white font-mono">
+                      ${selectedCoin.current_price?.toLocaleString("en-US", {
+                        maximumFractionDigits: selectedCoin.current_price < 1 ? 4 : 2,
+                      })}
+                    </span>
+                    <span
+                      className={`text-xs font-bold font-mono ${
+                        isPositive ? "text-emerald-400" : "text-rose-400"
+                      }`}
+                    >
+                      {isPositive ? `+${currentCoinChange.toFixed(2)}%` : `${currentCoinChange.toFixed(2)}%`} (24h)
+                    </span>
                   </div>
-
-                  <button
-                    onClick={() => handleStartScan()}
-                    disabled={isScanning}
-                    className="flex items-center justify-center gap-2 px-6 py-2.5 bg-gradient-to-r from-cyan-500 via-emerald-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-cyan-500/20 transition cursor-pointer disabled:opacity-50"
-                  >
-                    {isScanning ? (
-                      <>
-                        <RefreshCw className="w-4 h-4 animate-spin" />
-                        <span>Đang phân tích 2 luồng...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-4 h-4" />
-                        <span>Quét AI {selectedCoin.symbol.toUpperCase()}</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Limit Reached Notice */}
-          {showLimitReached && (
-            <div className="p-6 rounded-3xl bg-gradient-to-r from-amber-950/40 via-zinc-900 to-zinc-900 border border-amber-500/40 shadow-2xl space-y-3 animate-in fade-in">
-              <div className="flex items-start gap-3.5">
-                <div className="p-2.5 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                  <Lock className="w-6 h-6" />
-                </div>
-                <div className="space-y-1 flex-1">
-                  <h4 className="text-base font-bold text-white">
-                    Bạn đã sử dụng hết 3 lượt Quét AI của gói STARTER!
-                  </h4>
-                  <p className="text-xs text-zinc-300 leading-relaxed">
-                    Để quét không giới hạn toàn bộ hơn 100+ đồng crypto và nhận chiến lược chi tiết cả Spot & Futures, hãy nâng cấp lên gói <strong>PRO</strong> hoặc <strong>ULTRA</strong>.
-                  </p>
                 </div>
               </div>
 
-              {onOpenUpgradeModal && (
-                <div className="flex justify-end pt-2">
+              {/* Sparkline Graphic Preview */}
+              <div className="hidden md:flex items-center h-9 w-28 px-1">
+                <svg className="w-full h-full overflow-visible" viewBox="0 0 100 30">
+                  <path
+                    d={
+                      isPositive
+                        ? "M0,25 Q15,22 30,18 T60,12 T85,8 T100,2"
+                        : "M0,5 Q15,10 30,14 T60,20 T85,24 T100,28"
+                    }
+                    fill="none"
+                    stroke={isPositive ? "#10b981" : "#f43f5e"}
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
+
+              {/* Timeframe selector & Trigger Scan button */}
+              <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+                <div className="flex items-center bg-[#141830] p-1 rounded-xl border border-indigo-900/50 text-xs">
                   <button
-                    onClick={onOpenUpgradeModal}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-zinc-950 font-black text-xs rounded-xl shadow-lg shadow-amber-500/20 transition cursor-pointer"
-                  >
-                    <Crown className="w-4 h-4" />
-                    <span>Nâng cấp Gói Ngay</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* AI Result View (When Available) */}
-          {scanResult && !isScanning && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-3 duration-300">
-              {/* Dual Mode Switcher: SPOT vs FUTURES / MARGIN */}
-              <div className="p-1.5 rounded-2xl bg-zinc-900/90 border border-zinc-800 flex items-center gap-2">
-                <button
-                  onClick={() => setTradingMode("spot")}
-                  className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-xs sm:text-sm transition cursor-pointer ${
-                    tradingMode === "spot"
-                      ? "bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-cyan-500/10 text-emerald-300 border border-emerald-500/50 shadow-lg shadow-emerald-500/10"
-                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50"
-                  }`}
-                >
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  <span>Luồng 1: Giao Dịch SPOT (Nắm Giữ)</span>
-                  <span className="hidden sm:inline-block text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono">
-                    {scanResult.spot.signalLabel}
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => setTradingMode("future")}
-                  className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-xs sm:text-sm transition cursor-pointer ${
-                    tradingMode === "future"
-                      ? "bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-indigo-500/10 text-cyan-300 border border-cyan-500/50 shadow-lg shadow-cyan-500/10"
-                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50"
-                  }`}
-                >
-                  <Zap className="w-4 h-4 text-cyan-400" />
-                  <span>Luồng 2: FUTURE / MARGIN (Đòn Bẩy)</span>
-                  <span
-                    className={`hidden sm:inline-block text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
-                      scanResult.future.position === "LONG"
-                        ? "bg-emerald-500/20 text-emerald-400"
-                        : "bg-rose-500/20 text-rose-400"
+                    onClick={() => setTimeframe("short")}
+                    className={`px-2.5 py-1 rounded-lg font-medium transition cursor-pointer ${
+                      timeframe === "short"
+                        ? "bg-indigo-600 text-white font-bold"
+                        : "text-slate-400 hover:text-white"
                     }`}
                   >
-                    {scanResult.future.position}
-                  </span>
+                    Lướt sóng
+                  </button>
+                  <button
+                    onClick={() => setTimeframe("medium")}
+                    className={`px-2.5 py-1 rounded-lg font-medium transition cursor-pointer ${
+                      timeframe === "medium"
+                        ? "bg-indigo-600 text-white font-bold"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    Trung hạn
+                  </button>
+                  <button
+                    onClick={() => setTimeframe("long")}
+                    className={`px-2.5 py-1 rounded-lg font-medium transition cursor-pointer ${
+                      timeframe === "long"
+                        ? "bg-indigo-600 text-white font-bold"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    Hold / DCA
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => handleStartScan(selectedCoin)}
+                  disabled={isScanning}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs shadow-lg shadow-emerald-500/20 transition cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                >
+                  {isScanning ? (
+                    <RefreshCw className="w-4 h-4 animate-spin text-white" />
+                  ) : (
+                    <Sparkles className="w-4 h-4 text-white" />
+                  )}
+                  <span>{isScanning ? "Đang quét AI..." : `Quét AI ${selectedCoin.symbol.toUpperCase()}`}</span>
                 </button>
               </div>
-
-              {/* ========================================================= */}
-              {/* TAB 1: SPOT TRADING VIEW */}
-              {/* ========================================================= */}
-              {tradingMode === "spot" && (
-                <div className="space-y-6">
-                  {/* Signal & Probabilities Card */}
-                  <div className="p-6 rounded-3xl bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 border border-zinc-800 shadow-2xl space-y-5">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div>
-                        <div className="text-xs font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                          Chiến lược Giao dịch SPOT:
-                        </div>
-                        <div className="text-lg font-bold text-white mt-0.5">
-                          {scanResult.name} ({scanResult.symbol}) • {scanResult.spot.trend}
-                        </div>
-                      </div>
-
-                      <div
-                        className={`px-5 py-2.5 rounded-2xl border text-sm font-black tracking-wider uppercase shadow-xl ${getSpotSignalBadgeStyle(
-                          scanResult.spot.signal
-                        )}`}
-                      >
-                        {scanResult.spot.signalLabel}
-                      </div>
-                    </div>
-
-                    {/* Score Meters */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-4 border-t border-zinc-800/80">
-                      <div className="p-3.5 rounded-2xl bg-zinc-900/90 border border-zinc-800">
-                        <div className="text-xs text-zinc-400 font-medium">Xác suất thành công (Spot):</div>
-                        <div className="text-2xl font-black text-emerald-400 font-mono mt-1 flex items-center gap-1.5">
-                          <TrendingUp className="w-5 h-5" />
-                          {scanResult.spot.winRatePercent}%
-                        </div>
-                        <div className="w-full bg-zinc-800 h-2 rounded-full mt-2.5 overflow-hidden">
-                          <div
-                            className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full"
-                            style={{ width: `${scanResult.spot.winRatePercent}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="p-3.5 rounded-2xl bg-zinc-900/90 border border-zinc-800">
-                        <div className="text-xs text-zinc-400 font-medium">Điểm tiềm năng (Spot Score):</div>
-                        <div className="text-2xl font-black text-cyan-400 font-mono mt-1 flex items-center gap-1.5">
-                          <BarChart2 className="w-5 h-5" />
-                          {scanResult.spot.overallScore} / 10
-                        </div>
-                        <div className="w-full bg-zinc-800 h-2 rounded-full mt-2.5 overflow-hidden">
-                          <div
-                            className="bg-gradient-to-r from-blue-500 to-cyan-400 h-full rounded-full"
-                            style={{ width: `${scanResult.spot.overallScore * 10}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="p-3.5 rounded-2xl bg-zinc-900/90 border border-zinc-800">
-                        <div className="text-xs text-zinc-400 font-medium">Tỷ lệ Lời / Lỗ (R:R Spot):</div>
-                        <div className="text-2xl font-black text-amber-400 font-mono mt-1 flex items-center gap-1.5">
-                          <Target className="w-5 h-5" />
-                          {scanResult.spot.riskRewardRatio}
-                        </div>
-                        <div className="text-[10px] text-zinc-400 mt-2.5">
-                          Tối ưu biên độ sinh lời trên vốn nắm giữ
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 4-5 Price Targets Cards */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-                    <div className="p-4 rounded-2xl bg-emerald-950/30 border border-emerald-500/30 space-y-1">
-                      <div className="text-xs font-bold text-emerald-400 flex items-center gap-1.5 uppercase tracking-wider">
-                        <CheckCircle2 className="w-4 h-4" /> Vùng Mua DCA
-                      </div>
-                      <div className="text-sm sm:text-base font-black text-zinc-100 font-mono mt-1">
-                        {scanResult.spot.entryZone}
-                      </div>
-                      <p className="text-[10px] text-zinc-400">Gom hàng giá đỏ</p>
-                    </div>
-
-                    <div className="p-4 rounded-2xl bg-cyan-950/30 border border-cyan-500/30 space-y-1">
-                      <div className="text-xs font-bold text-cyan-400 flex items-center gap-1.5 uppercase tracking-wider">
-                        <Target className="w-4 h-4" /> Chốt Lời TP1
-                      </div>
-                      <div className="text-sm sm:text-base font-black text-zinc-100 font-mono mt-1">
-                        {scanResult.spot.targetPrice1}
-                      </div>
-                      <p className="text-[10px] text-zinc-400">Chốt 40% & kéo SL hòa</p>
-                    </div>
-
-                    <div className="p-4 rounded-2xl bg-teal-950/30 border border-teal-500/30 space-y-1">
-                      <div className="text-xs font-bold text-teal-400 flex items-center gap-1.5 uppercase tracking-wider">
-                        <TrendingUp className="w-4 h-4" /> Chốt Lời TP2 / TP3
-                      </div>
-                      <div className="text-sm sm:text-base font-black text-zinc-100 font-mono mt-1">
-                        {scanResult.spot.targetPrice2}
-                      </div>
-                      <p className="text-[10px] text-zinc-400">{scanResult.spot.targetPrice3 || "Đỉnh sóng chu kỳ"}</p>
-                    </div>
-
-                    <div className="p-4 rounded-2xl bg-rose-950/30 border border-rose-500/30 space-y-1">
-                      <div className="text-xs font-bold text-rose-400 flex items-center gap-1.5 uppercase tracking-wider">
-                        <ShieldAlert className="w-4 h-4" /> Cắt Lỗ (SL)
-                      </div>
-                      <div className="text-sm sm:text-base font-black text-rose-300 font-mono mt-1">
-                        {scanResult.spot.stopLoss}
-                      </div>
-                      <p className="text-[10px] text-zinc-400">Bảo vệ an toàn danh mục</p>
-                    </div>
-                  </div>
-
-                  {/* Liquidity Profile (Order Blocks & FVG) */}
-                  <div className="p-5 rounded-3xl bg-zinc-900/70 border border-zinc-800 space-y-4">
-                    <h4 className="font-bold text-zinc-100 flex items-center gap-2">
-                      <Droplets className="w-4 h-4 text-cyan-400" />
-                      Bản đồ Thanh khoản Thị trường (Liquidity & Order Blocks)
-                    </h4>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 text-xs">
-                      <div className="p-3.5 rounded-2xl bg-emerald-950/20 border border-emerald-500/30 space-y-1.5">
-                        <div className="font-bold text-emerald-400 flex items-center gap-1">
-                          <span>🟢 Vùng Cầu / Thanh Khoản Dồi Dào</span>
-                        </div>
-                        <p className="text-zinc-300 font-medium">
-                          {scanResult.spot.liquidity?.highLiquidityZone || scanResult.spot.entryZone}
-                        </p>
-                        <span className="text-[10px] text-zinc-400 block">Khu vực cá mập và tổ chức đặt lệnh mua chờ lớn</span>
-                      </div>
-
-                      <div className="p-3.5 rounded-2xl bg-amber-950/20 border border-amber-500/30 space-y-1.5">
-                        <div className="font-bold text-amber-400 flex items-center gap-1">
-                          <span>🟡 Vùng Thanh Khoản Mỏng (FVG)</span>
-                        </div>
-                        <p className="text-zinc-300 font-medium">
-                          {scanResult.spot.liquidity?.thinLiquidityZone || "Khoảng trống giá - biến động nhanh"}
-                        </p>
-                        <span className="text-[10px] text-zinc-400 block">Giá có xu hướng lấp đầy khoảng trống mất cân bằng</span>
-                      </div>
-
-                      <div className="p-3.5 rounded-2xl bg-rose-950/20 border border-rose-500/30 space-y-1.5">
-                        <div className="font-bold text-rose-400 flex items-center gap-1">
-                          <span>🔴 Vùng Áp Lực Bán (Supply Zone)</span>
-                        </div>
-                        <p className="text-zinc-300 font-medium">
-                          {scanResult.spot.liquidity?.supplyZone || scanResult.spot.targetPrice2}
-                        </p>
-                        <span className="text-[10px] text-zinc-400 block">Khu vực nhà đầu tư kẹt hàng có xu hướng thoát vốn</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Detailed Technical Indicators Breakdown (Each in dedicated Section) */}
-                  <div className="p-5 rounded-3xl bg-zinc-900/60 border border-zinc-800 space-y-4">
-                    <h4 className="font-bold text-zinc-100 flex items-center gap-2">
-                      <BarChart2 className="w-4 h-4 text-emerald-400" />
-                      Phân Tích Chi Tiết Từng Chỉ Số Kỹ Thuật
-                    </h4>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs">
-                      {/* Section 1: EMA Trend */}
-                      <div className="p-4 rounded-2xl bg-zinc-950/80 border border-zinc-800 space-y-1.5">
-                        <div className="font-bold text-cyan-400 flex items-center gap-1.5">
-                          <Activity className="w-4 h-4" /> 1. Cấu trúc Xu hướng & EMA Ribbon (20/50/200)
-                        </div>
-                        <p className="text-zinc-300 leading-relaxed">
-                          {scanResult.spot.indicators?.emaTrend || "Giá duy trì ổn định quanh các dải trung bình động chính."}
-                        </p>
-                      </div>
-
-                      {/* Section 2: RSI */}
-                      <div className="p-4 rounded-2xl bg-zinc-950/80 border border-zinc-800 space-y-1.5">
-                        <div className="font-bold text-emerald-400 flex items-center gap-1.5">
-                          <Gauge className="w-4 h-4" /> 2. Chỉ số Sức mạnh RSI 14 & Phân kỳ
-                        </div>
-                        <p className="text-zinc-300 leading-relaxed">
-                          {scanResult.spot.indicators?.rsi?.status || "RSI 14 đang ở vùng trung tính, dòng tiền vào đều đặn."}
-                        </p>
-                      </div>
-
-                      {/* Section 3: MACD */}
-                      <div className="p-4 rounded-2xl bg-zinc-950/80 border border-zinc-800 space-y-1.5">
-                        <div className="font-bold text-purple-400 flex items-center gap-1.5">
-                          <TrendingUp className="w-4 h-4" /> 3. Động lượng MACD & Histogram
-                        </div>
-                        <p className="text-zinc-300 leading-relaxed">
-                          {scanResult.spot.indicators?.macd || "MACD duy trì phân kỳ dương, áp lực bán yếu dần."}
-                        </p>
-                      </div>
-
-                      {/* Section 4: Volume & Support/Resistance */}
-                      <div className="p-4 rounded-2xl bg-zinc-950/80 border border-zinc-800 space-y-1.5">
-                        <div className="font-bold text-amber-400 flex items-center gap-1.5">
-                          <Shield className="w-4 h-4" /> 4. Volume Profile & Kháng cự / Hỗ trợ
-                        </div>
-                        <p className="text-zinc-300 leading-relaxed">
-                          🟢 Hỗ trợ: {scanResult.spot.indicators?.supportResistance?.support || scanResult.spot.entryZone} <br />
-                          🔴 Kháng cự: {scanResult.spot.indicators?.supportResistance?.resistance || scanResult.spot.targetPrice1}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Spot Final Action Verdict Card (NÊN MUA / NÊN BÁN / QUAN SÁT) */}
-                  {scanResult.spot.finalVerdict && (
-                    <div className={`p-5 sm:p-6 rounded-3xl border shadow-2xl space-y-4 ${getVerdictStyle(scanResult.spot.finalVerdict.action).bg}`}>
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800/80 pb-4">
-                        <div className="flex items-center gap-2.5">
-                          <div className="p-2 rounded-xl bg-zinc-950 border border-zinc-800 text-white shrink-0">
-                            <Target className="w-5 h-5 text-emerald-400" />
-                          </div>
-                          <div>
-                            <span className="text-[10px] sm:text-[11px] font-bold text-zinc-400 uppercase tracking-wider block">
-                              Kết Luận Thời Điểm Hiện Tại (Spot):
-                            </span>
-                            <h3 className="text-base sm:text-lg font-black text-white">
-                              Khuyến Nghị Giao Dịch Nắm Giữ
-                            </h3>
-                          </div>
-                        </div>
-
-                        <div className={`px-4 sm:px-5 py-2 rounded-2xl text-xs sm:text-sm uppercase tracking-wider flex items-center gap-1.5 self-start sm:self-center ${getVerdictStyle(scanResult.spot.finalVerdict.action).badge}`}>
-                          <CheckCircle2 className="w-4 h-4" />
-                          <span>{scanResult.spot.finalVerdict.action}</span>
-                        </div>
-                      </div>
-
-                      <div className="space-y-3 text-xs">
-                        <div className="p-3.5 rounded-2xl bg-zinc-950/80 border border-zinc-800/80 space-y-1">
-                          <span className="font-bold text-zinc-400 uppercase tracking-wider text-[10px]">Tóm Tắt Đánh Giá:</span>
-                          <p className="text-zinc-200 leading-relaxed text-xs sm:text-sm font-medium">
-                            {scanResult.spot.finalVerdict.summaryText}
-                          </p>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <div className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 space-y-1">
-                            <span className="font-bold text-cyan-400 text-[11px] flex items-center gap-1">
-                              <Activity className="w-3.5 h-3.5" /> Lý Do Chốt Hạ:
-                            </span>
-                            <p className="text-zinc-300 leading-relaxed">
-                              {scanResult.spot.finalVerdict.keyReason}
-                            </p>
-                          </div>
-
-                          <div className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 space-y-1">
-                            <span className="font-bold text-emerald-400 text-[11px] flex items-center gap-1">
-                              <CheckCircle2 className="w-3.5 h-3.5" /> Hành Động Khuyến Nghị Cụ Thể:
-                            </span>
-                            <p className="text-zinc-100 font-semibold leading-relaxed">
-                              {scanResult.spot.finalVerdict.recommendedAction}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Spot Capital Advice & Portfolio Button */}
-                  <div className="p-5 rounded-3xl bg-gradient-to-r from-emerald-950/30 to-zinc-900 border border-emerald-500/20 space-y-3">
-                    <h4 className="font-bold text-emerald-400 flex items-center gap-2">
-                      <Sparkles className="w-4 h-4" />
-                      Chiến lược Phân Bổ Vốn Spot Tối Ưu
-                    </h4>
-                    <p className="text-xs text-zinc-200 leading-relaxed">
-                      {scanResult.spot.strategyAdvice}
-                    </p>
-                    <div className="text-[11px] text-zinc-400 italic pt-2 border-t border-zinc-800/60">
-                      ⚠️ {scanResult.spot.riskWarning}
-                    </div>
-
-                    {onOpenAddAssetModal && (
-                      <div className="pt-2 flex justify-end">
-                        <button
-                          onClick={() => {
-                            onOpenAddAssetModal({
-                              symbol: scanResult.symbol,
-                              name: scanResult.name,
-                              price: scanResult.currentPrice,
-                            });
-                          }}
-                          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition cursor-pointer"
-                        >
-                          <Plus className="w-4 h-4" />
-                          <span>Thêm {scanResult.symbol} vào Danh mục Đầu tư</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* ========================================================= */}
-              {/* TAB 2: FUTURES / MARGIN TRADING VIEW */}
-              {/* ========================================================= */}
-              {tradingMode === "future" && (
-                <div className="space-y-6">
-                  {/* Position & Derivatives Strategy Card */}
-                  <div className="p-6 rounded-3xl bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 border border-cyan-500/30 shadow-2xl space-y-5">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div>
-                        <div className="text-xs font-semibold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
-                          <Zap className="w-3.5 h-3.5" />
-                          Khuyến nghị Vị thế Đòn bẩy (Futures & Margin):
-                        </div>
-                        <div className="text-lg font-bold text-white mt-0.5">
-                          {scanResult.name} ({scanResult.symbol}) • Đòn bẩy: {scanResult.future.recommendedLeverage}
-                        </div>
-                      </div>
-
-                      <div
-                        className={`px-5 py-2.5 rounded-2xl border text-sm font-black tracking-wider uppercase shadow-xl ${getFuturePositionStyle(
-                          scanResult.future.position
-                        )}`}
-                      >
-                        {scanResult.future.positionLabel}
-                      </div>
-                    </div>
-
-                    {/* Future Metrics Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-4 border-t border-zinc-800/80">
-                      <div className="p-3.5 rounded-2xl bg-zinc-900/90 border border-zinc-800">
-                        <div className="text-xs text-zinc-400 font-medium">Tỷ lệ Thắng (Winrate Futures):</div>
-                        <div className="text-2xl font-black text-cyan-400 font-mono mt-1 flex items-center gap-1.5">
-                          <Flame className="w-5 h-5 text-amber-400" />
-                          {scanResult.future.winRatePercent}%
-                        </div>
-                        <div className="w-full bg-zinc-800 h-2 rounded-full mt-2.5 overflow-hidden">
-                          <div
-                            className="bg-gradient-to-r from-cyan-500 to-blue-400 h-full rounded-full"
-                            style={{ width: `${scanResult.future.winRatePercent}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="p-3.5 rounded-2xl bg-zinc-900/90 border border-zinc-800">
-                        <div className="text-xs text-zinc-400 font-medium">Mức Rủi Ro Vốn (Risk per Trade):</div>
-                        <div className="text-2xl font-black text-amber-400 font-mono mt-1 flex items-center gap-1.5">
-                          <ShieldAlert className="w-5 h-5 text-amber-400" />
-                          {scanResult.future.capitalRiskPercent}
-                        </div>
-                        <div className="text-[10px] text-zinc-400 mt-2.5">
-                          Giới hạn tối đa không cháy tài khoản
-                        </div>
-                      </div>
-
-                      <div className="p-3.5 rounded-2xl bg-zinc-900/90 border border-zinc-800">
-                        <div className="text-xs text-zinc-400 font-medium">Tỷ lệ Risk / Reward (R:R Phái sinh):</div>
-                        <div className="text-2xl font-black text-emerald-400 font-mono mt-1 flex items-center gap-1.5">
-                          <Target className="w-5 h-5" />
-                          {scanResult.future.riskRewardRatio}
-                        </div>
-                        <div className="text-[10px] text-zinc-400 mt-2.5">
-                          Tỷ lệ kỳ vọng lợi nhuận trên đòn bẩy
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Future Targets & Stop Loss */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-                    <div className="p-4 rounded-2xl bg-cyan-950/30 border border-cyan-500/30 space-y-1">
-                      <div className="text-xs font-bold text-cyan-400 flex items-center gap-1.5 uppercase tracking-wider">
-                        <Target className="w-4 h-4" /> Vùng Entry Lệnh
-                      </div>
-                      <div className="text-sm sm:text-base font-black text-zinc-100 font-mono mt-1">
-                        {scanResult.future.entryZone}
-                      </div>
-                      <p className="text-[10px] text-zinc-400">Vào lệnh có kỷ luật</p>
-                    </div>
-
-                    <div className="p-4 rounded-2xl bg-emerald-950/30 border border-emerald-500/30 space-y-1">
-                      <div className="text-xs font-bold text-emerald-400 flex items-center gap-1.5 uppercase tracking-wider">
-                        <TrendingUp className="w-4 h-4" /> Chốt Lời TP1
-                      </div>
-                      <div className="text-sm sm:text-base font-black text-zinc-100 font-mono mt-1">
-                        {scanResult.future.targetPrice1}
-                      </div>
-                      <p className="text-[10px] text-zinc-400">Dời SL về hòa vốn</p>
-                    </div>
-
-                    <div className="p-4 rounded-2xl bg-teal-950/30 border border-teal-500/30 space-y-1">
-                      <div className="text-xs font-bold text-teal-400 flex items-center gap-1.5 uppercase tracking-wider">
-                        <Flame className="w-4 h-4" /> Chốt Lời TP2 / TP3
-                      </div>
-                      <div className="text-sm sm:text-base font-black text-zinc-100 font-mono mt-1">
-                        {scanResult.future.targetPrice2}
-                      </div>
-                      <p className="text-[10px] text-zinc-400">{scanResult.future.targetPrice3}</p>
-                    </div>
-
-                    <div className="p-4 rounded-2xl bg-rose-950/30 border border-rose-500/30 space-y-1">
-                      <div className="text-xs font-bold text-rose-400 flex items-center gap-1.5 uppercase tracking-wider">
-                        <ShieldAlert className="w-4 h-4" /> Stop Loss / Liq Price
-                      </div>
-                      <div className="text-sm sm:text-base font-black text-rose-300 font-mono mt-1">
-                        {scanResult.future.stopLoss}
-                      </div>
-                      <p className="text-[10px] text-zinc-400">Giá thanh lý: {scanResult.future.estLiquidationPrice}</p>
-                    </div>
-                  </div>
-
-                  {/* Long/Short Ratio & Liquidation Heatmap Breakdown */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Long/Short Ratio Box */}
-                    <div className="p-5 rounded-3xl bg-zinc-900/70 border border-zinc-800 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-bold text-zinc-100 flex items-center gap-2 text-xs sm:text-sm">
-                          <Scale className="w-4 h-4 text-cyan-400" />
-                          Tỷ lệ Long / Short Ratio (Tâm lý Phái sinh)
-                        </h4>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-amber-400 font-mono font-bold">
-                          {scanResult.future.metrics?.longShortRatio?.sentiment || "Cân Bằng"}
-                        </span>
-                      </div>
-
-                      {/* Visual Bar */}
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-between text-xs font-mono font-bold">
-                          <span className="text-emerald-400">
-                            LONG: {scanResult.future.metrics?.longShortRatio?.longPercent || 58}%
-                          </span>
-                          <span className="text-rose-400">
-                            SHORT: {scanResult.future.metrics?.longShortRatio?.shortPercent || 42}%
-                          </span>
-                        </div>
-                        <div className="w-full h-3 bg-zinc-800 rounded-full flex overflow-hidden border border-zinc-700/50">
-                          <div
-                            className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full"
-                            style={{
-                              width: `${scanResult.future.metrics?.longShortRatio?.longPercent || 58}%`,
-                            }}
-                          />
-                          <div
-                            className="bg-gradient-to-r from-rose-500 to-pink-500 h-full"
-                            style={{
-                              width: `${scanResult.future.metrics?.longShortRatio?.shortPercent || 42}%`,
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      <p className="text-xs text-zinc-300">
-                        Hệ số: <strong>{scanResult.future.metrics?.longShortRatio?.ratioText || "1.38"}</strong>.
-                        Cảnh báo: Nếu tỷ lệ Long quá áp đảo (&gt;65%), nguy cơ bị thị trường đạp giá quét thanh lý Long (Long Squeeze) là rất cao.
-                      </p>
-                    </div>
-
-                    {/* Liquidation Heatmap Box */}
-                    <div className="p-5 rounded-3xl bg-zinc-900/70 border border-zinc-800 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-bold text-zinc-100 flex items-center gap-2 text-xs sm:text-sm">
-                          <Flame className="w-4 h-4 text-rose-400" />
-                          Bản đồ Cụm Thanh Lý (Liquidation Heatmap)
-                        </h4>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-mono">
-                          {scanResult.future.metrics?.liquidationHeatmap?.stopHuntRisk || "Cảnh giác quét râu"}
-                        </span>
-                      </div>
-
-                      <div className="space-y-2 text-xs">
-                        <div className="p-2.5 rounded-xl bg-zinc-950/80 border border-zinc-800">
-                          <span className="text-zinc-400">Cụm Thanh Lý Phe Short:</span>
-                          <div className="font-mono font-bold text-rose-300 mt-0.5">
-                            {scanResult.future.metrics?.liquidationHeatmap?.shortLiquidationPool || scanResult.future.targetPrice1}
-                          </div>
-                        </div>
-
-                        <div className="p-2.5 rounded-xl bg-zinc-950/80 border border-zinc-800">
-                          <span className="text-zinc-400">Cụm Thanh Lý Phe Long:</span>
-                          <div className="font-mono font-bold text-emerald-300 mt-0.5">
-                            {scanResult.future.metrics?.liquidationHeatmap?.longLiquidationPool || scanResult.future.stopLoss}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Funding Rate & Open Interest */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                    <div className="p-4 rounded-2xl bg-zinc-950/80 border border-zinc-800 space-y-1.5">
-                      <div className="font-bold text-cyan-400 flex items-center gap-1.5">
-                        <Activity className="w-4 h-4" /> Funding Rate Hiện Tại: {scanResult.future.metrics?.fundingRate?.rate || "+0.01%"}
-                      </div>
-                      <p className="text-zinc-300 leading-relaxed">
-                        {scanResult.future.metrics?.fundingRate?.status || "Funding Rate ổn định, không có hiện tượng quá nhiệt hay phí âm sâu."}
-                      </p>
-                    </div>
-
-                    <div className="p-4 rounded-2xl bg-zinc-950/80 border border-zinc-800 space-y-1.5">
-                      <div className="font-bold text-purple-400 flex items-center gap-1.5">
-                        <Layers className="w-4 h-4" /> Hợp Đồng Mở (Open Interest - OI) & Biến Động ATR
-                      </div>
-                      <p className="text-zinc-300 leading-relaxed">
-                        {scanResult.future.metrics?.openInterest || "Dòng tiền hợp đồng mở duy trì tích cực."} {scanResult.future.metrics?.volatilityATR}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Futures Final Action Verdict Card (NÊN LONG / NÊN SHORT / QUAN SÁT) */}
-                  {scanResult.future.finalVerdict && (
-                    <div className={`p-5 sm:p-6 rounded-3xl border shadow-2xl space-y-4 ${getVerdictStyle(scanResult.future.finalVerdict.action).bg}`}>
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800/80 pb-4">
-                        <div className="flex items-center gap-2.5">
-                          <div className="p-2 rounded-xl bg-zinc-950 border border-zinc-800 text-white shrink-0">
-                            <Zap className="w-5 h-5 text-cyan-400" />
-                          </div>
-                          <div>
-                            <span className="text-[10px] sm:text-[11px] font-bold text-zinc-400 uppercase tracking-wider block">
-                              Kết Luận Thời Điểm Hiện Tại (Futures & Margin):
-                            </span>
-                            <h3 className="text-base sm:text-lg font-black text-white">
-                              Khuyến Nghị Vị Thế Phái Sinh
-                            </h3>
-                          </div>
-                        </div>
-
-                        <div className={`px-4 sm:px-5 py-2 rounded-2xl text-xs sm:text-sm uppercase tracking-wider flex items-center gap-1.5 self-start sm:self-center ${getVerdictStyle(scanResult.future.finalVerdict.action).badge}`}>
-                          <Zap className="w-4 h-4" />
-                          <span>{scanResult.future.finalVerdict.action}</span>
-                        </div>
-                      </div>
-
-                      <div className="space-y-3 text-xs">
-                        <div className="p-3.5 rounded-2xl bg-zinc-950/80 border border-zinc-800/80 space-y-1">
-                          <span className="font-bold text-zinc-400 uppercase tracking-wider text-[10px]">Tóm Tắt Vị Thế:</span>
-                          <p className="text-zinc-200 leading-relaxed text-xs sm:text-sm font-medium">
-                            {scanResult.future.finalVerdict.summaryText}
-                          </p>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <div className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 space-y-1">
-                            <span className="font-bold text-cyan-400 text-[11px] flex items-center gap-1">
-                              <Scale className="w-3.5 h-3.5" /> Căn Cứ & Cụm Thanh Lý:
-                            </span>
-                            <p className="text-zinc-300 leading-relaxed">
-                              {scanResult.future.finalVerdict.keyReason}
-                            </p>
-                          </div>
-
-                          <div className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 space-y-1">
-                            <span className="font-bold text-emerald-400 text-[11px] flex items-center gap-1">
-                              <Target className="w-3.5 h-3.5" /> Hướng Dẫn Đi Lệnh Chi Tiết:
-                            </span>
-                            <p className="text-zinc-100 font-semibold leading-relaxed">
-                              {scanResult.future.finalVerdict.recommendedAction}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 3 Golden Risk Management Rules */}
-                  <div className="p-5 rounded-3xl bg-gradient-to-r from-rose-950/30 via-zinc-900 to-zinc-900 border border-rose-500/30 space-y-3">
-                    <h4 className="font-bold text-rose-400 flex items-center gap-2">
-                      <ShieldAlert className="w-4 h-4" />
-                      3 Nguyên Tắc Kỷ Luật Sống Còn (Bảo Vệ Tài Khoản Futures)
-                    </h4>
-                    <div className="space-y-1.5 text-xs text-zinc-200">
-                      {(scanResult.future.riskManagementRules || []).map((rule, idx) => (
-                        <div key={idx} className="flex items-start gap-2">
-                          <span className="w-5 h-5 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
-                            {idx + 1}
-                          </span>
-                          <span>{rule}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
-          {/* Interactive TradingView Chart Section */}
-          <div className="bg-zinc-900/70 border border-zinc-800/90 rounded-3xl p-5 backdrop-blur-md space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-zinc-100 flex items-center gap-2">
-                <BarChart2 className="w-4 h-4 text-cyan-400" />
-                Biểu đồ Kỹ thuật Thời gian Thực (TradingView)
-              </h3>
-              <span className="text-xs text-zinc-400 font-mono">
-                Mã: {chartSymbol}
+          {/* ================= DUAL-STREAM SWITCHER (SPOT vs FUTURE) ================= */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Stream 1: SPOT (Nắm Giữ) */}
+            <button
+              onClick={() => setTradingMode("spot")}
+              className={`flex items-center justify-between p-3.5 rounded-2xl border transition-all cursor-pointer text-left ${
+                tradingMode === "spot"
+                  ? "bg-[#131a38] border-emerald-500/50 shadow-lg shadow-emerald-500/5 ring-1 ring-emerald-500/30"
+                  : "bg-[#0f1225] border-indigo-950/80 hover:bg-[#141830] text-slate-400"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <div
+                  className={`w-3 h-3 rounded-full border-2 ${
+                    tradingMode === "spot"
+                      ? "border-emerald-400 bg-emerald-400"
+                      : "border-slate-600 bg-transparent"
+                  }`}
+                />
+                <span className="font-bold text-xs sm:text-sm text-white">
+                  Luồng 1: Giao Dịch SPOT (Nắm Giữ)
+                </span>
+              </div>
+              <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase font-mono bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                {spotData.signalLabel || "MUA GOM"}
               </span>
-            </div>
+            </button>
 
-            <TradingViewWidget symbol={chartSymbol} theme="dark" />
+            {/* Stream 2: FUTURE / MARGIN (Đòn Bẩy) */}
+            <button
+              onClick={() => setTradingMode("future")}
+              className={`flex items-center justify-between p-3.5 rounded-2xl border transition-all cursor-pointer text-left ${
+                tradingMode === "future"
+                  ? "bg-[#131a38] border-cyan-500/50 shadow-lg shadow-cyan-500/5 ring-1 ring-cyan-500/30"
+                  : "bg-[#0f1225] border-indigo-950/80 hover:bg-[#141830] text-slate-400"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <div
+                  className={`w-3 h-3 rounded-full border-2 ${
+                    tradingMode === "future"
+                      ? "border-cyan-400 bg-cyan-400"
+                      : "border-slate-600 bg-transparent"
+                  }`}
+                />
+                <span className="font-bold text-xs sm:text-sm text-white">
+                  Luồng 2: FUTURE / MARGIN (Đòn Bẩy)
+                </span>
+              </div>
+              <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                {futureData.positionLabel || "LONG"}
+              </span>
+            </button>
           </div>
+
+          {/* ================= DETAILED STREAM VIEW ================= */}
+          {tradingMode === "future" ? (
+            /* ==================== FUTURE / MARGIN STREAM VIEW ==================== */
+            <div className="space-y-4">
+              {/* Section Header */}
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-300 px-1 pt-1">
+                <Target className="w-4 h-4 text-cyan-400" />
+                <span className="uppercase tracking-wider">TỔNG QUAN PHÂN TÍCH PHÁI SINH</span>
+              </div>
+
+              {/* 3 KPI Cards: Winrate, Capital Risk, Risk/Reward */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* 1. Winrate */}
+                <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-2">
+                  <div className="flex items-center gap-2 text-slate-400 text-xs">
+                    <Flame className="w-4 h-4 text-amber-400" />
+                    <span>Tỷ lệ Thắng (Winrate Futures)</span>
+                  </div>
+                  <div className="text-2xl font-black text-cyan-400 font-mono">
+                    {futureData.winRatePercent}%
+                  </div>
+                  <div className="w-full h-1.5 bg-[#141830] rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-cyan-400 to-emerald-400 rounded-full"
+                      style={{ width: `${futureData.winRatePercent}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* 2. Capital Risk */}
+                <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
+                  <div className="flex items-center gap-2 text-slate-400 text-xs">
+                    <Shield className="w-4 h-4 text-amber-400" />
+                    <span>Mức Rủi Ro Vốn (Risk per Trade)</span>
+                  </div>
+                  <div className="text-2xl font-black text-amber-400 font-mono">
+                    {futureData.capitalRiskPercent}
+                  </div>
+                  <div className="text-[11px] text-slate-500">
+                    Giới hạn tối đa không cháy tài khoản
+                  </div>
+                </div>
+
+                {/* 3. Risk / Reward */}
+                <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
+                  <div className="flex items-center gap-2 text-slate-400 text-xs">
+                    <Scale className="w-4 h-4 text-emerald-400" />
+                    <span>Tỷ lệ Risk / Reward (R:R Phái sinh)</span>
+                  </div>
+                  <div className="text-2xl font-black text-emerald-400 font-mono">
+                    {futureData.riskRewardRatio}
+                  </div>
+                  <div className="text-[11px] text-slate-500">
+                    Tỷ lệ kỳ vọng lợi nhuận trên vốn
+                  </div>
+                </div>
+              </div>
+
+              {/* 4 Execution Strategy Cards: Entry, TP1, TP2/TP3, Stop Loss/Liq */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {/* Entry Zone */}
+                <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
+                  <div className="flex items-center gap-1.5 text-xs text-cyan-400 font-bold">
+                    <Target className="w-3.5 h-3.5" />
+                    <span>VÙNG ENTRY LỆNH</span>
+                  </div>
+                  <div className="text-base font-black text-white font-mono pt-1">
+                    {futureData.entryZone}
+                  </div>
+                  <div className="text-[11px] text-slate-500">Vào lệnh có kỷ luật</div>
+                </div>
+
+                {/* TP1 */}
+                <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
+                  <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-bold">
+                    <TrendingUp className="w-3.5 h-3.5" />
+                    <span>CHỐT LỜI TP1</span>
+                  </div>
+                  <div className="text-base font-black text-emerald-400 font-mono pt-1">
+                    {futureData.targetPrice1}
+                  </div>
+                  <div className="text-[11px] text-slate-500">Đạt L1 về hòa vốn</div>
+                </div>
+
+                {/* TP2 / TP3 */}
+                <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
+                  <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-bold">
+                    <Crown className="w-3.5 h-3.5" />
+                    <span>CHỐT LỜI TP2 / TP3</span>
+                  </div>
+                  <div className="text-base font-black text-emerald-300 font-mono pt-1">
+                    {futureData.targetPrice2}
+                  </div>
+                  <div className="text-[11px] text-slate-500 font-mono">
+                    {futureData.targetPrice3}
+                  </div>
+                </div>
+
+                {/* Stop Loss / Liq Price */}
+                <div className="p-4 rounded-2xl bg-[#0f1225] border border-rose-950/60 space-y-1">
+                  <div className="flex items-center gap-1.5 text-xs text-rose-400 font-bold">
+                    <ShieldAlert className="w-3.5 h-3.5" />
+                    <span>STOP LOSS / LIQ PRICE</span>
+                  </div>
+                  <div className="text-base font-black text-rose-400 font-mono pt-1">
+                    {futureData.stopLoss}
+                  </div>
+                  <div className="text-[11px] text-slate-500 font-mono">
+                    Giá thanh lý: {futureData.estLiquidationPrice}
+                  </div>
+                </div>
+              </div>
+
+              {/* 2 Wide Technical Modules: Long/Short Ratio & Liquidation Heatmap */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* 1. Long/Short Ratio Module */}
+                <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs font-bold text-white">
+                      <BarChart2 className="w-4 h-4 text-cyan-400" />
+                      <span>Tỷ lệ Long / Short Ratio (Tâm lý Phái sinh)</span>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                      {futureData.metrics.longShortRatio.sentiment || "Bullish"}
+                    </span>
+                  </div>
+
+                  {/* Dual color progress bar */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-xs font-mono font-bold">
+                      <span className="text-emerald-400">
+                        LONG: {futureData.metrics.longShortRatio.longPercent}%
+                      </span>
+                      <span className="text-rose-400">
+                        SHORT: {futureData.metrics.longShortRatio.shortPercent}%
+                      </span>
+                    </div>
+                    <div className="h-2 w-full flex rounded-full overflow-hidden bg-[#141830]">
+                      <div
+                        className="h-full bg-emerald-400 transition-all duration-500"
+                        style={{ width: `${futureData.metrics.longShortRatio.longPercent}%` }}
+                      />
+                      <div
+                        className="h-full bg-rose-500 transition-all duration-500"
+                        style={{ width: `${futureData.metrics.longShortRatio.shortPercent}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Warning / Explanation Text */}
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    Hệ số: {futureData.metrics.longShortRatio.ratioText} Long / Short. Cảnh báo: Nếu tỷ lệ Long quá áp đảo (&gt;65%), nguy cơ bị thị trường đảo giá quét thanh lý Long (Long Squeeze) là rất cao.
+                  </p>
+
+                  {/* Bottom Submetric: Funding Rate */}
+                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#141830] border border-indigo-950/60 text-xs">
+                    <div className="flex items-center gap-2">
+                      <Droplets className="w-3.5 h-3.5 text-cyan-400" />
+                      <span className="text-slate-400">Funding Rate Hiện Tại:</span>
+                    </div>
+                    <div className="flex items-center gap-2 font-mono">
+                      <span className="font-bold text-emerald-400">
+                        {futureData.metrics.fundingRate.rate}
+                      </span>
+                      <span className="text-[10px] text-slate-500">
+                        ({futureData.metrics.fundingRate.status})
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Liquidation Heatmap Module */}
+                <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs font-bold text-white">
+                      <Layers className="w-4 h-4 text-indigo-400" />
+                      <span>Bản đồ Cụm Thanh Lý (Liquidation Heatmap)</span>
+                    </div>
+                    <button className="text-[11px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+                      <span>Xem chi tiết</span>
+                      <ArrowUpRight className="w-3 h-3" />
+                    </button>
+                  </div>
+
+                  {/* Short Liquidation Pool */}
+                  <div className="p-2.5 rounded-xl bg-[#141830] border border-rose-950/40 space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-rose-300 text-[11px]">Cụm Thanh Lý Phía Short</span>
+                      <span className="font-mono font-bold text-rose-400">
+                        {futureData.metrics.liquidationHeatmap.shortLiquidationPool}
+                      </span>
+                    </div>
+                    <div className="h-1.5 bg-[#090b14] rounded-full overflow-hidden">
+                      <div className="h-full w-3/4 bg-rose-500 rounded-full" />
+                    </div>
+                  </div>
+
+                  {/* Long Liquidation Pool */}
+                  <div className="p-2.5 rounded-xl bg-[#141830] border border-emerald-950/40 space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-emerald-300 text-[11px]">Cụm Thanh Lý Phía Long</span>
+                      <span className="font-mono font-bold text-emerald-400">
+                        {futureData.metrics.liquidationHeatmap.longLiquidationPool}
+                      </span>
+                    </div>
+                    <div className="h-1.5 bg-[#090b14] rounded-full overflow-hidden">
+                      <div className="h-full w-2/3 bg-emerald-400 rounded-full" />
+                    </div>
+                  </div>
+
+                  {/* Open Interest Submetric */}
+                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#141830] border border-indigo-950/60 text-xs">
+                    <div className="flex items-center gap-1.5 text-slate-400">
+                      <Activity className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>Hợp Đồng Mở (Open Interest):</span>
+                    </div>
+                    <div className="flex items-center gap-2 font-mono">
+                      <span className="font-bold text-cyan-300">
+                        {futureData.metrics.openInterest}
+                      </span>
+                      <span className="text-[10px] text-slate-500">
+                        ATR: {futureData.metrics.volatilityATR}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Final Verdict Banner (Futures) */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#0c2221] via-[#0f192b] to-[#0f1225] border border-emerald-500/40 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shrink-0 mt-0.5">
+                    <Zap className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="text-[10px] uppercase font-bold tracking-wider text-emerald-400 font-mono">
+                      KẾT LUẬN THỜI ĐIỂM HIỆN TẠI (FUTURES & MARGIN)
+                    </div>
+                    <h3 className="text-base font-bold text-white mt-0.5">
+                      Khuyến Nghị Vị Thế Phái Sinh
+                    </h3>
+                    <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
+                      {futureData.finalVerdict.summaryText}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="shrink-0 self-start sm:self-center">
+                  <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-emerald-500/25 tracking-wider uppercase cursor-default">
+                    <TrendingUp className="w-4 h-4 text-slate-950" />
+                    <span>{futureData.finalVerdict.action}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* ==================== SPOT TRADING STREAM VIEW ==================== */
+            <div className="space-y-4">
+              {/* Section Header */}
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-300 px-1 pt-1">
+                <Target className="w-4 h-4 text-emerald-400" />
+                <span className="uppercase tracking-wider">TỔNG QUAN PHÂN TÍCH SPOT (NẮM GIỮ DÀI HẠN)</span>
+              </div>
+
+              {/* 3 KPI Cards for Spot */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* 1. Winrate */}
+                <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-2">
+                  <div className="flex items-center gap-2 text-slate-400 text-xs">
+                    <Gauge className="w-4 h-4 text-emerald-400" />
+                    <span>Chỉ số Winrate Spot Kỳ Vọng</span>
+                  </div>
+                  <div className="text-2xl font-black text-emerald-400 font-mono">
+                    {spotData.winRatePercent}%
+                  </div>
+                  <div className="w-full h-1.5 bg-[#141830] rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-emerald-400 to-teal-300 rounded-full"
+                      style={{ width: `${spotData.winRatePercent}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* 2. Primary Trend */}
+                <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
+                  <div className="flex items-center gap-2 text-slate-400 text-xs">
+                    <TrendingUp className="w-4 h-4 text-cyan-400" />
+                    <span>Xu Hướng Chính (Trend)</span>
+                  </div>
+                  <div className="text-base font-black text-cyan-300 pt-1">
+                    {spotData.trend}
+                  </div>
+                  <div className="text-[11px] text-slate-500">
+                    {spotData.indicators.emaTrend}
+                  </div>
+                </div>
+
+                {/* 3. Risk / Reward */}
+                <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
+                  <div className="flex items-center gap-2 text-slate-400 text-xs">
+                    <Scale className="w-4 h-4 text-amber-400" />
+                    <span>Tỷ lệ Risk / Reward (R:R)</span>
+                  </div>
+                  <div className="text-2xl font-black text-amber-400 font-mono">
+                    {spotData.riskRewardRatio}
+                  </div>
+                  <div className="text-[11px] text-slate-500">
+                    Được tính toán theo phân bổ DCA
+                  </div>
+                </div>
+              </div>
+
+              {/* 4 Spot Execution Strategy Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {/* Entry Zone */}
+                <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
+                  <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-bold">
+                    <Target className="w-3.5 h-3.5" />
+                    <span>VÙNG MUA GOM (BUY)</span>
+                  </div>
+                  <div className="text-base font-black text-white font-mono pt-1">
+                    {spotData.entryZone}
+                  </div>
+                  <div className="text-[11px] text-slate-500">Chia vốn mua 3 đợt</div>
+                </div>
+
+                {/* TP1 */}
+                <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
+                  <div className="flex items-center gap-1.5 text-xs text-cyan-400 font-bold">
+                    <TrendingUp className="w-3.5 h-3.5" />
+                    <span>CHỐT LỜI TP1</span>
+                  </div>
+                  <div className="text-base font-black text-cyan-400 font-mono pt-1">
+                    {spotData.targetPrice1}
+                  </div>
+                  <div className="text-[11px] text-slate-500">Chốt 30-40% gốc</div>
+                </div>
+
+                {/* TP2 / TP3 */}
+                <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
+                  <div className="flex items-center gap-1.5 text-xs text-cyan-300 font-bold">
+                    <Crown className="w-3.5 h-3.5" />
+                    <span>CHỐT LỜI TP2 / TP3</span>
+                  </div>
+                  <div className="text-base font-black text-cyan-300 font-mono pt-1">
+                    {spotData.targetPrice2}
+                  </div>
+                  <div className="text-[11px] text-slate-500 font-mono">
+                    {spotData.targetPrice3}
+                  </div>
+                </div>
+
+                {/* Stop Loss */}
+                <div className="p-4 rounded-2xl bg-[#0f1225] border border-rose-950/60 space-y-1">
+                  <div className="flex items-center gap-1.5 text-xs text-rose-400 font-bold">
+                    <ShieldAlert className="w-3.5 h-3.5" />
+                    <span>CẮT LỖ AN TOÀN (SL)</span>
+                  </div>
+                  <div className="text-base font-black text-rose-400 font-mono pt-1">
+                    {spotData.stopLoss}
+                  </div>
+                  <div className="text-[11px] text-slate-500">Bảo toàn vốn danh mục</div>
+                </div>
+              </div>
+
+              {/* 2 Spot Technical Modules: Order Block & Liquidity Zones */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* 1. Order Block & FVG */}
+                <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs font-bold text-white">
+                      <BarChart2 className="w-4 h-4 text-emerald-400" />
+                      <span>Vùng Thanh Khoản & Khối Lệnh (Order Block)</span>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                      RSI: {spotData.indicators.rsi.value}
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="p-2.5 rounded-xl bg-[#141830] border border-emerald-950/40">
+                      <div className="text-[11px] text-emerald-400 font-semibold">Vùng Cầu Mua (Demand Zone):</div>
+                      <div className="text-xs font-mono font-bold text-white mt-0.5">
+                        {spotData.liquidity.highLiquidityZone}
+                      </div>
+                    </div>
+
+                    <div className="p-2.5 rounded-xl bg-[#141830] border border-rose-950/40">
+                      <div className="text-[11px] text-rose-400 font-semibold">Vùng Cung Bán (Supply Zone):</div>
+                      <div className="text-xs font-mono font-bold text-white mt-0.5">
+                        {spotData.liquidity.supplyZone}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-[#141830] border border-indigo-950/60 text-xs flex items-center justify-between">
+                    <span className="text-slate-400">Tín hiệu MACD:</span>
+                    <span className="font-semibold text-cyan-300">{spotData.indicators.macd}</span>
+                  </div>
+                </div>
+
+                {/* 2. Spot Liquidity & Volume */}
+                <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs font-bold text-white">
+                      <Layers className="w-4 h-4 text-cyan-400" />
+                      <span>Dòng Tiền & Hỗ Trợ Kháng Cự</span>
+                    </div>
+                    <span className="text-xs text-emerald-400 font-mono font-bold">
+                      {spotData.indicators.volumeProfile}
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between p-2.5 rounded-xl bg-[#141830] border border-indigo-950/60 text-xs">
+                      <span className="text-slate-400">Hỗ trợ quan trọng:</span>
+                      <span className="font-mono font-bold text-emerald-400">
+                        {spotData.indicators.supportResistance.support}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between p-2.5 rounded-xl bg-[#141830] border border-indigo-950/60 text-xs">
+                      <span className="text-slate-400">Kháng cự then chốt:</span>
+                      <span className="font-mono font-bold text-rose-400">
+                        {spotData.indicators.supportResistance.resistance}
+                      </span>
+                    </div>
+
+                    <div className="p-2.5 rounded-xl bg-[#141830] border border-indigo-950/60 text-xs text-slate-300">
+                      {spotData.strategyAdvice}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Final Verdict Banner (Spot) */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#0c2221] via-[#0f192b] to-[#0f1225] border border-emerald-500/40 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shrink-0 mt-0.5">
+                    <Zap className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="text-[10px] uppercase font-bold tracking-wider text-emerald-400 font-mono">
+                      KẾT LUẬN THỜI ĐIỂM HIỆN TẠI (SPOT TRADING)
+                    </div>
+                    <h3 className="text-base font-bold text-white mt-0.5">
+                      Khuyến Nghị Tích Lũy Spot
+                    </h3>
+                    <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
+                      {spotData.finalVerdict.summaryText}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="shrink-0 self-start sm:self-center">
+                  <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-emerald-500/25 tracking-wider uppercase cursor-default">
+                    <TrendingUp className="w-4 h-4 text-slate-950" />
+                    <span>{spotData.finalVerdict.action}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
