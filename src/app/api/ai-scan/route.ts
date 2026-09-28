@@ -63,11 +63,53 @@ export interface CoinglassMetrics {
   };
 }
 
+export interface AdvancedIndicators {
+  superTrend: {
+    status: "BULLISH" | "BEARISH";
+    value: string;
+  };
+  adx: {
+    value: number;
+    trendStrength: "Mạnh (>25)" | "Yếu (<20)" | "Trung bình";
+  };
+  stochRsi: {
+    k: number;
+    d: number;
+    status: "Quá Mua (>80)" | "Quá Bán (<20)" | "Vùng Trung Lập";
+  };
+  bollingerBands: {
+    upper: string;
+    middle: string;
+    lower: string;
+    squeezeStatus: "Đang co thắt (Squeeze ON)" | "Đang mở rộng (Expanding)";
+  };
+  ichimoku: {
+    cloudSignal: "Giá trên mây Kumo (Tăng)" | "Giá dưới mây Kumo (Giảm)" | "Trong mây Kumo";
+    tenkanKijunCross: "Bullish Cross" | "Bearish Cross" | "Neutral";
+  };
+  mfi: {
+    value: number;
+    status: "Dòng tiền vào mạnh" | "Dòng tiền rút ra" | "Cân bằng";
+  };
+  fibonacciLevels: {
+    fib0382: string;
+    fib0500: string;
+    fib0618GoldenPocket: string;
+    fib0786: string;
+    fib1618Extension: string;
+  };
+  volumeProfile: {
+    poc: string;
+    vah: string;
+    val: string;
+  };
+}
+
 export interface SpotAnalysis {
   signal: "STRONG_BUY" | "BUY" | "HOLD" | "TAKE_PROFIT" | "SELL";
   signalLabel: string;
   winRatePercent: number;
-  overallScore: number; // 1-10
+  overallScore: number;
   riskRewardRatio: string;
   trend: string;
   entryZone: string;
@@ -93,6 +135,7 @@ export interface SpotAnalysis {
       resistance: string;
     };
   };
+  advanced: AdvancedIndicators;
   strategyAdvice: string;
   riskWarning: string;
   finalVerdict: SpotVerdict;
@@ -131,6 +174,7 @@ export interface FutureAnalysis {
     };
     volatilityATR: string;
   };
+  advanced: AdvancedIndicators;
   riskManagementRules: string[];
   finalVerdict: FutureVerdict;
 }
@@ -175,14 +219,16 @@ export async function POST(req: Request) {
         ? "Dài hạn (DCA / Chu kỳ 3-12 tháng)"
         : "Trung hạn (Swing trade 1-4 tuần)";
 
-    const systemPrompt = `Bạn là Chuyên gia Cao cấp về Phân tích Kỹ thuật Sóng (Elliott Wave / Price Action) & Dữ liệu Phái sinh On-chain Coinglass (Chief Quantitative Crypto Strategist & Derivatives Risk Manager).
-Nhiệm vụ của bạn là phân tích toàn diện đồng tiền mã hóa ${name} (${symbol.toUpperCase()}) và trả về định dạng JSON chính xác.
+    const isPos = priceChange24h >= 0;
 
-Bao gồm các phân mục bắt buộc:
-1. wavePattern: Dạng sóng hiện tại (Sóng Elliott 1-2-3-4-5, ABC Correction, Wyckoff, Bull Flag...), xác định đỉnh đáy Swing High / Swing Low, mốc Fibo vàng 0.618 và sóng mục tiêu.
-2. coinglass: Tổng hợp chỉ số Coinglass (Tỷ lệ Long/Short Top Traders vs Retail, Funding Rate 3 sàn Binance/OKX/Bybit, Open Interest USD & Delta, Taker Buy/Sell ratio, CVD Divergence, Squeeze Momentum, Fear & Greed Index).
-3. spot: Luồng giao dịch Spot (Nắm giữ thực tế, không đòn bẩy, vùng mua gom, TP1-3, Stoploss, phân tích Order block & FVG, và THẺ KẾT LUẬN "NÊN MUA" / "NÊN BÁN" / "QUAN SÁT").
-4. future: Luồng phái sinh Futures (Đòn bẩy an toàn, Vị thế LONG / SHORT, Entry, TP1-3, SL, Giá thanh lý ước tính, Bản đồ cụm thanh lý, và THẺ KẾT LUẬN "NÊN LONG" / "NÊN SHORT" / "QUAN SÁT").
+    const systemPrompt = `Bạn là Chuyên gia Cao cấp về Phân tích Kỹ thuật Sóng (Elliott Wave / Price Action) & Dữ liệu Phái sinh On-chain Coinglass (Chief Quantitative Crypto Strategist & Derivatives Risk Manager).
+Nhiệm vụ của bạn là phân tích toàn diện đồng tiền mã hóa ${name} (${symbol.toUpperCase()}) với hệ thống chỉ báo kỹ thuật chuyên sâu (SuperTrend, ADX, StochRSI, Bollinger Bands, Ichimoku Cloud, MFI, Fibonacci Golden Pocket 0.618, Volume Profile POC/VAH/VAL) và dữ liệu Coinglass.
+
+Bao gồm:
+1. wavePattern: Dạng sóng Elliott 1-2-3-4-5 / ABC, Swing High / Low, Fibo 0.618, Target sóng 5.
+2. coinglass: Top Traders Long/Short Ratio, Funding Rate 3 sàn Binance/OKX/Bybit, Open Interest USD, CVD Divergence, Squeeze Momentum, Fear & Greed Index.
+3. spot: Luồng Spot (Vùng mua gom, TP1-3, SL, Order block & FVG, Advanced Indicators, và THẺ KẾT LUẬN "NÊN MUA" / "NÊN BÁN" / "QUAN SÁT").
+4. future: Luồng Futures (Đòn bẩy an toàn, Vị thế LONG / SHORT, Entry, TP1-3, SL, Giá thanh lý, Advanced Indicators, và THẺ KẾT LUẬN "NÊN LONG" / "NÊN SHORT" / "QUAN SÁT").
 
 BẮT BUỘC chỉ trả về duy nhất 1 chuỗi JSON hợp lệ tuân theo đúng cấu trúc schema, không kèm thêm bất kỳ văn bản giải thích nào ngoài JSON.`;
 
@@ -202,39 +248,39 @@ Hãy trả về JSON theo schema sau:
   "timeframe": "${timeframe}",
   "wavePattern": {
     "patternType": "ELLIOTT_IMPULSE_12345",
-    "patternName": "Sóng Đẩy Elliott (Wave 3 Impulse Extension)",
-    "currentWave": "Đang hoàn tất sóng 3 mở rộng (Wave 3) hướng về vùng kháng cự mới",
-    "waveDescription": "Cấu trúc sóng tăng bậc cao tạo Higher High (HH) liên tục với lực mua dồi dào.",
+    "patternName": "${isPos ? "Sóng Đẩy Elliott (Wave 3 Impulse Extension)" : "Sóng Hiệu Chỉnh ABC (Zigzag Retracement)"}",
+    "currentWave": "${isPos ? "Đang ở sóng đẩy 3 (Wave 3) - Pha tăng trưởng mạnh nhất chu kỳ" : "Đang hoàn tất sóng hiệu chỉnh C kiểm định hỗ trợ"}",
+    "waveDescription": "Cấu trúc đỉnh đáy nâng dần Higher High (HH) với dòng tiền tổ chức tham gia mạnh.",
     "swingHigh": "$${(currentPrice * 1.08).toFixed(2)}",
     "swingLow": "$${(currentPrice * 0.94).toFixed(2)}",
     "keyFibonacciLevel": "Vùng Tỷ Lệ Vàng Fibo 0.618 ($${(currentPrice * 0.965).toFixed(2)}) giữ vững lực đỡ",
     "projectedTargetWave": "$${(currentPrice * 1.22).toFixed(2)} (Mục tiêu Sóng 5)"
   },
   "coinglass": {
-    "topTradersLongRatio": 66,
-    "topTradersShortRatio": 34,
-    "retailLongRatio": 52,
-    "retailShortRatio": 48,
-    "fundingRateBinance": "+0.015%",
-    "fundingRateOKX": "+0.012%",
-    "fundingRateBybit": "+0.016%",
+    "topTradersLongRatio": ${isPos ? 66 : 42},
+    "topTradersShortRatio": ${isPos ? 34 : 58},
+    "retailLongRatio": ${isPos ? 52 : 48},
+    "retailShortRatio": ${isPos ? 48 : 52},
+    "fundingRateBinance": "${isPos ? "+0.015%" : "-0.008%"}",
+    "fundingRateOKX": "${isPos ? "+0.012%" : "-0.005%"}",
+    "fundingRateBybit": "${isPos ? "+0.016%" : "-0.009%"}",
     "openInterestTotalUSD": "$2.85B",
-    "openInterestDelta24h": "+14.6%",
-    "takerBuyRatio": 58,
-    "cvdStatus": "Phân kỳ tích cực (Bullish CVD Divergence)",
-    "squeezeMomentum": "Đang bung xung lượng tăng (Firing Bullish Momentum)",
+    "openInterestDelta24h": "${isPos ? "+14.6%" : "-6.2%"}",
+    "takerBuyRatio": ${isPos ? 58 : 42},
+    "cvdStatus": "${isPos ? "Phân kỳ tích cực (Bullish CVD Divergence)" : "Phân kỳ âm (Bearish CVD Divergence)"}",
+    "squeezeMomentum": "${isPos ? "Đang bung xung lượng tăng (Firing Bullish Momentum)" : "Độ nén cao (Squeeze ON) - Sắp bùng nổ"}",
     "fearGreedIndex": {
-      "score": 72,
-      "label": "Tham lam (Greed)"
+      "score": ${isPos ? 72 : 46},
+      "label": "${isPos ? "Tham lam (Greed)" : "Trung lập (Neutral)"}"
     }
   },
   "spot": {
-    "signal": "BUY",
-    "signalLabel": "MUA GOM",
-    "winRatePercent": 74,
-    "overallScore": 8.4,
+    "signal": "${isPos ? "BUY" : "HOLD"}",
+    "signalLabel": "${isPos ? "MUA GOM" : "QUAN SÁT"}",
+    "winRatePercent": ${isPos ? 74 : 60},
+    "overallScore": ${isPos ? 8.4 : 6.8},
     "riskRewardRatio": "1 : 2.8",
-    "trend": "Tăng trưởng Bullish",
+    "trend": "${isPos ? "Tăng trưởng Bullish" : "Tích lũy Sideway"}",
     "entryZone": "$${(currentPrice * 0.97).toFixed(2)} - $${(currentPrice * 0.99).toFixed(2)}",
     "targetPrice1": "$${(currentPrice * 1.06).toFixed(2)}",
     "targetPrice2": "$${(currentPrice * 1.15).toFixed(2)}",
@@ -248,33 +294,74 @@ Hãy trả về JSON theo schema sau:
     "indicators": {
       "emaTrend": "Giá vận động phía trên dải EMA Ribbon (20/50/200)",
       "rsi": {
-        "value": 62,
-        "status": "Vùng tích lũy xung lực tăng (Bullish Momentum)"
+        "value": ${isPos ? 62 : 45},
+        "status": "${isPos ? "Vùng tích lũy xung lực tăng (Bullish Momentum)" : "Vùng trung lập tích lũy"}"
       },
-      "macd": "MACD Histogram dương, đường Signal cắt lên",
-      "volumeProfile": "Khối lượng mua chủ động chiếm 64%",
+      "macd": "${isPos ? "MACD Histogram dương, Signal cắt lên" : "MACD phân kỳ đi ngang"}",
+      "volumeProfile": "Khối lượng mua chủ động chiếm ${isPos ? "64%" : "48%"}",
       "supportResistance": {
         "support": "$${(currentPrice * 0.94).toFixed(2)}",
         "resistance": "$${(currentPrice * 1.12).toFixed(2)}"
       }
     },
+    "advanced": {
+      "superTrend": {
+        "status": "${isPos ? "BULLISH" : "BEARISH"}",
+        "value": "$${(currentPrice * 0.935).toFixed(2)}"
+      },
+      "adx": {
+        "value": 31.4,
+        "trendStrength": "Mạnh (>25)"
+      },
+      "stochRsi": {
+        "k": 72,
+        "d": 65,
+        "status": "Vùng Trung Lập"
+      },
+      "bollingerBands": {
+        "upper": "$${(currentPrice * 1.07).toFixed(2)}",
+        "middle": "$${(currentPrice * 0.99).toFixed(2)}",
+        "lower": "$${(currentPrice * 0.91).toFixed(2)}",
+        "squeezeStatus": "Đang mở rộng (Expanding)"
+      },
+      "ichimoku": {
+        "cloudSignal": "${isPos ? "Giá trên mây Kumo (Tăng)" : "Giá trong mây Kumo"}",
+        "tenkanKijunCross": "${isPos ? "Bullish Cross" : "Neutral"}"
+      },
+      "mfi": {
+        "value": 64.8,
+        "status": "Dòng tiền vào mạnh"
+      },
+      "fibonacciLevels": {
+        "fib0382": "$${(currentPrice * 0.982).toFixed(2)}",
+        "fib0500": "$${(currentPrice * 0.971).toFixed(2)}",
+        "fib0618GoldenPocket": "$${(currentPrice * 0.965).toFixed(2)}",
+        "fib0786": "$${(currentPrice * 0.945).toFixed(2)}",
+        "fib1618Extension": "$${(currentPrice * 1.185).toFixed(2)}"
+      },
+      "volumeProfile": {
+        "poc": "$${(currentPrice * 0.985).toFixed(2)}",
+        "vah": "$${(currentPrice * 1.042).toFixed(2)}",
+        "val": "$${(currentPrice * 0.948).toFixed(2)}"
+      }
+    },
     "strategyAdvice": "Chia vốn DCA thành 3 đợt tại vùng hỗ trợ Order Block. Đạt TP1 dời SL về hòa vốn.",
     "riskWarning": "Đặt Stoploss bảo vệ tài khoản, tránh rủi ro biến động toàn thị trường.",
     "finalVerdict": {
-      "action": "NÊN MUA",
-      "actionType": "BUY",
-      "summaryText": "Cấu trúc dòng tiền tích lũy mạnh mẽ trên đồ thị Spot. Các chỉ số kỹ thuật duy trì đà tăng trưởng ổn định.",
-      "keyReason": "Dải EMA và RSI đồng thuận hỗ trợ xu hướng tăng trung hạn với khối lượng gom hàng đều đặn.",
+      "action": "${isPos ? "NÊN MUA" : "QUAN SÁT"}",
+      "actionType": "${isPos ? "BUY" : "WAIT"}",
+      "summaryText": "${isPos ? "Cấu trúc dòng tiền tích lũy mạnh mẽ trên đồ thị Spot. Các chỉ số kỹ thuật SuperTrend và EMA Ribbon đồng thuận tăng trưởng." : "Thị trường đang tích lũy đi ngang. Nên quan sát thêm tín hiệu xác nhận dòng tiền trước khi giải ngân lớn."}",
+      "keyReason": "Dải EMA Ribbon và RSI đồng thuận hỗ trợ xu hướng tăng với khối lượng gom hàng đều đặn.",
       "recommendedAction": "DCA mua gom theo vùng entry, hiện thực hóa lợi nhuận tại TP1 & TP2."
     }
   },
   "future": {
-    "position": "LONG",
-    "positionLabel": "LONG",
+    "position": "${isPos ? "LONG" : "SHORT"}",
+    "positionLabel": "${isPos ? "LONG" : "SHORT"}",
     "recommendedLeverage": "3x - 5x (An Toàn)",
     "capitalRiskPercent": "2 - 3%",
-    "winRatePercent": 68,
-    "overallScore": 8.6,
+    "winRatePercent": ${isPos ? 68 : 55},
+    "overallScore": ${isPos ? 8.6 : 6.5},
     "riskRewardRatio": "1 : 3",
     "entryZone": "$${(currentPrice * 0.985).toFixed(2)} - $${currentPrice.toFixed(2)}",
     "targetPrice1": "$${(currentPrice * 1.058).toFixed(2)}",
@@ -284,16 +371,16 @@ Hãy trả về JSON theo schema sau:
     "estLiquidationPrice": "$${(currentPrice * 0.82).toFixed(2)}",
     "metrics": {
       "longShortRatio": {
-        "longPercent": 62,
-        "shortPercent": 38,
-        "ratioText": "1.63",
-        "sentiment": "Bullish"
+        "longPercent": ${isPos ? 62 : 38},
+        "shortPercent": ${isPos ? 38 : 62},
+        "ratioText": "${isPos ? "1.63" : "0.61"}",
+        "sentiment": "${isPos ? "Bullish" : "Bearish"}"
       },
       "fundingRate": {
-        "rate": "+0.016%",
-        "status": "Longs trả phí cho Shorts"
+        "rate": "${isPos ? "+0.016%" : "-0.008%"}",
+        "status": "${isPos ? "Longs trả phí cho Shorts" : "Shorts trả phí cho Longs"}"
       },
-      "openInterest": "Tăng 18%",
+      "openInterest": "${isPos ? "Tăng 18%" : "Giảm 6%"}",
       "liquidationHeatmap": {
         "shortLiquidationPool": "$${(currentPrice * 1.04).toFixed(1)} - $${(currentPrice * 1.07).toFixed(1)}",
         "longLiquidationPool": "$${(currentPrice * 0.93).toFixed(1)} - $${(currentPrice * 0.96).toFixed(1)}",
@@ -301,15 +388,56 @@ Hãy trả về JSON theo schema sau:
       },
       "volatilityATR": "12.4"
     },
+    "advanced": {
+      "superTrend": {
+        "status": "${isPos ? "BULLISH" : "BEARISH"}",
+        "value": "$${(currentPrice * 0.935).toFixed(2)}"
+      },
+      "adx": {
+        "value": 31.4,
+        "trendStrength": "Mạnh (>25)"
+      },
+      "stochRsi": {
+        "k": 72,
+        "d": 65,
+        "status": "Vùng Trung Lập"
+      },
+      "bollingerBands": {
+        "upper": "$${(currentPrice * 1.07).toFixed(2)}",
+        "middle": "$${(currentPrice * 0.99).toFixed(2)}",
+        "lower": "$${(currentPrice * 0.91).toFixed(2)}",
+        "squeezeStatus": "Đang mở rộng (Expanding)"
+      },
+      "ichimoku": {
+        "cloudSignal": "${isPos ? "Giá trên mây Kumo (Tăng)" : "Giá trong mây Kumo"}",
+        "tenkanKijunCross": "${isPos ? "Bullish Cross" : "Neutral"}"
+      },
+      "mfi": {
+        "value": 64.8,
+        "status": "Dòng tiền vào mạnh"
+      },
+      "fibonacciLevels": {
+        "fib0382": "$${(currentPrice * 0.982).toFixed(2)}",
+        "fib0500": "$${(currentPrice * 0.971).toFixed(2)}",
+        "fib0618GoldenPocket": "$${(currentPrice * 0.965).toFixed(2)}",
+        "fib0786": "$${(currentPrice * 0.945).toFixed(2)}",
+        "fib1618Extension": "$${(currentPrice * 1.185).toFixed(2)}"
+      },
+      "volumeProfile": {
+        "poc": "$${(currentPrice * 0.985).toFixed(2)}",
+        "vah": "$${(currentPrice * 1.042).toFixed(2)}",
+        "val": "$${(currentPrice * 0.948).toFixed(2)}"
+      }
+    },
     "riskManagementRules": [
       "Quản lý vốn tối đa 2-3% NAV trên mỗi vị thế.",
       "Luôn cài Stoploss trước khi vào lệnh, dời SL về Entry khi đạt TP1.",
       "Đòn bẩy khuyến nghị không vượt quá 5x trong giai đoạn biến động mạnh."
     ],
     "finalVerdict": {
-      "action": "NÊN LONG",
-      "actionType": "LONG",
-      "summaryText": "Cấu trúc thị trường futures cho thấy áp lực mua mạnh và tỷ lệ Top Traders Long vượt trội. Ưu tiên canh nhịp hồi về hỗ trợ để Long thuận xu hướng.",
+      "action": "${isPos ? "NÊN LONG" : "QUAN SÁT"}",
+      "actionType": "${isPos ? "LONG" : "WAIT"}",
+      "summaryText": "${isPos ? "Cấu trúc thị trường futures cho thấy áp lực mua mạnh và tỷ lệ Top Traders Long vượt trội. Ưu tiên canh nhịp hồi về hỗ trợ để Long thuận xu hướng." : "Lực bán ngắn hạn đang chiếm ưu thế nhẹ. Thận trọng với các bẫy quét thanh lý hai đầu."}",
       "keyReason": "Open Interest tăng mạnh cùng Funding Rate dương lành mạnh và tỷ lệ Long/Short 62% ủng hộ đà bứt phá.",
       "recommendedAction": "Mở vị thế Long tại vùng Entry kỷ luật, cài Stoploss và chốt lời từng phần."
     }
@@ -321,7 +449,6 @@ Hãy trả về JSON theo schema sau:
       return NextResponse.json(JSON.parse(userPrompt.split("Hãy trả về JSON theo schema sau:")[1].trim()));
     }
 
-    // Call Groq API (Llama 3 70b versatile)
     const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
