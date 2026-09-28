@@ -6,6 +6,7 @@ import { PortfolioOverview } from "@/components/PortfolioOverview";
 import { AssetTable } from "@/components/AssetTable";
 import { AddAssetModal } from "@/components/AddAssetModal";
 import { ScannerPage } from "@/components/ScannerPage";
+import { AdminDashboard } from "@/components/AdminDashboard";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { CryptoList } from "@/components/CryptoList";
 import { GoldForexList } from "@/components/GoldForexList";
@@ -74,7 +75,7 @@ export default function Home() {
 
   return (
     <PortfolioProvider cryptos={cryptos} goldForex={goldForex}>
-      <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
+      <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col transition-colors duration-200">
         {/* Navigation */}
         <Navbar
           activeTab={activeTab}
@@ -88,8 +89,8 @@ export default function Home() {
 
         {/* Main Content Area */}
         <main className="flex-1 max-w-[1720px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-          {/* Market Status Ticker & Banner */}
-          {activeTab !== "scan" && (
+          {/* Market Status Ticker & Banner (Hidden on scan & admin tabs for clean workspace) */}
+          {activeTab !== "scan" && activeTab !== "admin" && (
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-zinc-900/60 to-zinc-900/40 border border-emerald-500/20 shadow-lg">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -138,6 +139,9 @@ export default function Home() {
               </div>
             </div>
           )}
+
+          {/* Tab: Admin Dashboard (Dedicated view for Admin) */}
+          {activeTab === "admin" && <AdminDashboard />}
 
           {/* Tab: Quét AI Chuyên sâu (Dedicated Full-screen Scanner View) */}
           {activeTab === "scan" && (

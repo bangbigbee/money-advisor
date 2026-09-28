@@ -11,8 +11,12 @@ import {
   ChevronDown,
   Scan,
   Crown,
+  ShieldAlert,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 
 interface NavbarProps {
   activeTab: string;
@@ -28,7 +32,10 @@ export function Navbar({
   onOpenUpgradeModal,
 }: NavbarProps) {
   const { user, isLoading, role, remainingScans, signInWithGoogle, signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [showUserMenu, setShowUserMenu] = useState(false);
+
+  const isAdmin = role === "ADMIN" || user?.email?.toLowerCase() === "bangdtbk@gmail.com";
 
   const navItems = [
     { id: "dashboard", label: "Tổng quan", icon: Wallet },
@@ -36,6 +43,7 @@ export function Navbar({
     { id: "crypto", label: "Crypto Market", icon: Coins },
     { id: "forex-gold", label: "Vàng & Ngoại hối", icon: TrendingUp },
     { id: "portfolio", label: "Danh mục đầu tư", icon: Layers },
+    ...(isAdmin ? [{ id: "admin", label: "Admin Dashboard", icon: Crown, isAdmin: true }] : []),
   ];
 
   const userAvatar = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
@@ -48,10 +56,10 @@ export function Navbar({
   const isUnlimited = role === "ADMIN" || role === "ULTRA";
 
   return (
-    <header className="sticky top-0 z-40 backdrop-blur-xl bg-zinc-950/85 border-b border-zinc-800/80 text-zinc-100">
+    <header className="sticky top-0 z-40 backdrop-blur-xl bg-zinc-950/85 border-b border-zinc-800/80 text-zinc-100 transition-colors duration-200">
       <div className="max-w-[1720px] w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-4">
-          {/* Logo & Brand - Strictly 1 Horizontal Line */}
+          {/* Logo & Brand */}
           <div
             onClick={() => setActiveTab("dashboard")}
             className="flex items-center gap-3 cursor-pointer select-none shrink-0"
@@ -69,11 +77,28 @@ export function Navbar({
             </div>
           </div>
 
-          {/* Navigation Links - Horizontal Row */}
+          {/* Navigation Links - 1 Horizontal Row */}
           <nav className="hidden md:flex items-center space-x-1.5 whitespace-nowrap">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
+
+              if (item.isAdmin) {
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border whitespace-nowrap ${
+                      isActive
+                        ? "bg-rose-500/20 text-rose-300 border-rose-500/50 shadow-md shadow-rose-500/10"
+                        : "text-rose-400 hover:text-rose-300 hover:bg-rose-950/30 border-rose-500/25"
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5 text-rose-400" />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              }
 
               if (item.isSpecial) {
                 return (
@@ -88,7 +113,6 @@ export function Navbar({
                   >
                     <Icon className="h-4 w-4 animate-pulse text-cyan-400" />
                     <span>{item.label}</span>
-                    {/* Circular Quota Indicator */}
                     <span className="flex items-center justify-center w-5 h-5 rounded-full bg-cyan-400 text-zinc-950 text-[10px] font-black font-mono shadow-sm">
                       {isUnlimited ? "∞" : remainingScans}
                     </span>
@@ -113,19 +137,31 @@ export function Navbar({
             })}
           </nav>
 
-          {/* Right Actions & Auth - Strictly 1 Horizontal Line */}
-          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 whitespace-nowrap">
+          {/* Right Actions, Theme Toggle & Auth */}
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0 whitespace-nowrap">
+            {/* Theme Toggle Button (Icon only) */}
+            <button
+              onClick={toggleTheme}
+              title={theme === "dark" ? "Chuyển sang Chế độ Sáng" : "Chuyển sang Chế độ Tối"}
+              className="p-2 rounded-xl bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 transition cursor-pointer"
+            >
+              {theme === "dark" ? (
+                <Sun className="w-4 h-4 text-amber-400" />
+              ) : (
+                <Moon className="w-4 h-4 text-cyan-500" />
+              )}
+            </button>
+
             {/* Mobile Scan Button */}
             <button
               onClick={() => setActiveTab("scan")}
-              className={`md:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer border whitespace-nowrap ${
+              className={`md:hidden flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer border whitespace-nowrap ${
                 activeTab === "scan"
                   ? "bg-cyan-500/30 text-cyan-300 border-cyan-500/50"
                   : "bg-cyan-500/10 text-cyan-400 border-cyan-500/30"
               }`}
             >
               <Scan className="w-3.5 h-3.5" />
-              <span>Quét AI</span>
               <span className="w-4 h-4 rounded-full bg-cyan-400 text-zinc-950 text-[9px] font-black flex items-center justify-center">
                 {isUnlimited ? "∞" : remainingScans}
               </span>
@@ -134,7 +170,7 @@ export function Navbar({
             {/* Quick Add Asset Button */}
             <button
               onClick={onOpenAddModal}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs font-bold shadow-md shadow-emerald-500/20 transition cursor-pointer whitespace-nowrap"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs font-bold shadow-md shadow-emerald-500/20 transition cursor-pointer whitespace-nowrap"
             >
               <PlusCircle className="h-4 w-4" />
               <span className="hidden sm:inline">Giao dịch mới</span>
@@ -145,7 +181,6 @@ export function Navbar({
             {isLoading ? (
               <div className="h-9 w-24 bg-zinc-800 animate-pulse rounded-xl" />
             ) : user ? (
-              /* User is Logged in - 1 Single Horizontal Row */
               <div className="relative">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
@@ -163,14 +198,14 @@ export function Navbar({
                     </div>
                   )}
 
-                  <span className="text-xs font-bold text-zinc-200 hidden sm:inline max-w-[110px] truncate">
+                  <span className="text-xs font-bold text-zinc-200 hidden sm:inline max-w-[100px] truncate">
                     {userName}
                   </span>
 
                   {/* Tier Badge */}
                   <span
                     className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider ${
-                      role === "ADMIN"
+                      isAdmin
                         ? "bg-rose-500/20 text-rose-400 border border-rose-500/40"
                         : role === "ULTRA"
                         ? "bg-amber-500/20 text-amber-400 border border-amber-500/40"
@@ -179,7 +214,7 @@ export function Navbar({
                         : "bg-zinc-800 text-zinc-300 border border-zinc-700"
                     }`}
                   >
-                    {role === "ADMIN" ? "👑 ADMIN" : role}
+                    {isAdmin ? "👑 ADMIN" : role}
                   </span>
 
                   <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
@@ -201,12 +236,26 @@ export function Navbar({
                       <div className="text-[11px] text-zinc-400 truncate">{user.email}</div>
                       <div className="mt-1.5 flex items-center justify-between text-[10px]">
                         <span className="text-zinc-400">Gói tài khoản:</span>
-                        <span className="font-black text-amber-400">{role}</span>
+                        <span className="font-black text-amber-400">{isAdmin ? "ADMIN" : role}</span>
                       </div>
                     </div>
 
+                    {/* Admin Dashboard Entry in Dropdown */}
+                    {isAdmin && (
+                      <button
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          setActiveTab("admin");
+                        }}
+                        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 transition text-left cursor-pointer mb-1 border border-rose-500/20"
+                      >
+                        <Crown className="w-4 h-4 text-rose-400" />
+                        <span className="font-bold">Admin Dashboard</span>
+                      </button>
+                    )}
+
                     {/* Upgrade Tier Button in Menu */}
-                    {onOpenUpgradeModal && (
+                    {onOpenUpgradeModal && !isAdmin && (
                       <button
                         onClick={() => {
                           setShowUserMenu(false);
@@ -255,12 +304,10 @@ export function Navbar({
                 )}
               </div>
             ) : (
-              /* User is Guest / Not Logged in */
               <button
                 onClick={signInWithGoogle}
                 className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-100 text-xs font-semibold shadow-sm transition cursor-pointer whitespace-nowrap"
               >
-                {/* Google "G" SVG Icon */}
                 <svg className="w-4 h-4" viewBox="0 0 24 24">
                   <path
                     fill="#4285F4"
