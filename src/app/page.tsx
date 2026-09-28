@@ -6,10 +6,12 @@ import { PortfolioOverview } from "@/components/PortfolioOverview";
 import { AssetTable } from "@/components/AssetTable";
 import { AddAssetModal } from "@/components/AddAssetModal";
 import { ScanModal } from "@/components/ScanModal";
+import { UpgradeModal } from "@/components/UpgradeModal";
 import { CryptoList } from "@/components/CryptoList";
 import { GoldForexList } from "@/components/GoldForexList";
 import { TradingViewWidget } from "@/components/TradingViewWidget";
 import { PortfolioProvider } from "@/context/PortfolioContext";
+import { useAuth } from "@/context/AuthContext";
 import {
   fetchTopCryptos,
   initialGoldForexData,
@@ -21,6 +23,8 @@ import {
   RefreshCw,
   Sparkles,
   Scan,
+  Crown,
+  Zap,
 } from "lucide-react";
 
 export default function Home() {
@@ -36,6 +40,10 @@ export default function Home() {
   const [addModalPrefill, setAddModalPrefill] = useState<any>(null);
   const [isScanModalOpen, setIsScanModalOpen] = useState(false);
   const [selectedScanCoin, setSelectedScanCoin] = useState<CryptoItem | null>(null);
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+
+  const { role, remainingScans } = useAuth();
+  const isUnlimited = role === "ADMIN" || role === "ULTRA";
 
   const loadCryptoData = async () => {
     setIsLoading(true);
@@ -84,6 +92,7 @@ export default function Home() {
             setSelectedScanCoin(null);
             setIsScanModalOpen(true);
           }}
+          onOpenUpgradeModal={() => setIsUpgradeModalOpen(true)}
         />
 
         {/* Main Content Area */}
@@ -98,26 +107,29 @@ export default function Home() {
                 <div className="text-sm font-semibold text-zinc-100 flex items-center gap-2">
                   MoneyAdvisor Pro
                   <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-mono">
-                    AI Scanner & Cloud Sync
+                    {role === "ADMIN" ? "ADMIN 👑" : `Gói ${role}`}
                   </span>
                 </div>
                 <p className="text-xs text-zinc-400">
-                  Tự động định giá danh mục đầu tư từ CoinGecko, Vàng SJC & Tích hợp Quét AI phân tích kỹ thuật
+                  Tự động định giá danh mục đầu tư từ CoinGecko, Vàng SJC & Quét AI phân tích kỹ thuật
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2.5 self-end sm:self-center">
-              {/* Scan Trigger Button on Banner */}
+              {/* Scan Trigger Button on Banner with Circular Quota Counter */}
               <button
                 onClick={() => {
                   setSelectedScanCoin(null);
                   setIsScanModalOpen(true);
                 }}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-cyan-500/20 via-emerald-500/20 to-teal-500/20 hover:from-cyan-500/30 hover:to-teal-500/30 text-cyan-300 text-xs font-bold rounded-lg border border-cyan-500/40 transition cursor-pointer shadow-sm"
+                className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-cyan-500/20 via-emerald-500/20 to-teal-500/20 hover:from-cyan-500/30 hover:to-teal-500/30 text-cyan-300 text-xs font-bold rounded-lg border border-cyan-500/40 transition cursor-pointer shadow-sm"
               >
                 <Scan className="w-3.5 h-3.5 text-cyan-400" />
                 <span>Quét AI Kỹ thuật</span>
+                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-cyan-400 text-zinc-950 text-[10px] font-black font-mono">
+                  {isUnlimited ? "∞" : remainingScans}
+                </span>
               </button>
 
               {lastUpdated && (
@@ -288,6 +300,11 @@ export default function Home() {
           cryptos={cryptos}
           initialSelectedCoin={selectedScanCoin}
           onOpenAddAssetModal={handleOpenAddWithPrefill}
+          onOpenUpgradeModal={() => setIsUpgradeModalOpen(true)}
+        />
+        <UpgradeModal
+          isOpen={isUpgradeModalOpen}
+          onClose={() => setIsUpgradeModalOpen(false)}
         />
 
         {/* Footer */}

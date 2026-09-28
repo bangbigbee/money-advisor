@@ -17,10 +17,13 @@ import {
   Search,
   ArrowRight,
   Plus,
+  Crown,
+  Zap,
+  Lock,
 } from "lucide-react";
 import { CryptoItem } from "@/lib/marketApi";
 import { ScanResult } from "@/app/api/ai-scan/route";
-import { usePortfolio } from "@/context/PortfolioContext";
+import { useAuth, UserRole } from "@/context/AuthContext";
 
 interface ScanModalProps {
   isOpen: boolean;
@@ -28,6 +31,7 @@ interface ScanModalProps {
   cryptos: CryptoItem[];
   initialSelectedCoin?: CryptoItem | null;
   onOpenAddAssetModal?: (prefill?: { symbol: string; name: string; price: number }) => void;
+  onOpenUpgradeModal?: () => void;
 }
 
 const POPULAR_COINS = [
@@ -49,7 +53,10 @@ export function ScanModal({
   cryptos,
   initialSelectedCoin,
   onOpenAddAssetModal,
+  onOpenUpgradeModal,
 }: ScanModalProps) {
+  const { role, remainingScans, scansLimit, scansUsed, useScanQuota, canScan, user } = useAuth();
+
   const [selectedCoin, setSelectedCoin] = useState<CryptoItem | (typeof POPULAR_COINS)[0] | null>(
     null
   );
@@ -58,6 +65,7 @@ export function ScanModal({
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [showLimitReached, setShowLimitReached] = useState(false);
 
   // Sync initial coin if provided
   useEffect(() => {
@@ -84,8 +92,15 @@ export function ScanModal({
   const handleStartScan = async (coinToScan = selectedCoin) => {
     if (!coinToScan) return;
 
+    // Check quota for STARTER
+    if (!canScan) {
+      setShowLimitReached(true);
+      return;
+    }
+
     setIsScanning(true);
     setErrorMessage("");
+    setShowLimitReached(false);
     setScanResult(null);
 
     const price = (coinToScan as CryptoItem).current_price || (coinToScan as any).defaultPrice || 100;
@@ -113,6 +128,8 @@ export function ScanModal({
       }
 
       const data: ScanResult = await res.json();
+      // Deduct 1 scan quota
+      useScanQuota();
       setScanResult(data);
     } catch (err: any) {
       console.error("Scan error:", err);
@@ -136,10 +153,12 @@ export function ScanModal({
     }
   };
 
+  const isUnlimited = role === "ADMIN" || role === "ULTRA";
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
       <div className="relative w-full max-w-3xl max-h-[92vh] flex flex-col bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl text-zinc-100 overflow-hidden">
-        {/* Header */}
+        {/* Header with User Tier & Circular Quota Badge */}
         <div className="flex items-center justify-between p-4 sm:p-5 border-b border-zinc-800 bg-zinc-950/60">
           <div className="flex items-center gap-3">
             <div className="relative p-2.5 rounded-xl bg-gradient-to-tr from-cyan-500/20 via-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/30">
@@ -151,8 +170,19 @@ export function ScanModal({
                 <h3 className="text-base sm:text-lg font-bold text-white">
                   AI Market Scanner
                 </h3>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-300 border border-emerald-500/30 font-mono">
-                  Grok Engine
+                {/* User Tier Badge */}
+                <span
+                  className={`px-2 py-0.5 rounded-md text-[10px] font-black tracking-wider uppercase border ${
+                    role === "ADMIN"
+                      ? "bg-rose-500/20 text-rose-400 border-rose-500/40"
+                      : role === "ULTRA"
+                      ? "bg-amber-500/20 text-amber-400 border-amber-500/40"
+                      : role === "PRO"
+                      ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
+                      : "bg-zinc-800 text-zinc-300 border-zinc-700"
+                  }`}
+                >
+                  {role === "ADMIN" ? "ADMIN 👑" : role}
                 </span>
               </div>
               <p className="text-xs text-zinc-400">
@@ -160,16 +190,68 @@ export function ScanModal({
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition cursor-pointer"
-          >
-            <X className="w-5 h-5" />
-          </button>
+
+          <div className="flex items-center gap-3">
+            {/* Circular Remaining Quota Badge */}
+            <div className="flex items-center gap-2 bg-zinc-950 px-3 py-1.5 rounded-xl border border-zinc-800">
+              <div className="flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500 text-white font-mono font-black text-xs shadow-md shadow-emerald-500/20">
+                {isUnlimited ? "∞" : remainingScans}
+              </div>
+              <div className="text-[11px] leading-tight hidden sm:block">
+                <div className="font-semibold text-zinc-200">
+                  {isUnlimited ? "Không giới hạn" : `Còn ${remainingScans}/${scansLimit} lượt`}
+                </div>
+                <div className="text-[9px] text-zinc-400">
+                  {role === "STARTER" ? "Gói STARTER" : "Đã kích hoạt"}
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Modal Body */}
         <div className="p-4 sm:p-6 overflow-y-auto space-y-6 text-xs text-zinc-300">
+          {/* Quota Exhausted Warning Card */}
+          {showLimitReached && (
+            <div className="p-5 rounded-2xl bg-gradient-to-r from-amber-950/40 via-zinc-900 to-zinc-900 border border-amber-500/40 shadow-xl space-y-3 animate-in fade-in">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                  <Lock className="w-5 h-5" />
+                </div>
+                <div className="space-y-1 flex-1">
+                  <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                    Bạn đã sử dụng hết 3 lượt quét AI của gói STARTER!
+                  </h4>
+                  <p className="text-xs text-zinc-300">
+                    Để tiếp tục quét không giới hạn các đồng coin và nhận điểm vào lệnh tối ưu, bạn hãy nâng cấp lên gói <strong>PRO</strong> hoặc <strong>ULTRA</strong>.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                {onOpenUpgradeModal && (
+                  <button
+                    onClick={() => {
+                      onClose();
+                      onOpenUpgradeModal();
+                    }}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-zinc-950 text-xs font-bold rounded-xl shadow-lg shadow-amber-500/20 transition cursor-pointer"
+                  >
+                    <Crown className="w-4 h-4" />
+                    <span>Nâng cấp ngay</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Top Controls: Coin Select & Timeframe */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-3 bg-zinc-950/60 rounded-2xl border border-zinc-800/80">
             {/* Search / Coin Selection */}
@@ -195,6 +277,7 @@ export function ScanModal({
                       onClick={() => {
                         setSelectedCoin(coin);
                         setScanResult(null);
+                        setShowLimitReached(false);
                       }}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer border ${
                         isSelected
