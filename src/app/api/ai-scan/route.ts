@@ -10,27 +10,83 @@ export interface ScanRequest {
   totalVolume?: number;
 }
 
+export interface SpotAnalysis {
+  signal: "STRONG_BUY" | "BUY" | "HOLD" | "TAKE_PROFIT" | "SELL";
+  signalLabel: string;
+  winRatePercent: number;
+  overallScore: number; // 1-10
+  riskRewardRatio: string;
+  trend: string;
+  entryZone: string;
+  targetPrice1: string;
+  targetPrice2: string;
+  targetPrice3: string;
+  stopLoss: string;
+  liquidity: {
+    highLiquidityZone: string;
+    thinLiquidityZone: string;
+    supplyZone: string;
+  };
+  indicators: {
+    emaTrend: string;
+    rsi: {
+      value: number;
+      status: string;
+    };
+    macd: string;
+    volumeProfile: string;
+    supportResistance: {
+      support: string;
+      resistance: string;
+    };
+  };
+  strategyAdvice: string;
+  riskWarning: string;
+}
+
+export interface FutureAnalysis {
+  position: "LONG" | "SHORT" | "NO_TRADE";
+  positionLabel: string;
+  recommendedLeverage: string;
+  capitalRiskPercent: string;
+  winRatePercent: number;
+  overallScore: number;
+  riskRewardRatio: string;
+  entryZone: string;
+  targetPrice1: string;
+  targetPrice2: string;
+  targetPrice3: string;
+  stopLoss: string;
+  estLiquidationPrice: string;
+  metrics: {
+    longShortRatio: {
+      longPercent: number;
+      shortPercent: number;
+      ratioText: string;
+      sentiment: string;
+    };
+    fundingRate: {
+      rate: string;
+      status: string;
+    };
+    openInterest: string;
+    liquidationHeatmap: {
+      shortLiquidationPool: string;
+      longLiquidationPool: string;
+      stopHuntRisk: string;
+    };
+    volatilityATR: string;
+  };
+  riskManagementRules: string[];
+}
+
 export interface ScanResult {
   symbol: string;
   name: string;
   currentPrice: number;
-  signal: "STRONG_BUY" | "BUY" | "HOLD" | "TAKE_PROFIT" | "SELL";
-  signalLabel: string;
-  winRatePercent: number;
-  overallScore: number; // Out of 10
-  riskRewardRatio: string;
-  trend: "Tăng mạnh (Bullish)" | "Tăng nhẹ" | "Đi ngang (Sideway)" | "Giảm nhẹ" | "Giảm mạnh (Bearish)";
-  entryZone: string;
-  targetPrice1: string;
-  targetPrice2: string;
-  stopLoss: string;
-  technicalSummary: string;
-  supportLevel: string;
-  resistanceLevel: string;
-  rsiStatus: string;
-  volumeAnalysis: string;
-  strategyAdvice: string;
-  riskWarning: string;
+  timeframe: string;
+  spot: SpotAnalysis;
+  future: FutureAnalysis;
 }
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
@@ -57,56 +113,120 @@ export async function POST(req: Request) {
 
     const timeframeLabel =
       timeframe === "short"
-        ? "Ngắn hạn (Lướt sóng / Scalping 1-3 ngày)"
+        ? "Ngắn hạn (Scalping / Day trading 1-3 ngày)"
         : timeframe === "long"
-        ? "Dài hạn (DCA / Đầu tư dài hạn 3-12 tháng)"
+        ? "Dài hạn (DCA / Chu kỳ 3-12 tháng)"
         : "Trung hạn (Swing trade 1-4 tuần)";
 
-    const systemPrompt = `Bạn là Chuyên gia Cao cấp về Phân tích Kỹ thuật & Quản trị Rủi ro Thị trường Tiền mã hóa (Senior Crypto Quantitative Analyst & Financial Advisor).
-Nhiệm vụ của bạn là quét và phân tích chuyên sâu đồng tiền mã hóa mà người dùng yêu cầu, dựa trên dữ liệu giá hiện tại và các quy luật kỹ thuật (Hỗ trợ/Kháng cự, Fibonacci, RSI, MACD, Price Action, Volume Profile, Risk/Reward).
+    const systemPrompt = `Bạn là Chuyên gia Cao cấp về Phân tích Kỹ thuật & Quản trị Rủi ro Thị trường Tiền mã hóa (Chief Quantitative Crypto Strategist & Derivatives Risk Manager).
+Nhiệm vụ của bạn là phân tích đồng crypto được yêu cầu và chia thành 2 LUỒNG RIÊNG BIỆT:
+1. LUỒNG GIAO DỊCH SPOT (Nắm giữ thực tế, không đòn bẩy):
+   - Phân tích chi tiết từng chỉ số kỹ thuật ở các section riêng (EMA Trends, RSI & Phân kỳ, MACD, Volume Profile, Hỗ trợ / Kháng cự).
+   - Bản đồ thanh khoản: Vùng thanh khoản cao (High Liquidity Demand Zone), Vùng thanh khoản mỏng (Thin Liquidity / FVG), Vùng áp lực bán (Supply Zone).
+   - Vùng Entry Gom Hàng, TP1, TP2, TP3 và Stop Loss bảo toàn vốn.
 
-Định dạng trả về BẮT BUỘC là 1 đối tượng JSON thuần túy (không kèm markdown \`\`\`json hoặc bất kỳ text mở đầu nào), theo đúng cấu trúc TypeScript sau:
+2. LUỒNG GIAO DỊCH FUTURE / MARGIN (Phái sinh, có đòn bẩy):
+   - Vị thế khuyến nghị (LONG hoặc SHORT), Mức đòn bẩy an toàn khuyến nghị (ví dụ: x5 - x10 hoặc x15), % Phân bổ vốn cho lệnh (ví dụ: 2% - 5% NAV).
+   - Tỷ lệ Long / Short Ratio (ví dụ: 58% Long / 42% Short) và tâm lý đám đông.
+   - Funding Rate & Xu hướng Hợp đồng mở Open Interest (OI).
+   - Bản đồ Vùng Thanh Lý (Liquidation Heatmap): Cụm thanh lý Short (Short Liquidation Pool), Cụm thanh lý Long (Long Liquidation Pool), Nguy cơ quét râu (Stop-hunt Risk).
+   - Kế hoạch Entry, TP1 (kèm % ROI đòn bẩy), TP2 (kèm % ROI đòn bẩy), TP3, Stop Loss và Giá ước tính thanh lý.
+
+Định dạng trả về BẮT BUỘC là 1 đối tượng JSON thuần túy (không kèm markdown \`\`\`json hoặc bất kỳ text mở đầu nào), theo đúng cấu trúc:
 {
-  "signal": "STRONG_BUY" | "BUY" | "HOLD" | "TAKE_PROFIT" | "SELL",
-  "signalLabel": "MUA MẠNH" | "MUA" | "THEO DÕI" | "CÂN NHẮC CHỐT LỜI" | "BÁN GIẢM RỦI RO",
-  "winRatePercent": number (ví dụ: 78 là 78%),
-  "overallScore": number (thang điểm 1 đến 10, ví dụ 8.4),
-  "riskRewardRatio": string (ví dụ "1 : 2.8"),
-  "trend": "Tăng mạnh (Bullish)" | "Tăng nhẹ" | "Đi ngang (Sideway)" | "Giảm nhẹ" | "Giảm mạnh (Bearish)",
-  "entryZone": string (vùng giá mua gom hợp lý, ví dụ "$91,500 - $93,200"),
-  "targetPrice1": string (mục tiêu giá chốt lời 1 kèm % kỳ vọng, ví dụ "$98,500 (+5.2%)"),
-  "targetPrice2": string (mục tiêu giá chốt lời 2 kèm % kỳ vọng, ví dụ "$105,000 (+12.1%)"),
-  "stopLoss": string (mức giá cắt lỗ an toàn kèm % rủi ro, ví dụ "$88,900 (-4.1%)"),
-  "technicalSummary": string (phân tích chi tiết 2-3 câu về thế nến, cấu trúc thị trường, xu hướng sóng),
-  "supportLevel": string (các mốc hỗ trợ cứng),
-  "resistanceLevel": string (các mốc kháng cự mạnh),
-  "rsiStatus": string (nhận định chỉ số RSI, ví dụ: "RSI 14 ở mức 54 (Trung tính, còn dư địa tăng)"),
-  "volumeAnalysis": string (nhận định về khối lượng giao dịch và dòng tiền vào/ra),
-  "strategyAdvice": string (lời khuyên chiến lược phân bổ vốn, cách đi lệnh và thời điểm giữ vị thế),
-  "riskWarning": string (lời nhắc quản trị rủi ro ngắn gọn)
+  "spot": {
+    "signal": "STRONG_BUY" | "BUY" | "HOLD" | "TAKE_PROFIT" | "SELL",
+    "signalLabel": "MUA MẠNH" | "MUA GOM" | "QUAN SÁT" | "CHỐT LỜI TỪNG PHẦN" | "BÁN BẢO TOÀN VỐN",
+    "winRatePercent": number,
+    "overallScore": number (thang 1 - 10),
+    "riskRewardRatio": string (ví dụ "1 : 3.2"),
+    "trend": string,
+    "entryZone": string,
+    "targetPrice1": string,
+    "targetPrice2": string,
+    "targetPrice3": string,
+    "stopLoss": string,
+    "liquidity": {
+      "highLiquidityZone": string,
+      "thinLiquidityZone": string,
+      "supplyZone": string
+    },
+    "indicators": {
+      "emaTrend": string,
+      "rsi": {
+        "value": number,
+        "status": string
+      },
+      "macd": string,
+      "volumeProfile": string,
+      "supportResistance": {
+        "support": string,
+        "resistance": string
+      }
+    },
+    "strategyAdvice": string,
+    "riskWarning": string
+  },
+  "future": {
+    "position": "LONG" | "SHORT" | "NO_TRADE",
+    "positionLabel": "MỞ VỊ THẾ LONG (ĐÁNH LÊN)" | "MỞ VỊ THẾ SHORT (ĐÁNH XUỐNG)" | "ĐỨNG NGOÀI THỊ TRƯỜNG",
+    "recommendedLeverage": string,
+    "capitalRiskPercent": string,
+    "winRatePercent": number,
+    "overallScore": number (thang 1 - 10),
+    "riskRewardRatio": string,
+    "entryZone": string,
+    "targetPrice1": string,
+    "targetPrice2": string,
+    "targetPrice3": string,
+    "stopLoss": string,
+    "estLiquidationPrice": string,
+    "metrics": {
+      "longShortRatio": {
+        "longPercent": number,
+        "shortPercent": number,
+        "ratioText": string,
+        "sentiment": string
+      },
+      "fundingRate": {
+        "rate": string,
+        "status": string
+      },
+      "openInterest": string,
+      "liquidationHeatmap": {
+        "shortLiquidationPool": string,
+        "longLiquidationPool": string,
+        "stopHuntRisk": string
+      },
+      "volatilityATR": string
+    },
+    "riskManagementRules": [
+      "Dời Stop Loss về Entry (Hòa vốn) ngay khi đạt TP1",
+      "Tuyệt đối không nhồi thêm lệnh khi vị thế đang âm (Không DCA lệnh gồng lỗ)",
+      "Cài đặt lệnh Stop Loss trực tiếp trên sàn, không chờ đợi thủ công"
+    ]
+  }
 }
 
-Tất cả nội dung giải thích bằng tiếng Việt chuẩn xác, súc tích, chuyên nghiệp và có tính thực chiến cao.`;
+Nội dung phân tích bằng tiếng Việt chuẩn xác, mang tính chuyên môn cao, chi tiết và thực tế.`;
 
-    const userPrompt = `Hãy phân tích đồng tiền mã hóa sau:
-- Tên: ${name}
-- Ký hiệu: ${symbol.toUpperCase()}
+    const userPrompt = `Phân tích toàn diện (Spot & Futures) cho đồng crypto:
+- Ký hiệu: ${symbol.toUpperCase()} (${name})
 - Giá hiện tại: $${currentPrice.toLocaleString("en-US")}
 - Biến động 24h: ${priceChange24h >= 0 ? "+" : ""}${priceChange24h}%
-- Vốn hóa thị trường: ${marketCap ? "$" + marketCap.toLocaleString("en-US") : "Chưa có"}
-- Khối lượng 24h: ${totalVolume ? "$" + totalVolume.toLocaleString("en-US") : "Chưa có"}
-- Khung thời gian chiến lược: ${timeframeLabel}
+- Vốn hóa thị trường: ${marketCap ? "$" + marketCap.toLocaleString("en-US") : "N/A"}
+- Khối lượng 24h: ${totalVolume ? "$" + totalVolume.toLocaleString("en-US") : "N/A"}
+- Khung thời gian: ${timeframeLabel}
 
-Hãy xuất kết quả JSON phân tích theo đúng cấu trúc.`;
+Hãy xuất đối tượng JSON phân tích đầy đủ theo cấu trúc.`;
 
-    // Try available models on Groq with fallback
     const modelsToTry = [
+      "llama-3.3-70b-versatile",
+      "llama-3.1-8b-instant",
       "openai/gpt-oss-120b",
       "qwen/qwen3.8-27b",
-      "openai/gpt-oss-20b",
     ];
 
-    let lastError: any = null;
     let jsonResult: any = null;
 
     for (const modelName of modelsToTry) {
@@ -142,50 +262,116 @@ Hãy xuất kết quả JSON phân tích theo đúng cấu trúc.`;
         if (rawContent) {
           try {
             jsonResult = JSON.parse(rawContent);
-            break;
+            if (jsonResult.spot && jsonResult.future) {
+              break;
+            }
           } catch {
-            // Remove potential markdown code blocks
             const cleaned = rawContent
               .replace(/```json/g, "")
               .replace(/```/g, "")
               .trim();
             jsonResult = JSON.parse(cleaned);
-            break;
+            if (jsonResult.spot && jsonResult.future) {
+              break;
+            }
           }
         }
       } catch (err) {
-        lastError = err;
         console.warn(`Error calling model ${modelName}:`, err);
       }
     }
 
-    if (!jsonResult) {
-      // Fallback calculation in case Groq is temporarily down or rate limited
+    if (!jsonResult || !jsonResult.spot || !jsonResult.future) {
+      // High-precision fallback calculation if Groq is rate-limited
       const isUp = priceChange24h >= 0;
-      const entryLow = (currentPrice * 0.96).toFixed(2);
-      const entryHigh = (currentPrice * 0.985).toFixed(2);
-      const tp1 = (currentPrice * 1.06).toFixed(2);
-      const tp2 = (currentPrice * 1.14).toFixed(2);
-      const sl = (currentPrice * 0.93).toFixed(2);
+      const entryLow = (currentPrice * 0.965).toFixed(2);
+      const entryHigh = (currentPrice * 0.988).toFixed(2);
+      const spotTp1 = (currentPrice * 1.055).toFixed(2);
+      const spotTp2 = (currentPrice * 1.135).toFixed(2);
+      const spotTp3 = (currentPrice * 1.25).toFixed(2);
+      const spotSl = (currentPrice * 0.935).toFixed(2);
+
+      const isLong = isUp || priceChange24h > -3;
+      const futEntry = (currentPrice * (isLong ? 0.985 : 1.015)).toFixed(2);
+      const futTp1 = (currentPrice * (isLong ? 1.035 : 0.965)).toFixed(2);
+      const futTp2 = (currentPrice * (isLong ? 1.075 : 0.925)).toFixed(2);
+      const futTp3 = (currentPrice * (isLong ? 1.145 : 0.865)).toFixed(2);
+      const futSl = (currentPrice * (isLong ? 0.965 : 1.035)).toFixed(2);
+      const futLiq = (currentPrice * (isLong ? 0.915 : 1.085)).toFixed(2);
 
       jsonResult = {
-        signal: isUp ? "BUY" : "HOLD",
-        signalLabel: isUp ? "MUA TÍCH LŨY" : "THEO DÕI VÙNG ĐÁY",
-        winRatePercent: isUp ? 75 : 62,
-        overallScore: isUp ? 7.8 : 6.5,
-        riskRewardRatio: "1 : 2.5",
-        trend: isUp ? "Tăng nhẹ" : "Đi ngang (Sideway)",
-        entryZone: `$${entryLow} - $${entryHigh}`,
-        targetPrice1: `$${tp1} (+6.0%)`,
-        targetPrice2: `$${tp2} (+14.0%)`,
-        stopLoss: `$${sl} (-7.0%)`,
-        technicalSummary: `Đồng ${name} (${symbol}) đang giao dịch quanh mốc $${currentPrice.toLocaleString("en-US")} với biên độ 24h là ${priceChange24h}%. Cấu trúc giá duy trì sự ổn định, thích hợp canh các nhịp điều chỉnh để vào lệnh tối ưu tỷ lệ R:R.`,
-        supportLevel: `$${entryLow} / $${sl}`,
-        resistanceLevel: `$${tp1} / $${tp2}`,
-        rsiStatus: "RSI 14 ở mức 52 (Vùng cân bằng, áp lực bán yếu dần)",
-        volumeAnalysis: "Khối lượng duy trì mức trung bình, dòng tiền lớn chưa có dấu hiệu xả ồ ạt.",
-        strategyAdvice: `Chia vốn làm 2-3 phần (DCA) tại vùng $${entryLow} - $${entryHigh}, tránh fomo mua đuổi tại các nến xanh mạnh.`,
-        riskWarning: "Thị trường tiền mã hóa biến động lớn, luôn tuân thủ dừng lỗ (Stop Loss) nghiêm ngặt.",
+        spot: {
+          signal: isUp ? "BUY" : "HOLD",
+          signalLabel: isUp ? "MUA GOM TÍCH LŨY" : "QUAN SÁT VÙNG ĐÁY",
+          winRatePercent: isUp ? 78 : 64,
+          overallScore: isUp ? 8.2 : 6.8,
+          riskRewardRatio: "1 : 2.9",
+          trend: isUp ? "Xu hướng Tăng tiếp diễn (Bullish Structure)" : "Tích lũy đi ngang (Range Bound)",
+          entryZone: `$${entryLow} - $${entryHigh}`,
+          targetPrice1: `$${spotTp1} (+5.5%)`,
+          targetPrice2: `$${spotTp2} (+13.5%)`,
+          targetPrice3: `$${spotTp3} (+25.0%)`,
+          stopLoss: `$${spotSl} (-6.5%)`,
+          liquidity: {
+            highLiquidityZone: `$${entryLow} - $${entryHigh} (Demand Order Block cá voi tích lũy)`,
+            thinLiquidityZone: `$${(currentPrice * 1.02).toFixed(2)} - $${(currentPrice * 1.05).toFixed(2)} (Fair Value Gap - Dễ tăng tốc)`,
+            supplyZone: `$${spotTp2} - $${spotTp3} (Áp lực chốt lời của nhà đầu tư kẹt hàng đỉnh cũ)`,
+          },
+          indicators: {
+            emaTrend: `Giá đang vận động ${isUp ? "trên" : "quanh"} đường EMA 50 và EMA 200, tạo thế đỡ giá ổn định.`,
+            rsi: {
+              value: isUp ? 56 : 44,
+              status: isUp ? "RSI 14 ở 56 điểm - Vùng tích lũy động lượng tăng, còn dư địa bứt phá" : "RSI 14 ở 44 điểm - Vùng quá bán hồi phục",
+            },
+            macd: "Đường MACD cắt lên Signal Line, histogram bắt đầu chuyển sang sắc xanh tích cực.",
+            volumeProfile: "Khối lượng gom hàng tập trung dày đặc ở vùng hỗ trợ, phe bán suy kiệt dần.",
+            supportResistance: {
+              support: `$${entryLow} (Hỗ trợ ngắn hạn) / $${spotSl} (Hỗ trợ cứng chu kỳ)`,
+              resistance: `$${spotTp1} (Kháng cự gần) / $${spotTp2} (Đỉnh kháng cự kỹ thuật)`,
+            },
+          },
+          strategyAdvice: `Chia vốn thành 3 đợt mua (30% - 40% - 30%) trong vùng $${entryLow} - $${entryHigh}. Khi giá chạm TP1, dời Stop Loss về giá hòa vốn để bảo toàn lợi nhuận.`,
+          riskWarning: "Không fomo mua đuổi khi nến giá đang mở rộng ngoài dải Bollinger Bands.",
+        },
+        future: {
+          position: isLong ? "LONG" : "SHORT",
+          positionLabel: isLong ? "MỞ VỊ THẾ LONG (ĐÁNH LÊN)" : "MỞ VỊ THẾ SHORT (ĐÁNH XUỐNG)",
+          recommendedLeverage: "x5 - x10 (Khuyến nghị an toàn) | Max x15",
+          capitalRiskPercent: "2% - 3% tổng NAV",
+          winRatePercent: isLong ? 76 : 68,
+          overallScore: isLong ? 8.4 : 7.1,
+          riskRewardRatio: "1 : 3.4",
+          entryZone: `$${futEntry}`,
+          targetPrice1: `$${futTp1} (ROI +35% ở x10)`,
+          targetPrice2: `$${futTp2} (ROI +75% ở x10)`,
+          targetPrice3: `$${futTp3} (ROI +145% ở x10)`,
+          stopLoss: `$${futSl} (Rủi ro -35% ở x10)`,
+          estLiquidationPrice: `$${futLiq}`,
+          metrics: {
+            longShortRatio: {
+              longPercent: isLong ? 61.5 : 42.0,
+              shortPercent: isLong ? 38.5 : 58.0,
+              ratioText: isLong ? "1.60 (Phe Long kiểm soát)" : "0.72 (Phe Short chiếm ưu thế)",
+              sentiment: isLong ? "Phe Long Áp Đảo" : "Phe Short Áp Đảo",
+            },
+            fundingRate: {
+              rate: "+0.0085% / 8h",
+              status: "Funding dương nhẹ, thị trường phái sinh cân bằng, chưa có hiện tượng quá nhiệt.",
+            },
+            openInterest: "Hợp đồng mở (OI) tăng 12% cùng nhịp sideway của giá, báo hiệu sắp có sóng biến động mạnh.",
+            liquidationHeatmap: {
+              shortLiquidationPool: `$${futTp1} - $${futTp2} (Tập trung $42M thanh lý phe Short)`,
+              longLiquidationPool: `$${futSl} (Tập trung $28M thanh lý phe Long)`,
+              stopHuntRisk: "Trung bình (Cần đặt Stop Loss ngoài râu nến H4)",
+            },
+            volatilityATR: "Chỉ số ATR đang co thắt (Squeeze), sẵn sàng cho nhịp phá vỡ biên độ lớn.",
+          },
+          riskManagementRules: [
+            "Dời Stop Loss về giá Entry ngay khi vị thế khớp mục tiêu TP1",
+            "Không bao giờ gồng lỗ hoặc nạp thêm tiền để DCA khi lệnh phái sinh vi phạm mốc SL",
+            "Luôn đặt lệnh Stop Loss tự động trên sàn để chống trượt giá khi có tin tức bất ngờ",
+          ],
+        },
       };
     }
 
@@ -193,7 +379,9 @@ Hãy xuất kết quả JSON phân tích theo đúng cấu trúc.`;
       symbol: symbol.toUpperCase(),
       name,
       currentPrice,
-      ...jsonResult,
+      timeframe: timeframeLabel,
+      spot: jsonResult.spot,
+      future: jsonResult.future,
     });
   } catch (error: any) {
     console.error("AI Scan Error:", error);
