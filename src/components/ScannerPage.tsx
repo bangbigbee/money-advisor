@@ -979,15 +979,15 @@ export function ScannerPage({
                         </div>
 
                         <div className="p-2.5 rounded-lg bg-white dark:bg-[#0b0e1b] border border-slate-200 dark:border-indigo-950/60">
-                          <span className="text-[10px] text-amber-600 dark:text-amber-400">Fibo Key Level:</span>
-                          <div className="font-mono font-bold text-amber-700 dark:text-amber-300 mt-0.5 truncate">
+                          <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">Fibo Key Level:</span>
+                          <div className="font-mono font-bold text-amber-700 dark:text-amber-300 mt-0.5 text-xs break-words leading-snug">
                             {waveData.keyFibonacciLevel}
                           </div>
                         </div>
 
                         <div className="p-2.5 rounded-lg bg-white dark:bg-[#0b0e1b] border border-slate-200 dark:border-indigo-950/60">
-                          <span className="text-[10px] text-emerald-600 dark:text-emerald-400">Mục tiêu mở rộng:</span>
-                          <div className="font-mono font-bold text-emerald-700 dark:text-emerald-300 mt-0.5 truncate">
+                          <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">Mục tiêu mở rộng:</span>
+                          <div className="font-mono font-bold text-emerald-700 dark:text-emerald-300 mt-0.5 text-xs break-words leading-snug">
                             {waveData.projectedTargetWave}
                           </div>
                         </div>
@@ -1115,7 +1115,7 @@ export function ScannerPage({
                         {advancedData.ichimoku.tenkanKijunCross}
                       </span>
                     </div>
-                    <div className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                    <div className="text-xs font-bold text-slate-900 dark:text-white break-words leading-snug">
                       {advancedData.ichimoku.cloudSignal}
                     </div>
                     <div className="text-[10px] text-slate-500 dark:text-slate-400">
@@ -1249,7 +1249,7 @@ export function ScannerPage({
                     <div className="text-xs font-bold text-amber-700 dark:text-amber-300">
                       {coinglassData.fearGreedIndex.label}
                     </div>
-                    <div className="text-[10px] text-cyan-600 dark:text-cyan-400 font-mono truncate">
+                    <div className="text-[10px] text-cyan-600 dark:text-cyan-400 font-mono break-words leading-tight">
                       {coinglassData.squeezeMomentum}
                     </div>
                   </div>
