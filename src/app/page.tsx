@@ -5,7 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { PortfolioOverview } from "@/components/PortfolioOverview";
 import { AssetTable } from "@/components/AssetTable";
 import { AddAssetModal } from "@/components/AddAssetModal";
-import { ScanModal } from "@/components/ScanModal";
+import { ScannerPage } from "@/components/ScannerPage";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { CryptoList } from "@/components/CryptoList";
 import { GoldForexList } from "@/components/GoldForexList";
@@ -23,8 +23,6 @@ import {
   RefreshCw,
   Sparkles,
   Scan,
-  Crown,
-  Zap,
 } from "lucide-react";
 
 export default function Home() {
@@ -38,8 +36,6 @@ export default function Home() {
   // Modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [addModalPrefill, setAddModalPrefill] = useState<any>(null);
-  const [isScanModalOpen, setIsScanModalOpen] = useState(false);
-  const [selectedScanCoin, setSelectedScanCoin] = useState<CryptoItem | null>(null);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
 
   const { role, remainingScans } = useAuth();
@@ -47,7 +43,7 @@ export default function Home() {
 
   const loadCryptoData = async () => {
     setIsLoading(true);
-    const data = await fetchTopCryptos();
+    const data = await fetchTopCryptos(100);
     setCryptos(data);
     setLastUpdated(new Date().toLocaleTimeString("vi-VN"));
     setIsLoading(false);
@@ -57,9 +53,8 @@ export default function Home() {
     loadCryptoData();
   }, []);
 
-  const handleOpenScanWithCoin = (coin: CryptoItem) => {
-    setSelectedScanCoin(coin);
-    setIsScanModalOpen(true);
+  const handleOpenScanWithCoin = (_coin: CryptoItem) => {
+    setActiveTab("scan");
   };
 
   const handleOpenAddWithPrefill = (prefill?: { symbol: string; name: string; price: number }) => {
@@ -88,66 +83,70 @@ export default function Home() {
             setAddModalPrefill(null);
             setIsAddModalOpen(true);
           }}
-          onOpenScanModal={() => {
-            setSelectedScanCoin(null);
-            setIsScanModalOpen(true);
-          }}
           onOpenUpgradeModal={() => setIsUpgradeModalOpen(true)}
         />
 
         {/* Main Content Area */}
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
           {/* Market Status Ticker & Banner */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-zinc-900/60 to-zinc-900/40 border border-emerald-500/20 shadow-lg">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                <Sparkles className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="text-sm font-semibold text-zinc-100 flex items-center gap-2">
-                  MoneyAdvisor Pro
-                  <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-mono">
-                    {role === "ADMIN" ? "ADMIN 👑" : `Gói ${role}`}
-                  </span>
+          {activeTab !== "scan" && (
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-zinc-900/60 to-zinc-900/40 border border-emerald-500/20 shadow-lg">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  <Sparkles className="w-5 h-5" />
                 </div>
-                <p className="text-xs text-zinc-400">
-                  Tự động định giá danh mục đầu tư từ CoinGecko, Vàng SJC & Quét AI phân tích kỹ thuật
-                </p>
+                <div>
+                  <div className="text-sm font-semibold text-zinc-100 flex items-center gap-2">
+                    MoneyAdvisor Pro
+                    <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-mono">
+                      {role === "ADMIN" ? "ADMIN 👑" : `Gói ${role}`}
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-400">
+                    Tự động định giá danh mục từ CoinGecko ({cryptos.length} coins), Vàng SJC & Quét AI phân tích kỹ thuật
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2.5 self-end sm:self-center">
+                {/* Scan Trigger Button on Banner with Circular Quota Counter */}
+                <button
+                  onClick={() => setActiveTab("scan")}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-cyan-500/20 via-emerald-500/20 to-teal-500/20 hover:from-cyan-500/30 hover:to-teal-500/30 text-cyan-300 text-xs font-bold rounded-lg border border-cyan-500/40 transition cursor-pointer shadow-sm"
+                >
+                  <Scan className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Vào Trang Quét AI</span>
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-cyan-400 text-zinc-950 text-[10px] font-black font-mono">
+                    {isUnlimited ? "∞" : remainingScans}
+                  </span>
+                </button>
+
+                {lastUpdated && (
+                  <span className="text-xs text-zinc-400 font-mono hidden md:inline">
+                    Cập nhật: {lastUpdated}
+                  </span>
+                )}
+
+                <button
+                  onClick={loadCryptoData}
+                  disabled={isLoading}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium rounded-lg border border-zinc-700 transition cursor-pointer disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
+                  Làm mới
+                </button>
               </div>
             </div>
+          )}
 
-            <div className="flex items-center gap-2.5 self-end sm:self-center">
-              {/* Scan Trigger Button on Banner with Circular Quota Counter */}
-              <button
-                onClick={() => {
-                  setSelectedScanCoin(null);
-                  setIsScanModalOpen(true);
-                }}
-                className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-cyan-500/20 via-emerald-500/20 to-teal-500/20 hover:from-cyan-500/30 hover:to-teal-500/30 text-cyan-300 text-xs font-bold rounded-lg border border-cyan-500/40 transition cursor-pointer shadow-sm"
-              >
-                <Scan className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Quét AI Kỹ thuật</span>
-                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-cyan-400 text-zinc-950 text-[10px] font-black font-mono">
-                  {isUnlimited ? "∞" : remainingScans}
-                </span>
-              </button>
-
-              {lastUpdated && (
-                <span className="text-xs text-zinc-400 font-mono hidden md:inline">
-                  Cập nhật: {lastUpdated}
-                </span>
-              )}
-
-              <button
-                onClick={loadCryptoData}
-                disabled={isLoading}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium rounded-lg border border-zinc-700 transition cursor-pointer disabled:opacity-50"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
-                Làm mới
-              </button>
-            </div>
-          </div>
+          {/* Tab: Quét AI Chuyên sâu (Dedicated Full-screen Scanner View) */}
+          {activeTab === "scan" && (
+            <ScannerPage
+              cryptos={cryptos}
+              onOpenAddAssetModal={handleOpenAddWithPrefill}
+              onOpenUpgradeModal={() => setIsUpgradeModalOpen(true)}
+            />
+          )}
 
           {/* Tab 1: Tổng quan (Dashboard) */}
           {activeTab === "dashboard" && (
@@ -212,10 +211,7 @@ export default function Home() {
                   cryptos={cryptos}
                   onSelectSymbol={(sym) => setSelectedChartSymbol(sym)}
                   onScanCoin={handleOpenScanWithCoin}
-                  onOpenScanModal={() => {
-                    setSelectedScanCoin(null);
-                    setIsScanModalOpen(true);
-                  }}
+                  onOpenScanModal={() => setActiveTab("scan")}
                 />
                 <GoldForexList
                   items={goldForex}
@@ -240,10 +236,7 @@ export default function Home() {
                 cryptos={cryptos}
                 onSelectSymbol={(sym) => setSelectedChartSymbol(sym)}
                 onScanCoin={handleOpenScanWithCoin}
-                onOpenScanModal={() => {
-                  setSelectedScanCoin(null);
-                  setIsScanModalOpen(true);
-                }}
+                onOpenScanModal={() => setActiveTab("scan")}
               />
             </div>
           )}
@@ -293,14 +286,6 @@ export default function Home() {
             setAddModalPrefill(null);
           }}
           initialData={addModalPrefill}
-        />
-        <ScanModal
-          isOpen={isScanModalOpen}
-          onClose={() => setIsScanModalOpen(false)}
-          cryptos={cryptos}
-          initialSelectedCoin={selectedScanCoin}
-          onOpenAddAssetModal={handleOpenAddWithPrefill}
-          onOpenUpgradeModal={() => setIsUpgradeModalOpen(true)}
         />
         <UpgradeModal
           isOpen={isUpgradeModalOpen}

@@ -14,6 +14,7 @@ import {
   Scan,
   Crown,
   Zap,
+  Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -21,7 +22,6 @@ interface NavbarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   onOpenAddModal: () => void;
-  onOpenScanModal?: () => void;
   onOpenUpgradeModal?: () => void;
 }
 
@@ -29,7 +29,6 @@ export function Navbar({
   activeTab,
   setActiveTab,
   onOpenAddModal,
-  onOpenScanModal,
   onOpenUpgradeModal,
 }: NavbarProps) {
   const { user, isLoading, role, remainingScans, signInWithGoogle, signOut } = useAuth();
@@ -37,6 +36,7 @@ export function Navbar({
 
   const navItems = [
     { id: "dashboard", label: "Tổng quan", icon: Wallet },
+    { id: "scan", label: "Quét AI", icon: Scan, isSpecial: true },
     { id: "crypto", label: "Crypto Market", icon: Coins },
     { id: "forex-gold", label: "Vàng & Ngoại hối", icon: TrendingUp },
     { id: "portfolio", label: "Danh mục đầu tư", icon: Layers },
@@ -78,6 +78,28 @@ export function Navbar({
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
+
+              if (item.isSpecial) {
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-sm font-bold transition-all cursor-pointer border ${
+                      isActive
+                        ? "bg-gradient-to-r from-cyan-500/30 via-emerald-500/20 to-teal-500/20 text-cyan-300 border-cyan-500/50 shadow-md shadow-cyan-500/10"
+                        : "text-cyan-400 hover:text-cyan-300 hover:bg-cyan-950/30 border-cyan-500/20"
+                    }`}
+                  >
+                    <Icon className="h-4 w-4 animate-pulse text-cyan-400" />
+                    <span>{item.label}</span>
+                    {/* Circular Quota Indicator */}
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-cyan-400 text-zinc-950 text-[10px] font-black font-mono shadow-sm">
+                      {isUnlimited ? "∞" : remainingScans}
+                    </span>
+                  </button>
+                );
+              }
+
               return (
                 <button
                   key={item.id}
@@ -97,21 +119,21 @@ export function Navbar({
 
           {/* Actions & Auth */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* AI Scan Button with Circular Remaining Quota Badge */}
-            {onOpenScanModal && (
-              <button
-                onClick={onOpenScanModal}
-                className="relative flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500/20 via-emerald-500/20 to-teal-500/20 hover:from-cyan-500/30 hover:to-teal-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-bold shadow-md shadow-cyan-500/10 transition cursor-pointer"
-              >
-                <Scan className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-                <span className="hidden sm:inline">Quét AI</span>
-                
-                {/* Circular Quota Indicator */}
-                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-cyan-400 text-zinc-950 text-[10px] font-black font-mono shadow-sm">
-                  {isUnlimited ? "∞" : remainingScans}
-                </span>
-              </button>
-            )}
+            {/* Mobile Scan Button */}
+            <button
+              onClick={() => setActiveTab("scan")}
+              className={`md:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer border ${
+                activeTab === "scan"
+                  ? "bg-cyan-500/30 text-cyan-300 border-cyan-500/50"
+                  : "bg-cyan-500/10 text-cyan-400 border-cyan-500/30"
+              }`}
+            >
+              <Scan className="w-3.5 h-3.5" />
+              <span>Quét AI</span>
+              <span className="w-4 h-4 rounded-full bg-cyan-400 text-zinc-950 text-[9px] font-black flex items-center justify-center">
+                {isUnlimited ? "∞" : remainingScans}
+              </span>
+            </button>
 
             {/* Quick Add Asset Button */}
             <button
@@ -200,6 +222,17 @@ export function Navbar({
                         <span className="font-bold">Nâng cấp Phân cấp</span>
                       </button>
                     )}
+
+                    <button
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        setActiveTab("scan");
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-zinc-800 text-zinc-300 transition text-left cursor-pointer"
+                    >
+                      <Scan className="w-4 h-4 text-cyan-400" />
+                      <span>Trang Quét AI</span>
+                    </button>
 
                     <button
                       onClick={() => {
