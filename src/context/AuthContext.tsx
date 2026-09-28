@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const remainingScans = isUnlimited ? 999 : Math.max(0, scansLimit - scansUsed);
   const canScan = isUnlimited || remainingScans > 0;
 
-  // Initialize or update user role and scans
+  // Initialize or update user role and scans from Supabase Database
   useEffect(() => {
     if (!user) {
       // Guest user: check guest storage or default to STARTER with 3 scans
@@ -68,38 +68,88 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const email = user.email?.toLowerCase().trim() || "";
     const isAdmin = email === ADMIN_EMAIL.toLowerCase();
 
-    // Key for local persistence
-    const userKey = `user_tier_${user.id}`;
-    const savedTier = localStorage.getItem(userKey);
+    async function syncAndFetchProfile() {
+      if (isAdmin) {
+        setRoleState("ADMIN");
+        setScansUsed(0);
+      }
 
-    if (isAdmin) {
-      setRoleState("ADMIN");
-      setScansUsed(0);
-    } else if (savedTier) {
       try {
-        const parsed = JSON.parse(savedTier);
-        setRoleState(parsed.role || "STARTER");
-        setScansUsed(parsed.scansUsed || 0);
-      } catch {
+        const res = await fetch("/api/user/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: user?.id,
+            email: user?.email,
+            fullName:
+              user?.user_metadata?.full_name ||
+              user?.user_metadata?.name ||
+              email.split("@")[0],
+            avatarUrl:
+              user?.user_metadata?.avatar_url || user?.user_metadata?.picture,
+            role: isAdmin ? "ADMIN" : "STARTER",
+          }),
+        });
+
+        if (res.ok) {
+          const { profile } = await res.json();
+          if (profile) {
+            setRoleState(profile.role || (isAdmin ? "ADMIN" : "STARTER"));
+            setScansUsed(Number(profile.scans_used) || 0);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn("Could not sync profile to Supabase API, fallback to local:", err);
+      }
+
+      // Fallback local storage
+      const userKey = `user_tier_${user?.id}`;
+      const savedTier = localStorage.getItem(userKey);
+      if (isAdmin) {
+        setRoleState("ADMIN");
+        setScansUsed(0);
+      } else if (savedTier) {
+        try {
+          const parsed = JSON.parse(savedTier);
+          setRoleState(parsed.role || "STARTER");
+          setScansUsed(parsed.scansUsed || 0);
+        } catch {
+          setRoleState("STARTER");
+          setScansUsed(0);
+        }
+      } else {
         setRoleState("STARTER");
         setScansUsed(0);
       }
-    } else {
-      // Default to STARTER for new users
-      setRoleState("STARTER");
-      setScansUsed(0);
-      localStorage.setItem(userKey, JSON.stringify({ role: "STARTER", scansUsed: 0 }));
     }
+
+    syncAndFetchProfile();
   }, [user]);
 
-  // Save changes to local storage when scansUsed or role changes
-  const persistUserData = (newRole: UserRole, newScansUsed: number) => {
+  // Save changes to local storage & Supabase when scansUsed or role changes
+  const persistUserData = async (newRole: UserRole, newScansUsed: number) => {
     if (user) {
       const userKey = `user_tier_${user.id}`;
       localStorage.setItem(
         userKey,
         JSON.stringify({ role: newRole, scansUsed: newScansUsed })
       );
+
+      try {
+        await fetch("/api/user/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: user.id,
+            email: user.email,
+            role: newRole,
+            scansUsed: newScansUsed,
+          }),
+        });
+      } catch (e) {
+        console.warn("Async Supabase sync failed:", e);
+      }
     } else {
       localStorage.setItem("moneyadvisor_guest_scans", newScansUsed.toString());
     }
