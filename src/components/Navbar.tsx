@@ -8,13 +8,9 @@ import {
   Layers,
   PlusCircle,
   LogOut,
-  User as UserIcon,
-  Cloud,
   ChevronDown,
   Scan,
   Crown,
-  Zap,
-  Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -52,29 +48,29 @@ export function Navbar({
   const isUnlimited = role === "ADMIN" || role === "ULTRA";
 
   return (
-    <header className="sticky top-0 z-40 backdrop-blur-xl bg-zinc-950/80 border-b border-zinc-800/80 text-zinc-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 gap-3 sm:gap-4">
-          {/* Logo */}
+    <header className="sticky top-0 z-40 backdrop-blur-xl bg-zinc-950/85 border-b border-zinc-800/80 text-zinc-100">
+      <div className="max-w-[1720px] w-full mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 gap-4">
+          {/* Logo & Brand - Strictly 1 Horizontal Line */}
           <div
             onClick={() => setActiveTab("dashboard")}
-            className="flex items-center gap-3 cursor-pointer select-none"
+            className="flex items-center gap-3 cursor-pointer select-none shrink-0"
           >
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 shrink-0">
               <TrendingUp className="h-5 w-5 text-white" />
             </div>
-            <div>
-              <span className="text-lg font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+            <div className="flex items-center gap-2 whitespace-nowrap">
+              <span className="text-lg font-black tracking-tight bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
                 MoneyAdvisor
               </span>
-              <span className="hidden sm:inline-block ml-2 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full">
+              <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full font-mono">
                 AI & Cloud
               </span>
             </div>
           </div>
 
-          {/* Navigation Links */}
-          <nav className="hidden md:flex items-center space-x-1">
+          {/* Navigation Links - Horizontal Row */}
+          <nav className="hidden md:flex items-center space-x-1.5 whitespace-nowrap">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -84,10 +80,10 @@ export function Navbar({
                   <button
                     key={item.id}
                     onClick={() => setActiveTab(item.id)}
-                    className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-sm font-bold transition-all cursor-pointer border ${
+                    className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border whitespace-nowrap ${
                       isActive
                         ? "bg-gradient-to-r from-cyan-500/30 via-emerald-500/20 to-teal-500/20 text-cyan-300 border-cyan-500/50 shadow-md shadow-cyan-500/10"
-                        : "text-cyan-400 hover:text-cyan-300 hover:bg-cyan-950/30 border-cyan-500/20"
+                        : "text-cyan-400 hover:text-cyan-300 hover:bg-cyan-950/30 border-cyan-500/25"
                     }`}
                   >
                     <Icon className="h-4 w-4 animate-pulse text-cyan-400" />
@@ -104,25 +100,25 @@ export function Navbar({
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
+                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
                     isActive
                       ? "bg-zinc-800/90 text-emerald-400 shadow-inner border border-zinc-700/60"
                       : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
-                  {item.label}
+                  <span>{item.label}</span>
                 </button>
               );
             })}
           </nav>
 
-          {/* Actions & Auth */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          {/* Right Actions & Auth - Strictly 1 Horizontal Line */}
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 whitespace-nowrap">
             {/* Mobile Scan Button */}
             <button
               onClick={() => setActiveTab("scan")}
-              className={`md:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer border ${
+              className={`md:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer border whitespace-nowrap ${
                 activeTab === "scan"
                   ? "bg-cyan-500/30 text-cyan-300 border-cyan-500/50"
                   : "bg-cyan-500/10 text-cyan-400 border-cyan-500/30"
@@ -138,7 +134,7 @@ export function Navbar({
             {/* Quick Add Asset Button */}
             <button
               onClick={onOpenAddModal}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs font-semibold shadow-md shadow-emerald-500/20 transition cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs font-bold shadow-md shadow-emerald-500/20 transition cursor-pointer whitespace-nowrap"
             >
               <PlusCircle className="h-4 w-4" />
               <span className="hidden sm:inline">Giao dịch mới</span>
@@ -149,38 +145,38 @@ export function Navbar({
             {isLoading ? (
               <div className="h-9 w-24 bg-zinc-800 animate-pulse rounded-xl" />
             ) : user ? (
-              /* User is Logged in */
+              /* User is Logged in - 1 Single Horizontal Row */
               <div className="relative">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center gap-2 p-1.5 pr-2.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition cursor-pointer"
+                  className="flex items-center gap-2 p-1.5 pr-2.5 rounded-xl bg-zinc-900/90 border border-zinc-800 hover:border-zinc-700 transition cursor-pointer whitespace-nowrap"
                 >
                   {userAvatar ? (
                     <img
                       src={userAvatar}
                       alt={userName}
-                      className="w-6 h-6 rounded-full object-cover border border-emerald-500/40"
+                      className="w-6 h-6 rounded-full object-cover border border-emerald-500/40 shrink-0"
                     />
                   ) : (
-                    <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold">
+                    <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold shrink-0">
                       {userName.charAt(0).toUpperCase()}
                     </div>
                   )}
 
-                  <span className="text-xs font-medium text-zinc-200 hidden sm:inline max-w-[90px] truncate">
+                  <span className="text-xs font-bold text-zinc-200 hidden sm:inline max-w-[110px] truncate">
                     {userName}
                   </span>
 
-                  {/* Tier Badge in Navbar */}
+                  {/* Tier Badge */}
                   <span
-                    className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
+                    className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider ${
                       role === "ADMIN"
                         ? "bg-rose-500/20 text-rose-400 border border-rose-500/40"
                         : role === "ULTRA"
                         ? "bg-amber-500/20 text-amber-400 border border-amber-500/40"
                         : role === "PRO"
                         ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
-                        : "bg-zinc-800 text-zinc-400"
+                        : "bg-zinc-800 text-zinc-300 border border-zinc-700"
                     }`}
                   >
                     {role === "ADMIN" ? "👑 ADMIN" : role}
@@ -192,7 +188,7 @@ export function Navbar({
                 {/* Dropdown Menu */}
                 {showUserMenu && (
                   <div
-                    className="absolute right-0 mt-2 w-60 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl p-2 text-xs text-zinc-200 z-50 animate-in fade-in duration-150"
+                    className="absolute right-0 mt-2 w-64 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl p-2 text-xs text-zinc-200 z-50 animate-in fade-in duration-150"
                     onMouseLeave={() => setShowUserMenu(false)}
                   >
                     <div className="px-3 py-2 border-b border-zinc-800 mb-1">
@@ -262,7 +258,7 @@ export function Navbar({
               /* User is Guest / Not Logged in */
               <button
                 onClick={signInWithGoogle}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-100 text-xs font-medium shadow-sm transition cursor-pointer"
+                className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-100 text-xs font-semibold shadow-sm transition cursor-pointer whitespace-nowrap"
               >
                 {/* Google "G" SVG Icon */}
                 <svg className="w-4 h-4" viewBox="0 0 24 24">
