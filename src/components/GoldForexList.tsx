@@ -16,26 +16,26 @@ export function GoldForexList({ items, onSelectSymbol }: GoldForexListProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Bảng Giá Vàng */}
-      <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-5 backdrop-blur-md">
+      <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-4 sm:p-5 backdrop-blur-md">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
-              <Award className="w-5 h-5" />
+            <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0">
+              <Award className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-zinc-100">Bảng giá Vàng (Gold Rate)</h2>
-              <p className="text-xs text-zinc-400">SJC, PNJ và Giá Vàng Thế Giới (Spot Gold)</p>
+              <h2 className="text-sm sm:text-base font-semibold text-zinc-100">Bảng giá Vàng (Gold Rate)</h2>
+              <p className="text-[11px] sm:text-xs text-zinc-400">SJC, PNJ và Giá Vàng Thế Giới (Spot Gold)</p>
             </div>
           </div>
-          <span className="text-[11px] font-medium text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
-            Cập nhật hôm nay
+          <span className="text-[10px] sm:text-[11px] font-medium text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20 whitespace-nowrap">
+            Hôm nay
           </span>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+        <div className="overflow-x-auto scrollbar-thin">
+          <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
             <thead>
-              <tr className="border-b border-zinc-800 text-zinc-400 text-xs uppercase tracking-wider">
+              <tr className="border-b border-zinc-800 text-zinc-400 text-[10px] sm:text-xs uppercase tracking-wider">
                 <th className="pb-3 font-medium">Loại Vàng</th>
                 <th className="pb-3 font-medium text-right">Mua vào</th>
                 <th className="pb-3 font-medium text-right">Bán ra</th>
@@ -48,19 +48,19 @@ export function GoldForexList({ items, onSelectSymbol }: GoldForexListProps) {
                 <tr key={item.code} className="hover:bg-zinc-800/40 transition">
                   <td className="py-3.5">
                     <div className="font-semibold text-zinc-100">{item.name}</div>
-                    <div className="text-xs text-zinc-400">{item.unit}</div>
+                    <div className="text-[11px] text-zinc-400">{item.unit}</div>
                   </td>
-                  <td className="py-3.5 text-right font-medium text-emerald-400">
+                  <td className="py-3.5 text-right font-medium text-emerald-400 font-mono">
                     {item.code === "XAU/USD"
                       ? `$${item.buyPrice.toLocaleString()}`
                       : `${(item.buyPrice / 1e6).toFixed(2)} tr`}
                   </td>
-                  <td className="py-3.5 text-right font-semibold text-zinc-100">
+                  <td className="py-3.5 text-right font-semibold text-zinc-100 font-mono">
                     {item.code === "XAU/USD"
                       ? `$${item.sellPrice.toLocaleString()}`
                       : `${(item.sellPrice / 1e6).toFixed(2)} tr`}
                   </td>
-                  <td className="py-3.5 text-right">
+                  <td className="py-3.5 text-right font-mono">
                     <span className="text-xs font-semibold text-emerald-400 inline-flex items-center gap-0.5">
                       <TrendingUp className="w-3 h-3" />+{item.change24h}%
                     </span>
@@ -84,26 +84,26 @@ export function GoldForexList({ items, onSelectSymbol }: GoldForexListProps) {
       </div>
 
       {/* Bảng Tỷ Giá Ngoại Tệ */}
-      <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-5 backdrop-blur-md">
+      <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-4 sm:p-5 backdrop-blur-md">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
-              <DollarSign className="w-5 h-5" />
+            <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0">
+              <DollarSign className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-zinc-100">Tỷ giá Ngoại tệ (Forex)</h2>
-              <p className="text-xs text-zinc-400">Tỷ giá quy đổi với VNĐ tham khảo ngân hàng</p>
+              <h2 className="text-sm sm:text-base font-semibold text-zinc-100">Tỷ giá Ngoại tệ (Forex)</h2>
+              <p className="text-[11px] sm:text-xs text-zinc-400">Tỷ giá quy đổi với VNĐ tham khảo ngân hàng</p>
             </div>
           </div>
-          <span className="text-[11px] font-medium text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
-            Vietcombank / VCB
+          <span className="text-[10px] sm:text-[11px] font-medium text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20 whitespace-nowrap">
+            VCB
           </span>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+        <div className="overflow-x-auto scrollbar-thin">
+          <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
             <thead>
-              <tr className="border-b border-zinc-800 text-zinc-400 text-xs uppercase tracking-wider">
+              <tr className="border-b border-zinc-800 text-zinc-400 text-[10px] sm:text-xs uppercase tracking-wider">
                 <th className="pb-3 font-medium">Ngoại tệ</th>
                 <th className="pb-3 font-medium text-right">Mua vào (VNĐ)</th>
                 <th className="pb-3 font-medium text-right">Bán ra (VNĐ)</th>

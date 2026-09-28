@@ -51,6 +51,7 @@ export function ScannerPage({
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState<"market_cap" | "gainers" | "losers" | "volume">("market_cap");
   const [timeframe, setTimeframe] = useState<"short" | "medium" | "long">("medium");
+  const [mobileView, setMobileView] = useState<"analysis" | "coins">("analysis");
 
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
@@ -221,10 +222,37 @@ export function ScannerPage({
         </div>
       </div>
 
+      {/* Mobile Mode Switcher (Visible only on lg:hidden) */}
+      <div className="lg:hidden flex items-center p-1 bg-zinc-900 border border-zinc-800 rounded-2xl">
+        <button
+          onClick={() => setMobileView("analysis")}
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+            mobileView === "analysis"
+              ? "bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm"
+              : "text-zinc-400 hover:text-zinc-200"
+          }`}
+        >
+          <BarChart2 className="w-4 h-4 text-cyan-400" />
+          <span>Biểu đồ & AI ({selectedCoin?.symbol.toUpperCase() || "BTC"})</span>
+        </button>
+
+        <button
+          onClick={() => setMobileView("coins")}
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+            mobileView === "coins"
+              ? "bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm"
+              : "text-zinc-400 hover:text-zinc-200"
+          }`}
+        >
+          <Layers className="w-4 h-4 text-emerald-400" />
+          <span>Chọn Coin ({filteredCoins.length})</span>
+        </button>
+      </div>
+
       {/* Main Scanner Layout: Left Sidebar (Coins) + Right Canvas (Chart & AI Result) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Crypto Selector (4 cols on lg) */}
-        <div className="lg:col-span-4 space-y-4">
+        <div className={`lg:col-span-4 space-y-4 ${mobileView === "coins" ? "block" : "hidden lg:block"}`}>
           <div className="bg-zinc-900/70 border border-zinc-800/90 rounded-3xl p-4 sm:p-5 backdrop-blur-md space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-zinc-100 flex items-center gap-2">
@@ -302,6 +330,7 @@ export function ScannerPage({
                       setSelectedCoin(coin);
                       setScanResult(null);
                       setShowLimitReached(false);
+                      setMobileView("analysis");
                     }}
                     className={`flex items-center justify-between p-2.5 rounded-2xl border transition-all cursor-pointer ${
                       isSelected
@@ -351,7 +380,7 @@ export function ScannerPage({
         </div>
 
         {/* Right Column: Main Canvas with Chart & AI Analysis Result (8 cols on lg) */}
-        <div className="lg:col-span-8 space-y-6">
+        <div className={`lg:col-span-8 space-y-6 ${mobileView === "analysis" ? "block" : "hidden lg:block"}`}>
           {/* Selected Coin Action Header */}
           {selectedCoin && (
             <div className="bg-zinc-900/80 border border-zinc-800/90 rounded-3xl p-5 backdrop-blur-md space-y-4">

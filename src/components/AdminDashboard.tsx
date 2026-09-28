@@ -431,40 +431,40 @@ export function AdminDashboard() {
       </div>
 
       {/* User Management Table Section */}
-      <div className="bg-zinc-900/70 border border-zinc-800 rounded-3xl p-6 backdrop-blur-md space-y-5">
+      <div className="bg-zinc-900/70 border border-zinc-800 rounded-3xl p-4 sm:p-6 backdrop-blur-md space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <Users className="w-5 h-5 text-rose-400" />
+            <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+              <Users className="w-4 h-4 sm:w-5 sm:h-5 text-rose-400" />
               Quản lý Danh sách Người dùng & Phân cấp
             </h3>
-            <p className="text-xs text-zinc-400">
+            <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5">
               Xem chi tiết tài khoản, thay đổi quyền hạn gói và thiết lập lượt quét cho từng user
             </p>
           </div>
 
-          <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
             {/* Search Input */}
-            <div className="relative">
+            <div className="relative flex-1 sm:flex-initial min-w-[180px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
               <input
                 type="text"
                 placeholder="Tìm user hoặc email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 pr-4 py-1.5 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-white focus:outline-none focus:border-rose-500/60 w-52"
+                className="w-full pl-9 pr-4 py-1.5 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-white focus:outline-none focus:border-rose-500/60 sm:w-52"
               />
             </div>
 
             {/* Filter by Role */}
-            <div className="flex items-center bg-zinc-950 p-1 rounded-xl border border-zinc-800 text-xs">
+            <div className="flex items-center bg-zinc-950 p-1 rounded-xl border border-zinc-800 text-xs overflow-x-auto scrollbar-thin">
               {["ALL", "STARTER", "PRO", "ULTRA", "ADMIN"].map((r) => (
                 <button
                   key={r}
                   onClick={() => setRoleFilter(r)}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer ${
+                  className={`px-2 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-semibold transition cursor-pointer whitespace-nowrap ${
                     roleFilter === r
-                      ? "bg-zinc-800 text-rose-400 font-bold"
+                      ? "bg-zinc-800 text-rose-400 font-bold shadow-sm"
                       : "text-zinc-400 hover:text-zinc-200"
                   }`}
                 >
@@ -476,8 +476,8 @@ export function AdminDashboard() {
         </div>
 
         {/* Users Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-zinc-300">
+        <div className="overflow-x-auto scrollbar-thin">
+          <table className="w-full text-left text-xs text-zinc-300 whitespace-nowrap">
             <thead className="bg-zinc-950/60 text-zinc-400 uppercase text-[10px] tracking-wider border-b border-zinc-800">
               <tr>
                 <th className="py-3 px-4 font-semibold">Người dùng</th>

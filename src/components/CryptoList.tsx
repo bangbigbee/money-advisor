@@ -18,39 +18,39 @@ export function CryptoList({
   onOpenScanModal,
 }: CryptoListProps) {
   return (
-    <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-5 backdrop-blur-md">
+    <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-4 sm:p-5 backdrop-blur-md">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div>
-          <h2 className="text-base font-semibold text-zinc-100 flex items-center gap-2">
+          <h2 className="text-sm sm:text-base font-semibold text-zinc-100 flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
             Bảng giá Tiền mã hóa (Top Cryptos)
           </h2>
-          <p className="text-xs text-zinc-400 mt-0.5">
+          <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5">
             Dữ liệu thời gian thực theo dõi biến động 24h & Tích hợp Quét AI
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {onOpenScanModal && (
             <button
               onClick={onOpenScanModal}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-cyan-500/20 hover:from-emerald-500/30 hover:to-cyan-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-semibold shadow-sm transition cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-cyan-500/20 hover:from-emerald-500/30 hover:to-cyan-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-semibold shadow-sm transition cursor-pointer whitespace-nowrap"
             >
               <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
               <span>Quét AI chuyên sâu</span>
             </button>
           )}
 
-          <span className="text-[11px] font-medium text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+          <span className="text-[10px] sm:text-[11px] font-medium text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 whitespace-nowrap">
             Live CoinGecko
           </span>
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm">
+      <div className="overflow-x-auto scrollbar-thin">
+        <table className="w-full text-left text-sm whitespace-nowrap">
           <thead>
-            <tr className="border-b border-zinc-800 text-zinc-400 text-xs uppercase tracking-wider">
+            <tr className="border-b border-zinc-800 text-zinc-400 text-[10px] sm:text-xs uppercase tracking-wider">
               <th className="pb-3 font-medium">Tài sản</th>
               <th className="pb-3 font-medium text-right">Giá (USD)</th>
               <th className="pb-3 font-medium text-right">Biến động 24h</th>

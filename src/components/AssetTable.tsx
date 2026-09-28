@@ -39,22 +39,22 @@ export function AssetTable({ onOpenAddModal }: { onOpenAddModal: () => void }) {
   );
 
   return (
-    <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-6 backdrop-blur-md space-y-4">
+    <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-4 sm:p-6 backdrop-blur-md space-y-4">
       {/* Header & Filter Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h3 className="text-base font-bold text-zinc-100 flex items-center gap-2">
-            <Layers className="w-5 h-5 text-emerald-400" />
+          <h3 className="text-sm sm:text-base font-bold text-zinc-100 flex items-center gap-2">
+            <Layers className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" />
             Chi tiết Danh mục & Lợi nhuận từng Tài sản
           </h3>
-          <p className="text-xs text-zinc-400">
+          <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5">
             Dữ liệu được định giá tự động theo biến động thị trường thời gian thực
           </p>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 overflow-x-auto max-w-full pb-1 scrollbar-thin">
           {/* Category Filter */}
-          <div className="flex items-center bg-zinc-950/60 p-1 rounded-xl border border-zinc-800/80 text-xs">
+          <div className="flex items-center bg-zinc-950/60 p-1 rounded-xl border border-zinc-800/80 text-xs shrink-0">
             {[
               { id: "all", label: "Tất cả" },
               { id: "crypto", label: "Crypto" },
@@ -65,9 +65,9 @@ export function AssetTable({ onOpenAddModal }: { onOpenAddModal: () => void }) {
               <button
                 key={f.id}
                 onClick={() => setFilter(f.id)}
-                className={`px-3 py-1 rounded-lg font-medium transition cursor-pointer ${
+                className={`px-2.5 sm:px-3 py-1 rounded-lg text-xs font-medium transition cursor-pointer whitespace-nowrap ${
                   filter === f.id
-                    ? "bg-zinc-800 text-emerald-400 shadow-sm"
+                    ? "bg-zinc-800 text-emerald-400 shadow-sm font-bold"
                     : "text-zinc-400 hover:text-zinc-200"
                 }`}
               >
@@ -78,10 +78,10 @@ export function AssetTable({ onOpenAddModal }: { onOpenAddModal: () => void }) {
 
           <button
             onClick={onOpenAddModal}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-semibold rounded-xl border border-emerald-500/40 transition cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-semibold rounded-xl border border-emerald-500/40 transition cursor-pointer shrink-0 whitespace-nowrap"
           >
             <Plus className="w-3.5 h-3.5" />
-            Thêm tài sản
+            <span>Thêm tài sản</span>
           </button>
         </div>
       </div>
@@ -106,18 +106,18 @@ export function AssetTable({ onOpenAddModal }: { onOpenAddModal: () => void }) {
           </div>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-zinc-300">
+        <div className="overflow-x-auto scrollbar-thin">
+          <table className="w-full text-left text-xs text-zinc-300 whitespace-nowrap">
             <thead className="bg-zinc-950/60 text-zinc-400 uppercase text-[10px] tracking-wider border-b border-zinc-800">
               <tr>
-                <th className="py-3 px-4 font-semibold">Tài sản / Ký hiệu</th>
-                <th className="py-3 px-4 font-semibold">Phân loại</th>
-                <th className="py-3 px-4 font-semibold text-right">Số lượng</th>
-                <th className="py-3 px-4 font-semibold text-right">Giá vốn / Giá hiện tại</th>
-                <th className="py-3 px-4 font-semibold text-right">Tổng giá trị (USD)</th>
-                <th className="py-3 px-4 font-semibold text-right">Lợi nhuận (PnL)</th>
-                <th className="py-3 px-4 font-semibold text-center">Tỷ trọng</th>
-                <th className="py-3 px-4 font-semibold text-center">Thao tác</th>
+                <th className="py-3 px-3 sm:px-4 font-semibold">Tài sản / Ký hiệu</th>
+                <th className="py-3 px-3 sm:px-4 font-semibold">Phân loại</th>
+                <th className="py-3 px-3 sm:px-4 font-semibold text-right">Số lượng</th>
+                <th className="py-3 px-3 sm:px-4 font-semibold text-right">Giá vốn / Giá hiện tại</th>
+                <th className="py-3 px-3 sm:px-4 font-semibold text-right">Tổng giá trị (USD)</th>
+                <th className="py-3 px-3 sm:px-4 font-semibold text-right">Lợi nhuận (PnL)</th>
+                <th className="py-3 px-3 sm:px-4 font-semibold text-center">Tỷ trọng</th>
+                <th className="py-3 px-3 sm:px-4 font-semibold text-center">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800/50">

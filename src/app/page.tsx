@@ -88,42 +88,42 @@ export default function Home() {
         />
 
         {/* Main Content Area */}
-        <main className="flex-1 max-w-[1720px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        <main className="flex-1 max-w-[1720px] w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 md:pb-8 space-y-6">
           {/* Market Status Ticker & Banner (Hidden on scan & admin tabs for clean workspace) */}
           {activeTab !== "scan" && activeTab !== "admin" && (
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-zinc-900/60 to-zinc-900/40 border border-emerald-500/20 shadow-lg">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-4 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-zinc-900/60 to-zinc-900/40 border border-emerald-500/20 shadow-lg">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  <Sparkles className="w-5 h-5" />
+                <div className="p-2 sm:p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
+                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-zinc-100 flex items-center gap-2">
+                  <div className="text-xs sm:text-sm font-semibold text-zinc-100 flex items-center gap-2">
                     MoneyAdvisor Pro
-                    <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-mono">
+                    <span className="text-[9px] sm:text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-mono">
                       {role === "ADMIN" ? "ADMIN 👑" : `Gói ${role}`}
                     </span>
                   </div>
-                  <p className="text-xs text-zinc-400">
-                    Tự động định giá danh mục từ CoinGecko ({cryptos.length} coins), Vàng SJC & Quét AI phân tích kỹ thuật
+                  <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5">
+                    Tự động định giá danh mục từ CoinGecko ({cryptos.length} coins), Vàng SJC & Quét AI
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2.5 self-end sm:self-center">
+              <div className="flex items-center gap-2 self-stretch sm:self-center justify-between sm:justify-end">
                 {/* Scan Trigger Button on Banner with Circular Quota Counter */}
                 <button
                   onClick={() => setActiveTab("scan")}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-cyan-500/20 via-emerald-500/20 to-teal-500/20 hover:from-cyan-500/30 hover:to-teal-500/30 text-cyan-300 text-xs font-bold rounded-lg border border-cyan-500/40 transition cursor-pointer shadow-sm"
+                  className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 bg-gradient-to-r from-cyan-500/20 via-emerald-500/20 to-teal-500/20 hover:from-cyan-500/30 hover:to-teal-500/30 text-cyan-300 text-xs font-bold rounded-lg border border-cyan-500/40 transition cursor-pointer shadow-sm whitespace-nowrap"
                 >
                   <Scan className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Vào Trang Quét AI</span>
-                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-cyan-400 text-zinc-950 text-[10px] font-black font-mono">
+                  <span>Quét AI</span>
+                  <span className="flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-cyan-400 text-zinc-950 text-[9px] sm:text-[10px] font-black font-mono">
                     {isUnlimited ? "∞" : remainingScans}
                   </span>
                 </button>
 
                 {lastUpdated && (
-                  <span className="text-xs text-zinc-400 font-mono hidden md:inline">
+                  <span className="text-[11px] text-zinc-400 font-mono hidden md:inline">
                     Cập nhật: {lastUpdated}
                   </span>
                 )}
@@ -131,10 +131,10 @@ export default function Home() {
                 <button
                   onClick={loadCryptoData}
                   disabled={isLoading}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium rounded-lg border border-zinc-700 transition cursor-pointer disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium rounded-lg border border-zinc-700 transition cursor-pointer disabled:opacity-50 whitespace-nowrap"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
-                  Làm mới
+                  <span>Làm mới</span>
                 </button>
               </div>
             </div>
@@ -174,24 +174,25 @@ export default function Home() {
                   </div>
 
                   {/* Quick Symbol Switcher */}
-                  <div className="flex flex-wrap items-center gap-1.5 bg-zinc-950/60 p-1 rounded-xl border border-zinc-800/80">
+                  <div className="flex items-center gap-1.5 bg-zinc-950/60 p-1 rounded-xl border border-zinc-800/80 overflow-x-auto max-w-full scrollbar-thin">
                     {[
-                      { label: "Bitcoin", symbol: "BINANCE:BTCUSDT" },
-                      { label: "Ethereum", symbol: "BINANCE:ETHUSDT" },
-                      { label: "Solana", symbol: "BINANCE:SOLUSDT" },
-                      { label: "Vàng Thế Giới", symbol: "OANDA:XAUUSD" },
-                      { label: "USD / DXY", symbol: "CAPITALCOM:DXY" },
+                      { label: "BTC", fullLabel: "Bitcoin", symbol: "BINANCE:BTCUSDT" },
+                      { label: "ETH", fullLabel: "Ethereum", symbol: "BINANCE:ETHUSDT" },
+                      { label: "SOL", fullLabel: "Solana", symbol: "BINANCE:SOLUSDT" },
+                      { label: "Vàng", fullLabel: "Vàng Thế Giới", symbol: "OANDA:XAUUSD" },
+                      { label: "DXY", fullLabel: "USD / DXY", symbol: "CAPITALCOM:DXY" },
                     ].map((s) => (
                       <button
                         key={s.symbol}
                         onClick={() => setSelectedChartSymbol(s.symbol)}
-                        className={`px-3 py-1 text-xs rounded-lg font-medium transition cursor-pointer ${
+                        className={`px-2.5 sm:px-3 py-1 text-xs rounded-lg font-medium transition cursor-pointer whitespace-nowrap ${
                           selectedChartSymbol === s.symbol
-                            ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                            ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold shadow-sm"
                             : "text-zinc-400 hover:text-zinc-200"
                         }`}
                       >
-                        {s.label}
+                        <span className="sm:hidden">{s.label}</span>
+                        <span className="hidden sm:inline">{s.fullLabel}</span>
                       </button>
                     ))}
                   </div>
