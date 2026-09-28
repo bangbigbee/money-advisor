@@ -1,19 +1,24 @@
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+// Hỗ trợ cả định dạng mới (publishable key) và định dạng cũ (anon key)
+const supabaseKey =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_KEY ||
+  "";
 
 export const isSupabaseConfigured = Boolean(
   supabaseUrl &&
-  supabaseAnonKey &&
+  supabaseKey &&
   !supabaseUrl.includes("placeholder-project") &&
-  !supabaseAnonKey.includes("placeholder-anon-key")
+  !supabaseKey.includes("placeholder-anon-key")
 );
 
-// Fallback client to prevent crashing when unconfigured
+// Client-side Supabase instance (dùng cho Frontend, Auth & RLS bảo mật)
 export const supabase = createClient(
   supabaseUrl || "https://placeholder-project.supabase.co",
-  supabaseAnonKey || "placeholder-anon-key",
+  supabaseKey || "placeholder-anon-key",
   {
     auth: {
       persistSession: true,
