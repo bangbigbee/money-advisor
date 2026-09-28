@@ -14,6 +14,7 @@ import {
   ShieldAlert,
   Sun,
   Moon,
+  History,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
@@ -264,6 +265,21 @@ export function Navbar({
                       >
                         <Scan className="w-4 h-4 text-cyan-400" />
                         <span>Trang Phân tích</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          setActiveTab("scan");
+                          setTimeout(() => {
+                            const el = document.getElementById("analysis-history-section");
+                            if (el) el.scrollIntoView({ behavior: "smooth" });
+                          }, 150);
+                        }}
+                        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-zinc-800 text-zinc-300 transition text-left cursor-pointer"
+                      >
+                        <History className="w-4 h-4 text-amber-400" />
+                        <span>Lịch sử phân tích</span>
                       </button>
 
                       <button

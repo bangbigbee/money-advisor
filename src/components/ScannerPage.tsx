@@ -339,6 +339,14 @@ export function ScannerPage({
     projectedTargetWave: `$${(currentCoinPrice * 1.22).toLocaleString("en-US", { maximumFractionDigits: 2 })} (Mục tiêu Sóng 5)`,
   };
 
+  // Active Wave Stage Detection
+  const waveText = `${waveData.currentWave} ${waveData.patternName}`.toLowerCase();
+  const isWave4Current = waveText.includes("wave 4") || waveText.includes("sóng 4") || waveText.includes("correction") || waveText.includes("sóng c") || waveText.includes("hiệu chỉnh");
+  const isWave3Current = !isWave4Current && (waveText.includes("wave 3") || waveText.includes("sóng 3") || waveText.includes("impulse 3"));
+  const isWave5Current = !isWave4Current && !isWave3Current && (waveText.includes("wave 5") || waveText.includes("sóng 5"));
+  const isWave2Current = !isWave4Current && !isWave3Current && !isWave5Current && (waveText.includes("wave 2") || waveText.includes("sóng 2"));
+  const isWave1Current = !isWave4Current && !isWave3Current && !isWave5Current && !isWave2Current && (waveText.includes("wave 1") || waveText.includes("sóng 1"));
+
   // Coinglass Data
   const coinglassData: CoinglassMetrics = scanResult?.coinglass || {
     topTradersLongRatio: isPositive ? 68 : 44,
@@ -511,45 +519,76 @@ export function ScannerPage({
   };
 
   return (
-    <div className="space-y-6 min-h-screen text-slate-900 dark:text-slate-100 p-2 sm:p-4">
+    <div className="space-y-6 min-h-screen text-slate-100 p-2 sm:p-4">
       {/* Top Header Banner */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 sm:p-5 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-300 dark:border-indigo-950/80 shadow-md">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 sm:p-5 rounded-xl bg-[#0f1225] border border-indigo-950/80 shadow-md">
         <div className="flex items-center gap-3.5">
-          <div className="p-3 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 shadow-sm shrink-0">
-            <BarChart2 className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+          <div className="p-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shadow-sm shrink-0">
+            <BarChart2 className="w-6 h-6 text-indigo-400" />
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight">
+              <h1 className="text-base sm:text-lg font-black text-white tracking-tight">
                 AI Crypto Scanner 2.0 Pro
               </h1>
-              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-indigo-500/10 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 border border-indigo-500/30">
+              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/30">
                 Sóng Elliott, Coinglass & Multi-Indicators
               </span>
             </div>
-            <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+            <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
               Phân tích kỹ thuật chuyên sâu: SuperTrend, ADX, StochRSI, Bollinger Bands, Ichimoku, MFI, Volume Profile & Fibo Golden Pocket
             </p>
           </div>
         </div>
 
-        {/* User Account / Role Pill Badge */}
-        <div className="flex items-center gap-2.5 self-start lg:self-center">
+        {/* User Account / Role Pill Badge & History Button */}
+        <div className="flex items-center gap-2.5 self-start lg:self-center flex-wrap">
           {user ? (
-            <div className="flex items-center gap-3 bg-slate-100 dark:bg-[#141830] px-3.5 py-2 rounded-xl border border-slate-300 dark:border-indigo-900/40">
-              <div className="w-7 h-7 rounded-full bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-xs border border-indigo-500/30">
-                {role === "ADMIN" ? "👑" : "👤"}
+            <>
+              {/* Scan Quota Card */}
+              <div className="flex items-center gap-3 bg-[#141830] px-3.5 py-2 rounded-xl border border-indigo-900/40">
+                <div className="w-7 h-7 rounded-full bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-xs border border-indigo-500/30">
+                  {role === "ADMIN" ? "👑" : "👤"}
+                </div>
+                <div className="text-xs">
+                  <div className="flex items-center gap-1.5 font-bold text-white">
+                    <span>{isUnlimited ? "Không giới hạn" : `Còn ${remainingScans}/${scansLimit} lượt`}</span>
+                    <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-black bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                      {role === "ADMIN" ? "+ ADMIN" : role}
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-slate-400">Đã đăng nhập</div>
+                </div>
               </div>
-              <div className="text-xs">
-                <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-white">
-                  <span>{isUnlimited ? "Không giới hạn" : `Còn ${remainingScans}/${scansLimit} lượt`}</span>
-                  <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-black bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30">
-                    {role === "ADMIN" ? "+ ADMIN" : role}
+
+              {/* Personal Analysis History Button beside Quota Card */}
+              <button
+                onClick={() => {
+                  const el = document.getElementById("analysis-history-section");
+                  if (el) el.scrollIntoView({ behavior: "smooth" });
+                }}
+                title="Xem Lịch sử Phân tích cá nhân"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#141830] hover:bg-[#1a2040] border border-indigo-900/40 text-slate-200 transition cursor-pointer shadow-sm group"
+              >
+                <div className="p-1 rounded-lg bg-amber-500/10 text-amber-400 group-hover:scale-110 transition-transform">
+                  <History className="w-4 h-4" />
+                </div>
+                <div className="text-left hidden sm:block">
+                  <div className="text-[11px] font-bold flex items-center gap-1.5 text-white">
+                    <span>Lịch sử phân tích</span>
+                    <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                      {history.length}
+                    </span>
+                  </div>
+                  <div className="text-[9px] text-slate-400">Xem lại các lệnh đã quét</div>
+                </div>
+                <div className="sm:hidden flex items-center">
+                  <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    {history.length}
                   </span>
                 </div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400">Đã đăng nhập</div>
-              </div>
-            </div>
+              </button>
+            </>
           ) : (
             <button
               onClick={() => signInWithGoogle()}
@@ -565,18 +604,18 @@ export function ScannerPage({
       {/* Main Grid: Left Column (Coins List) & Right Column (Analysis & Engine) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         {/* ================= LEFT COLUMN: COIN WATCHLIST & SELECTOR (4 Cols) ================= */}
-        <div className="lg:col-span-4 bg-white dark:bg-[#0f1225] border border-slate-300 dark:border-indigo-950/80 rounded-xl p-4 space-y-3.5 shadow-sm">
+        <div className="lg:col-span-4 bg-[#0f1225] border border-indigo-950/80 rounded-xl p-4 space-y-3.5 shadow-sm">
           {/* Search Box */}
           <div className="relative flex items-center">
-            <Search className="absolute left-3.5 w-4 h-4 text-slate-500 dark:text-slate-400" />
+            <Search className="absolute left-3.5 w-4 h-4 text-slate-400" />
             <input
               type="text"
               placeholder="Tìm mã coin (BTC, ETH, SOL...)"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-9 py-2 bg-slate-50 dark:bg-[#141830] border border-slate-300 dark:border-indigo-900/40 rounded-lg text-xs text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              className="w-full pl-9 pr-9 py-2 bg-[#141830] border border-indigo-900/40 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
             />
-            <SlidersHorizontal className="absolute right-3.5 w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+            <SlidersHorizontal className="absolute right-3.5 w-3.5 h-3.5 text-slate-400" />
           </div>
 
           {/* Quick Filter Pill Buttons */}
@@ -586,7 +625,7 @@ export function ScannerPage({
               className={`px-3 py-1 rounded-lg text-[11px] font-bold transition whitespace-nowrap cursor-pointer ${
                 activeFilter === "all"
                   ? "bg-indigo-600 text-white shadow-sm"
-                  : "bg-slate-100 dark:bg-[#141830] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-indigo-950"
+                  : "bg-[#141830] text-slate-400 hover:text-white border border-indigo-900/50"
               }`}
             >
               Tất cả ({cryptos.length})
@@ -596,7 +635,7 @@ export function ScannerPage({
               className={`px-3 py-1 rounded-lg text-[11px] font-bold transition whitespace-nowrap cursor-pointer ${
                 activeFilter === "gainers"
                   ? "bg-emerald-600 text-white shadow-sm"
-                  : "bg-slate-100 dark:bg-[#141830] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-indigo-950"
+                  : "bg-[#141830] text-slate-400 hover:text-white border border-indigo-900/50"
               }`}
             >
               Top Gainer
@@ -606,7 +645,7 @@ export function ScannerPage({
               className={`px-3 py-1 rounded-lg text-[11px] font-bold transition whitespace-nowrap cursor-pointer ${
                 activeFilter === "losers"
                   ? "bg-rose-600 text-white shadow-sm"
-                  : "bg-slate-100 dark:bg-[#141830] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-indigo-950"
+                  : "bg-[#141830] text-slate-400 hover:text-white border border-indigo-900/50"
               }`}
             >
               Top Loser
@@ -616,7 +655,7 @@ export function ScannerPage({
               className={`px-3 py-1 rounded-lg text-[11px] font-bold transition whitespace-nowrap cursor-pointer ${
                 activeFilter === "watchlist"
                   ? "bg-amber-600 text-white shadow-sm"
-                  : "bg-slate-100 dark:bg-[#141830] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-indigo-950"
+                  : "bg-[#141830] text-slate-400 hover:text-white border border-indigo-900/50"
               }`}
             >
               Watchlist +
@@ -624,7 +663,7 @@ export function ScannerPage({
           </div>
 
           {/* Table Header */}
-          <div className="grid grid-cols-12 text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-2 py-1 border-b border-slate-200 dark:border-indigo-950/60">
+          <div className="grid grid-cols-12 text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-2 py-1 border-b border-indigo-950/60">
             <span className="col-span-1">#</span>
             <span className="col-span-5 flex items-center gap-1">Coin ▾</span>
             <span className="col-span-3 text-right">Giá (USD)</span>
@@ -650,8 +689,8 @@ export function ScannerPage({
                     onClick={() => setSelectedCoin(coin)}
                     className={`grid grid-cols-12 items-center px-2 py-2.5 rounded-lg cursor-pointer transition-all ${
                       isSelected
-                        ? "bg-indigo-50 dark:bg-[#191f42] border border-indigo-400 dark:border-indigo-500/40 shadow-sm"
-                        : "hover:bg-slate-100 dark:hover:bg-[#141830]/80 border border-transparent"
+                        ? "bg-[#191f42] border border-indigo-500/50 shadow-sm"
+                        : "hover:bg-[#141830]/80 border border-transparent"
                     }`}
                   >
                     <span className="col-span-1 text-[11px] font-mono text-slate-500">
@@ -665,16 +704,16 @@ export function ScannerPage({
                         className="w-5 h-5 rounded-full shrink-0"
                       />
                       <div className="truncate">
-                        <div className="font-bold text-xs text-slate-900 dark:text-white leading-tight">
+                        <div className="font-bold text-xs text-white leading-tight">
                           {coin.symbol.toUpperCase()}
                         </div>
-                        <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate leading-tight">
+                        <div className="text-[10px] text-slate-400 truncate leading-tight">
                           {coin.name}
                         </div>
                       </div>
                     </div>
 
-                    <div className="col-span-3 text-right font-mono text-xs font-semibold text-slate-900 dark:text-white">
+                    <div className="col-span-3 text-right font-mono text-xs font-semibold text-white">
                       ${coin.current_price?.toLocaleString("en-US", {
                         maximumFractionDigits: coin.current_price < 1 ? 4 : 2,
                       })}
@@ -683,18 +722,18 @@ export function ScannerPage({
                     <div className="col-span-3 flex items-center justify-end gap-1.5">
                       <span
                         className={`font-mono text-xs font-bold ${
-                          isGain ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
+                          isGain ? "text-emerald-400" : "text-rose-400"
                         }`}
                       >
                         {isGain ? `+${change.toFixed(2)}%` : `${change.toFixed(2)}%`}
                       </span>
                       <button
                         onClick={(e) => toggleWatchlist(coin.symbol, e)}
-                        className="text-slate-400 hover:text-amber-500 transition cursor-pointer"
+                        className="text-slate-400 hover:text-amber-400 transition cursor-pointer"
                       >
                         <Star
                           className={`w-3.5 h-3.5 ${
-                            isStarred ? "text-amber-500 fill-amber-500" : ""
+                            isStarred ? "text-amber-400 fill-amber-400" : ""
                           }`}
                         />
                       </button>
@@ -706,19 +745,19 @@ export function ScannerPage({
           </div>
 
           {/* Bottom Summary Bar */}
-          <div className="flex items-center justify-between pt-3 border-t border-slate-200 dark:border-indigo-950/80 px-1">
+          <div className="flex items-center justify-between pt-3 border-t border-indigo-950/80 px-1">
             <div className="flex items-center gap-2 text-xs">
-              <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+              <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-400">
                 <Coins className="w-4 h-4" />
               </div>
-              <span className="text-slate-500 dark:text-slate-400 text-[11px]">Tổng số coin</span>
-              <span className="font-mono font-bold text-slate-900 dark:text-white text-xs">
+              <span className="text-slate-400 text-[11px]">Tổng số coin</span>
+              <span className="font-mono font-bold text-white text-xs">
                 {cryptos.length}
               </span>
             </div>
             <button
               onClick={() => setActiveFilter("watchlist")}
-              className="px-3 py-1 rounded-lg bg-slate-100 dark:bg-[#141830] hover:bg-slate-200 dark:hover:bg-[#1a2040] text-indigo-700 dark:text-indigo-300 text-xs font-semibold border border-slate-300 dark:border-indigo-900/50 transition cursor-pointer"
+              className="px-3 py-1 rounded-lg bg-[#141830] hover:bg-[#1a2040] text-indigo-300 text-xs font-semibold border border-indigo-900/50 transition cursor-pointer"
             >
               Watchlist ({watchlist.length})
             </button>
@@ -729,31 +768,31 @@ export function ScannerPage({
         <div className="lg:col-span-8 space-y-4">
           {/* Top Coin Header Card with Sparkline & Scan Button */}
           {selectedCoin && (
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-300 dark:border-indigo-950/80 shadow-md">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-xl bg-[#0f1225] border border-indigo-950/80 shadow-md">
               <div className="flex items-center gap-3.5">
                 <img
                   src={selectedCoin.image}
                   alt={selectedCoin.name}
-                  className="w-11 h-11 rounded-full border border-slate-300 dark:border-indigo-800/40 p-0.5 bg-slate-100 dark:bg-black"
+                  className="w-11 h-11 rounded-full border border-indigo-800/40 p-0.5 bg-[#090b14]"
                 />
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                    <h2 className="text-xl font-black text-white tracking-tight">
                       {selectedCoin.name}
                     </h2>
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold font-mono bg-indigo-50 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700/40 uppercase">
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold font-mono bg-indigo-900/60 text-indigo-300 border border-indigo-700/40 uppercase">
                       {selectedCoin.symbol}
                     </span>
                   </div>
                   <div className="flex items-center gap-2.5 mt-0.5">
-                    <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">
+                    <span className="text-2xl font-black text-white font-mono">
                       ${selectedCoin.current_price?.toLocaleString("en-US", {
                         maximumFractionDigits: selectedCoin.current_price < 1 ? 4 : 2,
                       })}
                     </span>
                     <span
                       className={`text-xs font-bold font-mono ${
-                        isPositive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
+                        isPositive ? "text-emerald-400" : "text-rose-400"
                       }`}
                     >
                       {isPositive ? `+${currentCoinChange.toFixed(2)}%` : `${currentCoinChange.toFixed(2)}%`} (24h)
@@ -799,15 +838,15 @@ export function ScannerPage({
 
           {/* ================= GUEST / AUTH LOCK GATE IF NOT LOGGED IN ================= */}
           {!user ? (
-            <div className="p-8 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-300 dark:border-indigo-950/80 shadow-md text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30 flex items-center justify-center mx-auto">
+            <div className="p-8 rounded-xl bg-[#0f1225] border border-indigo-950/80 shadow-md text-center space-y-4">
+              <div className="w-16 h-16 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 flex items-center justify-center mx-auto">
                 <Lock className="w-8 h-8" />
               </div>
               <div className="space-y-1 max-w-md mx-auto">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                <h3 className="text-lg font-bold text-white">
                   Đăng nhập Google để xem Phân tích AI Chuyên Sâu
                 </h3>
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                <p className="text-xs text-slate-400 leading-relaxed">
                   Vui lòng đăng nhập để mở khóa dạng sóng Elliott động, chỉ số phái sinh Coinglass, hệ thống 8 chỉ báo kỹ thuật nâng cao và lưu trữ lịch sử phân tích cá nhân của bạn.
                 </p>
               </div>
@@ -824,28 +863,28 @@ export function ScannerPage({
           ) : (
             <>
               {/* ================= WAVEFORM & TRADINGVIEW CHART SWITCHER SECTION ================= */}
-              <div className="bg-white dark:bg-[#0f1225] border border-slate-300 dark:border-indigo-950/80 rounded-xl p-4 sm:p-5 shadow-md space-y-4">
+              <div className="bg-[#0f1225] border border-indigo-950/80 rounded-xl p-4 sm:p-5 shadow-md space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
-                    <Compass className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                    <Compass className="w-5 h-5 text-indigo-400" />
                     <div>
-                      <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                      <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
                         Mô Hình Dạng Sóng & Biểu Đồ Trực Tuyến
                       </h3>
-                      <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                      <p className="text-[11px] text-slate-400">
                         Phân tích chu kỳ sóng Elliott, cấu trúc đỉnh đáy và nến trực tiếp
                       </p>
                     </div>
                   </div>
 
                   {/* View mode toggle */}
-                  <div className="flex items-center bg-slate-100 dark:bg-[#141830] p-1 rounded-lg border border-slate-200 dark:border-indigo-900/50 text-xs">
+                  <div className="flex items-center bg-[#141830] p-1 rounded-lg border border-indigo-900/50 text-xs">
                     <button
                       onClick={() => setChartViewMode("wave")}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md font-bold transition cursor-pointer ${
                         chartViewMode === "wave"
                           ? "bg-indigo-600 text-white shadow-sm"
-                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                          : "text-slate-400 hover:text-white"
                       }`}
                     >
                       <Radio className="w-3.5 h-3.5" />
@@ -856,7 +895,7 @@ export function ScannerPage({
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md font-bold transition cursor-pointer ${
                         chartViewMode === "tradingview"
                           ? "bg-indigo-600 text-white shadow-sm"
-                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                          : "text-slate-400 hover:text-white"
                       }`}
                     >
                       <LineChart className="w-3.5 h-3.5" />
@@ -868,79 +907,172 @@ export function ScannerPage({
                 {chartViewMode === "wave" ? (
                   /* DYNAMIC WAVE PATTERN SVG VISUALIZER */
                   <div className="space-y-3.5">
-                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#141830] border border-slate-200 dark:border-indigo-900/40 space-y-3">
+                    <div className="p-4 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-3">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div>
-                          <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider font-mono">
+                          <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider font-mono">
                             DẠNG SÓNG HIỆN TẠI (WAVE CYCLE)
                           </span>
-                          <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                          <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
                             <span>{waveData.patternName}</span>
                           </h4>
                         </div>
-                        <div className="px-2.5 py-1 rounded-md bg-indigo-500/10 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-[11px] font-bold border border-indigo-500/30">
+                        <div className="px-2.5 py-1 rounded-md bg-indigo-500/20 text-indigo-300 text-[11px] font-bold border border-indigo-500/30 font-mono">
                           {waveData.currentWave}
                         </div>
                       </div>
 
                       {/* SVG Wave Visual Rendering */}
-                      <div className="relative h-44 sm:h-52 w-full bg-slate-900 dark:bg-[#0b0e1b] rounded-lg border border-slate-800 dark:border-indigo-950/80 p-2 overflow-hidden flex items-center justify-center">
+                      <div className="relative h-56 sm:h-64 w-full bg-[#0b0e1b] rounded-lg border border-indigo-950/80 p-2 overflow-hidden flex items-center justify-center">
                         <svg
                           className="w-full h-full overflow-visible"
-                          viewBox="0 0 700 200"
+                          viewBox="0 0 700 220"
                           preserveAspectRatio="none"
                         >
                           <defs>
                             <linearGradient id="waveGradient" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.35" />
-                              <stop offset="100%" stopColor="#06b6d4" stopOpacity="0" />
+                              <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.4" />
+                              <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.02" />
                             </linearGradient>
                           </defs>
 
                           {/* Grid lines */}
-                          <line x1="0" y1="50" x2="700" y2="50" stroke="#334155" strokeDasharray="3 3" />
-                          <line x1="0" y1="100" x2="700" y2="100" stroke="#334155" strokeDasharray="3 3" />
-                          <line x1="0" y1="150" x2="700" y2="150" stroke="#334155" strokeDasharray="3 3" />
+                          <line x1="0" y1="45" x2="700" y2="45" stroke="#1e293b" strokeDasharray="3 3" />
+                          <line x1="0" y1="100" x2="700" y2="100" stroke="#1e293b" strokeDasharray="3 3" />
+                          <line x1="0" y1="155" x2="700" y2="155" stroke="#1e293b" strokeDasharray="3 3" />
 
-                          {/* Fill area */}
-                          <path
-                            d={
-                              isPositive
-                                ? "M 50 160 L 150 100 L 250 140 L 420 40 L 520 80 L 650 20 L 650 190 L 50 190 Z"
-                                : "M 50 40 L 180 140 L 320 80 L 480 170 L 650 120 L 650 190 L 50 190 Z"
-                            }
-                            fill="url(#waveGradient)"
-                          />
-
-                          {/* Stroke Line */}
-                          <path
-                            d={
-                              isPositive
-                                ? "M 50 160 L 150 100 L 250 140 L 420 40 L 520 80 L 650 20"
-                                : "M 50 40 L 180 140 L 320 80 L 480 170 L 650 120"
-                            }
-                            fill="none"
-                            stroke="#06b6d4"
-                            strokeWidth="3.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-
-                          {/* Wave Nodes & Labels */}
-                          {isPositive ? (
+                          {/* Fill area & Stroke Line */}
+                          {isWave4Current ? (
                             <>
+                              {/* Wave 4 specific visualization */}
+                              <path
+                                d="M 55 165 L 160 130 L 310 45 L 480 135 L 645 30 L 645 210 L 55 210 Z"
+                                fill="url(#waveGradient)"
+                              />
+                              <path
+                                d="M 55 165 L 160 130 L 310 45 L 480 135 L 645 30"
+                                fill="none"
+                                stroke="#06b6d4"
+                                strokeWidth="3.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                              {/* ABC internal retracement within Wave 4 */}
+                              <path
+                                d="M 310 45 L 365 105 L 415 80 L 480 135"
+                                fill="none"
+                                stroke="#f59e0b"
+                                strokeWidth="2"
+                                strokeDasharray="3 3"
+                                opacity="0.85"
+                              />
+                              <text x="365" y="118" fill="#f59e0b" fontSize="10" fontWeight="bold" textAnchor="middle">sóng a</text>
+                              <text x="415" y="74" fill="#38bdf8" fontSize="10" fontWeight="bold" textAnchor="middle">sóng b</text>
+
+                              {/* Nodes */}
+                              <circle cx="55" cy="165" r="5" fill="#3b82f6" />
+                              <text x="55" y="185" fill="#94a3b8" fontSize="11" textAnchor="middle" fontWeight="bold">Wave 1</text>
+
+                              <circle cx="160" cy="130" r="5" fill="#10b981" />
+                              <text x="160" y="150" fill="#10b981" fontSize="11" textAnchor="middle" fontWeight="bold">Wave 2 (HL)</text>
+
+                              <circle cx="310" cy="45" r="6" fill="#f59e0b" />
+                              <text x="310" y="28" fill="#f59e0b" fontSize="12" textAnchor="middle" fontWeight="black">Đỉnh Wave 3 (HH)</text>
+
+                              {/* WAVE 4 ACTIVE PIN MARKER */}
+                              <g transform="translate(480, 135)">
+                                <line x1="0" y1="-85" x2="0" y2="70" stroke="#06b6d4" strokeWidth="1.5" strokeDasharray="3 3" opacity="0.7" />
+                                <circle r="16" fill="#06b6d4" opacity="0.3" className="animate-ping" />
+                                <circle r="9" fill="#06b6d4" stroke="#ffffff" strokeWidth="2.5" />
+                                <circle r="4" fill="#ffffff" />
+                                <g transform="translate(0, 16)">
+                                  <rect x="-95" y="0" width="190" height="28" rx="6" fill="#06b6d4" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.5))" />
+                                  <text x="0" y="18" fill="#090b14" fontSize="11" fontWeight="900" textAnchor="middle" letterSpacing="0.3">
+                                    📍 VỊ TRÍ HIỆN TẠI: WAVE 4
+                                  </text>
+                                </g>
+                                <text x="0" y="-12" fill="#67e8f9" fontSize="11" fontWeight="bold" textAnchor="middle">
+                                  Đáy Sóng C (Fibo 0.618)
+                                </text>
+                              </g>
+
+                              <circle cx="645" cy="30" r="6" fill="#ec4899" stroke="#ffffff" strokeWidth="1" strokeDasharray="2 2" />
+                              <text x="645" y="18" fill="#ec4899" fontSize="12" textAnchor="middle" fontWeight="black">🚀 Wave 5 (Target $)</text>
+                            </>
+                          ) : isWave3Current ? (
+                            <>
+                              {/* Wave 3 specific visualization */}
+                              <path
+                                d="M 55 165 L 160 130 L 330 45 L 500 120 L 645 30 L 645 210 L 55 210 Z"
+                                fill="url(#waveGradient)"
+                              />
+                              <path
+                                d="M 55 165 L 160 130 L 330 45 L 500 120 L 645 30"
+                                fill="none"
+                                stroke="#06b6d4"
+                                strokeWidth="3.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+
+                              <circle cx="55" cy="165" r="5" fill="#3b82f6" />
+                              <text x="55" y="185" fill="#94a3b8" fontSize="11" textAnchor="middle" fontWeight="bold">Wave 1</text>
+
+                              <circle cx="160" cy="130" r="5" fill="#10b981" />
+                              <text x="160" y="150" fill="#10b981" fontSize="11" textAnchor="middle" fontWeight="bold">Wave 2 (HL)</text>
+
+                              {/* WAVE 3 ACTIVE PIN */}
+                              <g transform="translate(330, 45)">
+                                <circle r="16" fill="#06b6d4" opacity="0.3" className="animate-ping" />
+                                <circle r="9" fill="#06b6d4" stroke="#ffffff" strokeWidth="2.5" />
+                                <circle r="4" fill="#ffffff" />
+                                <g transform="translate(0, -38)">
+                                  <rect x="-95" y="0" width="190" height="28" rx="6" fill="#06b6d4" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.5))" />
+                                  <text x="0" y="18" fill="#090b14" fontSize="11" fontWeight="900" textAnchor="middle">
+                                    📍 VỊ TRÍ HIỆN TẠI: WAVE 3 🔥
+                                  </text>
+                                </g>
+                              </g>
+
+                              <circle cx="500" cy="120" r="5" fill="#a855f7" strokeDasharray="2 2" />
+                              <text x="500" y="140" fill="#a855f7" fontSize="11" textAnchor="middle" fontWeight="bold">Wave 4 (Dự phóng)</text>
+
+                              <circle cx="645" cy="30" r="6" fill="#ec4899" stroke="#ffffff" strokeWidth="1" />
+                              <text x="645" y="18" fill="#ec4899" fontSize="12" textAnchor="middle" fontWeight="black">🚀 Wave 5 (Target $)</text>
+                            </>
+                          ) : isPositive ? (
+                            <>
+                              {/* Standard Bullish Impulse */}
+                              <path
+                                d="M 50 160 L 150 100 L 250 140 L 420 40 L 520 80 L 650 20 L 650 210 L 50 210 Z"
+                                fill="url(#waveGradient)"
+                              />
+                              <path
+                                d="M 50 160 L 150 100 L 250 140 L 420 40 L 520 80 L 650 20"
+                                fill="none"
+                                stroke="#06b6d4"
+                                strokeWidth="3.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+
                               <circle cx="50" cy="160" r="5" fill="#3b82f6" />
-                              <text x="50" y="180" fill="#94a3b8" fontSize="11" textAnchor="middle" fontWeight="bold">Start</text>
+                              <text x="50" y="180" fill="#94a3b8" fontSize="11" textAnchor="middle" fontWeight="bold">Wave 1</text>
 
                               <circle cx="150" cy="100" r="5" fill="#10b981" />
-                              <text x="150" y="90" fill="#10b981" fontSize="11" textAnchor="middle" fontWeight="bold">Wave 1</text>
+                              <text x="150" y="90" fill="#10b981" fontSize="11" textAnchor="middle" fontWeight="bold">Wave 2</text>
 
                               <circle cx="250" cy="140" r="5" fill="#f59e0b" />
-                              <text x="250" y="160" fill="#f59e0b" fontSize="11" textAnchor="middle" fontWeight="bold">Wave 2 (HL)</text>
+                              <text x="250" y="160" fill="#f59e0b" fontSize="11" textAnchor="middle" fontWeight="bold">Wave 3</text>
 
-                              <circle cx="420" cy="40" r="7" fill="#06b6d4" className="animate-ping" />
-                              <circle cx="420" cy="40" r="6" fill="#06b6d4" />
-                              <text x="420" y="25" fill="#06b6d4" fontSize="12" textAnchor="middle" fontWeight="black">Wave 3 (Đang chạy 🔥)</text>
+                              <g transform="translate(420, 40)">
+                                <circle r="14" fill="#06b6d4" opacity="0.3" className="animate-ping" />
+                                <circle r="8" fill="#06b6d4" stroke="#ffffff" strokeWidth="2" />
+                                <rect x="-85" y="-36" width="170" height="26" rx="6" fill="#06b6d4" />
+                                <text x="0" y="-19" fill="#090b14" fontSize="11" fontWeight="900" textAnchor="middle">
+                                  📍 VỊ TRÍ: SÓNG ĐẨY
+                                </text>
+                              </g>
 
                               <circle cx="520" cy="80" r="5" fill="#a855f7" strokeDasharray="2 2" />
                               <text x="520" y="100" fill="#a855f7" fontSize="11" textAnchor="middle" fontWeight="bold">Wave 4 (Dự phóng)</text>
@@ -950,44 +1082,89 @@ export function ScannerPage({
                             </>
                           ) : (
                             <>
-                              <circle cx="50" cy="40" r="5" fill="#f43f5e" />
-                              <text x="50" y="30" fill="#f43f5e" fontSize="11" textAnchor="middle" fontWeight="bold">Top (HH)</text>
+                              {/* Bearish / ABC Correction */}
+                              <path
+                                d="M 50 45 L 180 145 L 320 85 L 480 170 L 650 115 L 650 210 L 50 210 Z"
+                                fill="url(#waveGradient)"
+                              />
+                              <path
+                                d="M 50 45 L 180 145 L 320 85 L 480 170 L 650 115"
+                                fill="none"
+                                stroke="#06b6d4"
+                                strokeWidth="3.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
 
-                              <circle cx="180" cy="140" r="5" fill="#f43f5e" />
-                              <text x="180" y="160" fill="#f43f5e" fontSize="11" textAnchor="middle" fontWeight="bold">Sóng A</text>
+                              <circle cx="50" cy="45" r="5" fill="#f43f5e" />
+                              <text x="50" y="32" fill="#f43f5e" fontSize="11" textAnchor="middle" fontWeight="bold">Top (HH)</text>
 
-                              <circle cx="320" cy="80" r="5" fill="#f59e0b" />
-                              <text x="320" y="70" fill="#f59e0b" fontSize="11" textAnchor="middle" fontWeight="bold">Sóng B (Pullback)</text>
+                              <circle cx="180" cy="145" r="5" fill="#f43f5e" />
+                              <text x="180" y="165" fill="#f43f5e" fontSize="11" textAnchor="middle" fontWeight="bold">Sóng A</text>
 
-                              <circle cx="480" cy="170" r="6" fill="#06b6d4" />
-                              <text x="480" y="190" fill="#06b6d4" fontSize="12" textAnchor="middle" fontWeight="black">Sóng C (Đáy Fibo 0.618)</text>
+                              <circle cx="320" cy="85" r="5" fill="#f59e0b" />
+                              <text x="320" y="72" fill="#f59e0b" fontSize="11" textAnchor="middle" fontWeight="bold">Sóng B (Pullback)</text>
 
-                              <circle cx="650" cy="120" r="5" fill="#10b981" />
-                              <text x="650" y="110" fill="#10b981" fontSize="11" textAnchor="middle" fontWeight="bold">Rebound Mới</text>
+                              <g transform="translate(480, 170)">
+                                <circle r="16" fill="#06b6d4" opacity="0.3" className="animate-ping" />
+                                <circle r="9" fill="#06b6d4" stroke="#ffffff" strokeWidth="2.5" />
+                                <circle r="4" fill="#ffffff" />
+                                <g transform="translate(0, 16)">
+                                  <rect x="-95" y="0" width="190" height="28" rx="6" fill="#06b6d4" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.5))" />
+                                  <text x="0" y="18" fill="#090b14" fontSize="11" fontWeight="900" textAnchor="middle" letterSpacing="0.3">
+                                    📍 VỊ TRÍ: ĐÁY SÓNG C / W4
+                                  </text>
+                                </g>
+                              </g>
+
+                              <circle cx="650" cy="115" r="5" fill="#10b981" />
+                              <text x="650" y="102" fill="#10b981" fontSize="11" textAnchor="middle" fontWeight="bold">🚀 Rebound Mới</text>
                             </>
                           )}
                         </svg>
                       </div>
 
+                      {/* Active Wave Location Status Banner */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-xs">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping shrink-0" />
+                          <span className="font-bold text-white">Xác định vị trí trên biểu đồ:</span>
+                          <span className="text-cyan-300 font-bold font-mono">
+                            {isWave4Current
+                              ? "ĐANG Ở ĐÁY WAVE 4 (Pha hiệu chỉnh tích lũy Fibo 0.618 sau đỉnh Wave 3)"
+                              : isWave3Current
+                              ? "ĐANG Ở ĐỈNH SÓNG 3 (Pha bứt phá xung lượng mạnh nhất)"
+                              : isWave5Current
+                              ? "ĐANG Ở SÓNG 5 (Pha mở rộng - Chạm vùng chốt lời)"
+                              : isWave2Current
+                              ? "ĐANG Ở SÓNG 2 (Pha retest đáy thành công)"
+                              : "ĐANG Ở PHA TÍCH LŨY / HIỆU CHỈNH TẠO ĐÁY"}
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-slate-300">
+                          Mục tiêu tiếp theo: <strong className="font-mono text-emerald-400">{isWave4Current ? "Bứt phá lên Wave 5" : waveData.projectedTargetWave}</strong>
+                        </div>
+                      </div>
+
                       {/* Wave Pattern details & targets */}
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 text-xs">
-                        <div className="p-2.5 rounded-lg bg-white dark:bg-[#0b0e1b] border border-slate-200 dark:border-indigo-950/60">
-                          <span className="text-[10px] text-slate-500 dark:text-slate-400">Đỉnh / Đáy Swing:</span>
-                          <div className="font-mono font-bold text-slate-900 dark:text-white mt-0.5">
+                        <div className="p-2.5 rounded-lg bg-[#0b0e1b] border border-indigo-950/60">
+                          <span className="text-[10px] text-slate-400">Đỉnh / Đáy Swing:</span>
+                          <div className="font-mono font-bold text-white mt-0.5">
                             High: {waveData.swingHigh} • Low: {waveData.swingLow}
                           </div>
                         </div>
 
-                        <div className="p-2.5 rounded-lg bg-white dark:bg-[#0b0e1b] border border-slate-200 dark:border-indigo-950/60">
-                          <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">Fibo Key Level:</span>
-                          <div className="font-mono font-bold text-amber-700 dark:text-amber-300 mt-0.5 text-xs break-words leading-snug">
+                        <div className="p-2.5 rounded-lg bg-[#0b0e1b] border border-indigo-950/60">
+                          <span className="text-[10px] text-amber-400 font-semibold">Fibo Key Level:</span>
+                          <div className="font-mono font-bold text-amber-300 mt-0.5 text-xs break-words leading-snug">
                             {waveData.keyFibonacciLevel}
                           </div>
                         </div>
 
-                        <div className="p-2.5 rounded-lg bg-white dark:bg-[#0b0e1b] border border-slate-200 dark:border-indigo-950/60">
-                          <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">Mục tiêu mở rộng:</span>
-                          <div className="font-mono font-bold text-emerald-700 dark:text-emerald-300 mt-0.5 text-xs break-words leading-snug">
+                        <div className="p-2.5 rounded-lg bg-[#0b0e1b] border border-indigo-950/60">
+                          <span className="text-[10px] text-emerald-400 font-semibold">Mục tiêu mở rộng:</span>
+                          <div className="font-mono font-bold text-emerald-300 mt-0.5 text-xs break-words leading-snug">
                             {waveData.projectedTargetWave}
                           </div>
                         </div>
@@ -1003,20 +1180,20 @@ export function ScannerPage({
               </div>
 
               {/* ================= COMPREHENSIVE MULTI-INDICATORS SUITE ================= */}
-              <div className="bg-white dark:bg-[#0f1225] border border-slate-300 dark:border-indigo-950/80 rounded-xl p-4 sm:p-5 shadow-md space-y-4">
+              <div className="bg-[#0f1225] border border-indigo-950/80 rounded-xl p-4 sm:p-5 shadow-md space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Activity className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                    <Activity className="w-5 h-5 text-indigo-400" />
                     <div>
-                      <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                      <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
                         Bộ Chỉ Báo Kỹ Thuật Đa Tầng (Multi-Indicator Suite)
                       </h3>
-                      <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                      <p className="text-[11px] text-slate-400">
                         Tổng hợp SuperTrend, ADX, StochRSI, Bollinger Bands, Ichimoku Cloud, MFI, Volume Profile & Fibonacci
                       </p>
                     </div>
                   </div>
-                  <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold font-mono bg-indigo-500/10 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 border border-indigo-500/30">
+                  <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold font-mono bg-indigo-500/10 text-indigo-300 border border-indigo-500/30">
                     8 Indicators
                   </span>
                 </div>
@@ -1024,131 +1201,131 @@ export function ScannerPage({
                 {/* 4x2 Indicator Cards Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
                   {/* 1. SuperTrend */}
-                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#141830] border border-slate-200 dark:border-indigo-900/40 space-y-1.5">
+                  <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500 dark:text-slate-400 font-medium">SuperTrend</span>
+                      <span className="text-slate-400 font-medium">SuperTrend</span>
                       <span
                         className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold ${
                           advancedData.superTrend.status === "BULLISH"
-                            ? "bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 border border-emerald-500/30"
-                            : "bg-rose-500/10 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400 border border-rose-500/30"
+                            ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                            : "bg-rose-500/20 text-rose-400 border border-rose-500/30"
                         }`}
                       >
                         {advancedData.superTrend.status}
                       </span>
                     </div>
-                    <div className="font-mono font-bold text-slate-900 dark:text-white text-sm">
+                    <div className="font-mono font-bold text-white text-sm">
                       {advancedData.superTrend.value}
                     </div>
-                    <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                    <div className="text-[10px] text-slate-400">
                       Ngưỡng cản xu hướng chủ đạo
                     </div>
                   </div>
 
                   {/* 2. ADX */}
-                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#141830] border border-slate-200 dark:border-indigo-900/40 space-y-1.5">
+                  <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500 dark:text-slate-400 font-medium">ADX (Trend Strength)</span>
-                      <span className="font-mono font-bold text-cyan-600 dark:text-cyan-400">
+                      <span className="text-slate-400 font-medium">ADX (Trend Strength)</span>
+                      <span className="font-mono font-bold text-cyan-400">
                         {advancedData.adx.value}
                       </span>
                     </div>
-                    <div className="font-bold text-slate-900 dark:text-white text-sm">
+                    <div className="font-bold text-white text-sm">
                       {advancedData.adx.trendStrength}
                     </div>
-                    <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                    <div className="text-[10px] text-slate-400">
                       Độ mạnh của đà chuyển động
                     </div>
                   </div>
 
                   {/* 3. StochRSI */}
-                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#141830] border border-slate-200 dark:border-indigo-900/40 space-y-1.5">
+                  <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500 dark:text-slate-400 font-medium">StochRSI (K/D)</span>
-                      <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                      <span className="text-slate-400 font-medium">StochRSI (K/D)</span>
+                      <span className="font-mono font-bold text-indigo-400">
                         {advancedData.stochRsi.k} / {advancedData.stochRsi.d}
                       </span>
                     </div>
-                    <div className="font-bold text-slate-900 dark:text-white text-sm">
+                    <div className="font-bold text-white text-sm">
                       {advancedData.stochRsi.status}
                     </div>
-                    <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                    <div className="text-[10px] text-slate-400">
                       Tín hiệu giao cắt xung lượng
                     </div>
                   </div>
 
                   {/* 4. MFI (Money Flow Index) */}
-                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#141830] border border-slate-200 dark:border-indigo-900/40 space-y-1.5">
+                  <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500 dark:text-slate-400 font-medium">MFI (Dòng Tiền)</span>
-                      <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                      <span className="text-slate-400 font-medium">MFI (Dòng Tiền)</span>
+                      <span className="font-mono font-bold text-emerald-400">
                         {advancedData.mfi.value}/100
                       </span>
                     </div>
-                    <div className="font-bold text-slate-900 dark:text-white text-sm">
+                    <div className="font-bold text-white text-sm">
                       {advancedData.mfi.status}
                     </div>
-                    <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                    <div className="text-[10px] text-slate-400">
                       Đo lường áp lực mua/bán vốn
                     </div>
                   </div>
 
                   {/* 5. Bollinger Bands */}
-                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#141830] border border-slate-200 dark:border-indigo-900/40 space-y-1.5">
+                  <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500 dark:text-slate-400 font-medium">Bollinger Bands</span>
-                      <span className="text-[10px] text-amber-600 dark:text-amber-400 font-mono">20, 2</span>
+                      <span className="text-slate-400 font-medium">Bollinger Bands</span>
+                      <span className="text-[10px] text-amber-400 font-mono">20, 2</span>
                     </div>
-                    <div className="text-[11px] font-mono text-slate-700 dark:text-slate-300">
+                    <div className="text-[11px] font-mono text-slate-300">
                       U: {advancedData.bollingerBands.upper} • L: {advancedData.bollingerBands.lower}
                     </div>
-                    <div className="text-[10px] font-bold text-cyan-600 dark:text-cyan-400">
+                    <div className="text-[10px] font-bold text-cyan-400">
                       {advancedData.bollingerBands.squeezeStatus}
                     </div>
                   </div>
 
                   {/* 6. Ichimoku Cloud */}
-                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#141830] border border-slate-200 dark:border-indigo-900/40 space-y-1.5">
+                  <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500 dark:text-slate-400 font-medium">Mây Ichimoku</span>
-                      <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                      <span className="text-slate-400 font-medium">Mây Ichimoku</span>
+                      <span className="text-[10px] font-bold text-emerald-400">
                         {advancedData.ichimoku.tenkanKijunCross}
                       </span>
                     </div>
-                    <div className="text-xs font-bold text-slate-900 dark:text-white break-words leading-snug">
+                    <div className="text-xs font-bold text-white break-words leading-snug">
                       {advancedData.ichimoku.cloudSignal}
                     </div>
-                    <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                    <div className="text-[10px] text-slate-400">
                       Vị thế so với Kumo Cloud
                     </div>
                   </div>
 
                   {/* 7. Volume Profile */}
-                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#141830] border border-slate-200 dark:border-indigo-900/40 space-y-1.5">
+                  <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500 dark:text-slate-400 font-medium">Volume Profile</span>
-                      <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400 font-mono">
+                      <span className="text-slate-400 font-medium">Volume Profile</span>
+                      <span className="text-[10px] font-bold text-rose-400 font-mono">
                         POC
                       </span>
                     </div>
-                    <div className="text-[11px] font-mono font-bold text-slate-900 dark:text-white">
+                    <div className="text-[11px] font-mono font-bold text-white">
                       POC: {advancedData.volumeProfile.poc}
                     </div>
-                    <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
+                    <div className="text-[10px] font-mono text-slate-400">
                       VAH: {advancedData.volumeProfile.vah} • VAL: {advancedData.volumeProfile.val}
                     </div>
                   </div>
 
                   {/* 8. Fibonacci Golden Pocket */}
-                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#141830] border border-slate-200 dark:border-indigo-900/40 space-y-1.5">
+                  <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500 dark:text-slate-400 font-medium">Fibo 0.618 Pocket</span>
-                      <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 font-mono">Golden</span>
+                      <span className="text-slate-400 font-medium">Fibo 0.618 Pocket</span>
+                      <span className="text-[10px] font-bold text-amber-400 font-mono">Golden</span>
                     </div>
-                    <div className="text-xs font-mono font-bold text-amber-700 dark:text-amber-300">
+                    <div className="text-xs font-mono font-bold text-amber-300">
                       {advancedData.fibonacciLevels.fib0618GoldenPocket}
                     </div>
-                    <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
+                    <div className="text-[10px] font-mono text-slate-400">
                       Target 1.618: {advancedData.fibonacciLevels.fib1618Extension}
                     </div>
                   </div>
@@ -1156,20 +1333,20 @@ export function ScannerPage({
               </div>
 
               {/* ================= COINGLASS METRICS & ON-CHAIN DERIVATIVES SUITE ================= */}
-              <div className="bg-white dark:bg-[#0f1225] border border-slate-300 dark:border-indigo-950/80 rounded-xl p-4 sm:p-5 shadow-md space-y-4">
+              <div className="bg-[#0f1225] border border-indigo-950/80 rounded-xl p-4 sm:p-5 shadow-md space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Cpu className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+                    <Cpu className="w-5 h-5 text-cyan-400" />
                     <div>
-                      <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                      <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
                         Chỉ Số Phái Sinh Coinglass & Dòng Tiền (Derivatives Intelligence)
                       </h3>
-                      <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                      <p className="text-[11px] text-slate-400">
                         Theo dõi tỷ lệ cá mập (Top Traders), hợp đồng mở OI, Funding đa sàn và độ nén Squeeze
                       </p>
                     </div>
                   </div>
-                  <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold font-mono bg-cyan-500/10 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300 border border-cyan-500/30">
+                  <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
                     Coinglass Live
                   </span>
                 </div>
@@ -1177,14 +1354,14 @@ export function ScannerPage({
                 {/* Grid 4 cards of Coinglass metrics */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                   {/* 1. Top Traders Long/Short Ratio */}
-                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#141830] border border-slate-200 dark:border-indigo-900/40 space-y-2">
+                  <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-2">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-500 dark:text-slate-400 font-medium">Top Traders L/S</span>
-                      <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                      <span className="text-slate-400 font-medium">Top Traders L/S</span>
+                      <span className="font-mono font-bold text-emerald-400">
                         {coinglassData.topTradersLongRatio}% Long
                       </span>
                     </div>
-                    <div className="h-2 w-full flex rounded-full overflow-hidden bg-slate-200 dark:bg-[#090b14]">
+                    <div className="h-2 w-full flex rounded-full overflow-hidden bg-[#090b14]">
                       <div
                         className="h-full bg-emerald-500"
                         style={{ width: `${coinglassData.topTradersLongRatio}%` }}
@@ -1194,62 +1371,62 @@ export function ScannerPage({
                         style={{ width: `${coinglassData.topTradersShortRatio}%` }}
                       />
                     </div>
-                    <div className="flex justify-between text-[10px] font-mono text-slate-500">
+                    <div className="flex justify-between text-[10px] font-mono text-slate-400">
                       <span>Retail: {coinglassData.retailLongRatio}% L</span>
                       <span>{coinglassData.retailShortRatio}% S</span>
                     </div>
                   </div>
 
                   {/* 2. Open Interest Total & 24h Delta */}
-                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#141830] border border-slate-200 dark:border-indigo-900/40 space-y-1">
+                  <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-1">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-500 dark:text-slate-400 font-medium">Open Interest (OI)</span>
-                      <span className="text-[10px] font-bold font-mono text-emerald-600 dark:text-emerald-400">
+                      <span className="text-slate-400 font-medium">Open Interest (OI)</span>
+                      <span className="text-[10px] font-bold font-mono text-emerald-400">
                         {coinglassData.openInterestDelta24h}
                       </span>
                     </div>
-                    <div className="text-lg font-black text-slate-900 dark:text-white font-mono">
+                    <div className="text-lg font-black text-white font-mono">
                       {coinglassData.openInterestTotalUSD}
                     </div>
-                    <div className="text-[10px] text-slate-500">
+                    <div className="text-[10px] text-slate-400">
                       Dòng tiền đòn bẩy phái sinh
                     </div>
                   </div>
 
                   {/* 3. Multi-Exchange Funding Rates */}
-                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#141830] border border-slate-200 dark:border-indigo-900/40 space-y-1.5">
+                  <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-1.5">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-500 dark:text-slate-400 font-medium">Funding Đa Sàn (8h)</span>
-                      <span className="text-[10px] text-cyan-600 dark:text-cyan-400 font-mono">Real-time</span>
+                      <span className="text-slate-400 font-medium">Funding Đa Sàn (8h)</span>
+                      <span className="text-[10px] text-cyan-400 font-mono">Real-time</span>
                     </div>
                     <div className="grid grid-cols-3 gap-1 text-center font-mono text-[10px]">
-                      <div className="p-1 rounded bg-white dark:bg-[#090b14] border border-slate-200 dark:border-indigo-950/60">
-                        <div className="text-slate-500 dark:text-slate-400 text-[9px]">Binance</div>
-                        <div className="font-bold text-emerald-600 dark:text-emerald-400">{coinglassData.fundingRateBinance}</div>
+                      <div className="p-1 rounded bg-[#090b14] border border-indigo-950/60">
+                        <div className="text-slate-400 text-[9px]">Binance</div>
+                        <div className="font-bold text-emerald-400">{coinglassData.fundingRateBinance}</div>
                       </div>
-                      <div className="p-1 rounded bg-white dark:bg-[#090b14] border border-slate-200 dark:border-indigo-950/60">
-                        <div className="text-slate-500 dark:text-slate-400 text-[9px]">OKX</div>
-                        <div className="font-bold text-emerald-600 dark:text-emerald-400">{coinglassData.fundingRateOKX}</div>
+                      <div className="p-1 rounded bg-[#090b14] border border-indigo-950/60">
+                        <div className="text-slate-400 text-[9px]">OKX</div>
+                        <div className="font-bold text-emerald-400">{coinglassData.fundingRateOKX}</div>
                       </div>
-                      <div className="p-1 rounded bg-white dark:bg-[#090b14] border border-slate-200 dark:border-indigo-950/60">
-                        <div className="text-slate-500 dark:text-slate-400 text-[9px]">Bybit</div>
-                        <div className="font-bold text-emerald-600 dark:text-emerald-400">{coinglassData.fundingRateBybit}</div>
+                      <div className="p-1 rounded bg-[#090b14] border border-indigo-950/60">
+                        <div className="text-slate-400 text-[9px]">Bybit</div>
+                        <div className="font-bold text-emerald-400">{coinglassData.fundingRateBybit}</div>
                       </div>
                     </div>
                   </div>
 
                   {/* 4. Fear & Greed + Squeeze Momentum */}
-                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#141830] border border-slate-200 dark:border-indigo-900/40 space-y-1">
+                  <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-1">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-500 dark:text-slate-400 font-medium">Fear & Greed</span>
-                      <span className="font-mono font-bold text-amber-600 dark:text-amber-400">
+                      <span className="text-slate-400 font-medium">Fear & Greed</span>
+                      <span className="font-mono font-bold text-amber-400">
                         {coinglassData.fearGreedIndex.score}/100
                       </span>
                     </div>
-                    <div className="text-xs font-bold text-amber-700 dark:text-amber-300">
+                    <div className="text-xs font-bold text-amber-300">
                       {coinglassData.fearGreedIndex.label}
                     </div>
-                    <div className="text-[10px] text-cyan-600 dark:text-cyan-400 font-mono break-words leading-tight">
+                    <div className="text-[10px] text-cyan-400 font-mono break-words leading-tight">
                       {coinglassData.squeezeMomentum}
                     </div>
                   </div>
@@ -1262,8 +1439,8 @@ export function ScannerPage({
                   onClick={() => setTradingMode("spot")}
                   className={`flex items-center justify-between p-3.5 rounded-xl border transition-all cursor-pointer text-left ${
                     tradingMode === "spot"
-                      ? "bg-indigo-50 dark:bg-[#131a38] border-emerald-500 dark:border-emerald-500/50 shadow-md ring-1 ring-emerald-500/30"
-                      : "bg-white dark:bg-[#0f1225] border-slate-300 dark:border-indigo-950/80 hover:bg-slate-50 dark:hover:bg-[#141830] text-slate-600 dark:text-slate-400"
+                      ? "bg-[#131a38] border-emerald-500/50 shadow-md ring-1 ring-emerald-500/30 text-white"
+                      : "bg-[#0f1225] border-indigo-950/80 hover:bg-[#141830] text-slate-400"
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
@@ -1271,14 +1448,14 @@ export function ScannerPage({
                       className={`w-3 h-3 rounded-full border-2 ${
                         tradingMode === "spot"
                           ? "border-emerald-500 bg-emerald-500"
-                          : "border-slate-400 bg-transparent"
+                          : "border-slate-500 bg-transparent"
                       }`}
                     />
-                    <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
+                    <span className="font-bold text-xs sm:text-sm text-white">
                       GIAO DỊCH SPOT
                     </span>
                   </div>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase font-mono bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 border border-emerald-500/40">
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/40">
                     {spotData.signalLabel || "MUA GOM"}
                   </span>
                 </button>
@@ -1287,8 +1464,8 @@ export function ScannerPage({
                   onClick={() => setTradingMode("future")}
                   className={`flex items-center justify-between p-3.5 rounded-xl border transition-all cursor-pointer text-left ${
                     tradingMode === "future"
-                      ? "bg-indigo-50 dark:bg-[#131a38] border-cyan-500 dark:border-cyan-500/50 shadow-md ring-1 ring-cyan-500/30"
-                      : "bg-white dark:bg-[#0f1225] border-slate-300 dark:border-indigo-950/80 hover:bg-slate-50 dark:hover:bg-[#141830] text-slate-600 dark:text-slate-400"
+                      ? "bg-[#131a38] border-cyan-500/50 shadow-md ring-1 ring-cyan-500/30 text-white"
+                      : "bg-[#0f1225] border-indigo-950/80 hover:bg-[#141830] text-slate-400"
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
@@ -1296,14 +1473,14 @@ export function ScannerPage({
                       className={`w-3 h-3 rounded-full border-2 ${
                         tradingMode === "future"
                           ? "border-cyan-500 bg-cyan-500"
-                          : "border-slate-400 bg-transparent"
+                          : "border-slate-500 bg-transparent"
                       }`}
                     />
-                    <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
+                    <span className="font-bold text-xs sm:text-sm text-white">
                       GIAO DỊCH FUTURE
                     </span>
                   </div>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase font-mono bg-cyan-500/10 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300 border border-cyan-500/40">
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/40">
                     {futureData.positionLabel || "LONG"}
                   </span>
                 </button>
@@ -1313,22 +1490,22 @@ export function ScannerPage({
               {tradingMode === "future" ? (
                 /* ==================== FUTURE / MARGIN STREAM VIEW ==================== */
                 <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 px-1 pt-1">
-                    <Target className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-300 px-1 pt-1">
+                    <Target className="w-4 h-4 text-cyan-400" />
                     <span className="uppercase tracking-wider">TỔNG QUAN PHÂN TÍCH PHÁI SINH</span>
                   </div>
 
                   {/* 3 KPI Cards */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-300 dark:border-indigo-950/80 space-y-2">
-                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
-                        <Flame className="w-4 h-4 text-amber-500" />
+                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-2">
+                      <div className="flex items-center gap-2 text-slate-400 text-xs">
+                        <Flame className="w-4 h-4 text-amber-400" />
                         <span>Tỷ lệ Thắng (Winrate Futures)</span>
                       </div>
-                      <div className="text-2xl font-black text-cyan-600 dark:text-cyan-400 font-mono">
+                      <div className="text-2xl font-black text-cyan-400 font-mono">
                         {futureData.winRatePercent}%
                       </div>
-                      <div className="w-full h-1.5 bg-slate-200 dark:bg-[#141830] rounded-full overflow-hidden">
+                      <div className="w-full h-1.5 bg-[#141830] rounded-full overflow-hidden">
                         <div
                           className="h-full bg-gradient-to-r from-cyan-400 to-emerald-400 rounded-full"
                           style={{ width: `${futureData.winRatePercent}%` }}
@@ -1336,28 +1513,28 @@ export function ScannerPage({
                       </div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-300 dark:border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
-                        <Shield className="w-4 h-4 text-amber-500" />
+                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
+                      <div className="flex items-center gap-2 text-slate-400 text-xs">
+                        <Shield className="w-4 h-4 text-amber-400" />
                         <span>Mức Rủi Ro Vốn (Risk per Trade)</span>
                       </div>
-                      <div className="text-2xl font-black text-amber-600 dark:text-amber-400 font-mono">
+                      <div className="text-2xl font-black text-amber-400 font-mono">
                         {futureData.capitalRiskPercent}
                       </div>
-                      <div className="text-[11px] text-slate-500">
+                      <div className="text-[11px] text-slate-400">
                         Giới hạn tối đa không cháy tài khoản
                       </div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-300 dark:border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
-                        <Scale className="w-4 h-4 text-emerald-500" />
+                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
+                      <div className="flex items-center gap-2 text-slate-400 text-xs">
+                        <Scale className="w-4 h-4 text-emerald-400" />
                         <span>Tỷ lệ Risk / Reward (R:R)</span>
                       </div>
-                      <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
+                      <div className="text-2xl font-black text-emerald-400 font-mono">
                         {futureData.riskRewardRatio}
                       </div>
-                      <div className="text-[11px] text-slate-500">
+                      <div className="text-[11px] text-slate-400">
                         Tỷ lệ kỳ vọng lợi nhuận trên vốn
                       </div>
                     </div>
@@ -1365,50 +1542,50 @@ export function ScannerPage({
 
                   {/* 4 Execution Strategy Cards */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-300 dark:border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-1.5 text-xs text-cyan-600 dark:text-cyan-400 font-bold">
+                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
+                      <div className="flex items-center gap-1.5 text-xs text-cyan-400 font-bold">
                         <Target className="w-3.5 h-3.5" />
                         <span>VÙNG ENTRY LỆNH</span>
                       </div>
-                      <div className="text-base font-black text-slate-900 dark:text-white font-mono pt-1">
+                      <div className="text-base font-black text-white font-mono pt-1">
                         {futureData.entryZone}
                       </div>
-                      <div className="text-[11px] text-slate-500">Vào lệnh có kỷ luật</div>
+                      <div className="text-[11px] text-slate-400">Vào lệnh có kỷ luật</div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-300 dark:border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold">
+                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
+                      <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-bold">
                         <TrendingUp className="w-3.5 h-3.5" />
                         <span>CHỐT LỜI TP1</span>
                       </div>
-                      <div className="text-base font-black text-emerald-600 dark:text-emerald-400 font-mono pt-1">
+                      <div className="text-base font-black text-emerald-400 font-mono pt-1">
                         {futureData.targetPrice1}
                       </div>
-                      <div className="text-[11px] text-slate-500">Đạt L1 về hòa vốn</div>
+                      <div className="text-[11px] text-slate-400">Đạt L1 về hòa vốn</div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-300 dark:border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold">
+                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
+                      <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-bold">
                         <Crown className="w-3.5 h-3.5" />
                         <span>CHỐT LỜI TP2 / TP3</span>
                       </div>
-                      <div className="text-base font-black text-emerald-600 dark:text-emerald-300 font-mono pt-1">
+                      <div className="text-base font-black text-emerald-300 font-mono pt-1">
                         {futureData.targetPrice2}
                       </div>
-                      <div className="text-[11px] text-slate-500 font-mono">
+                      <div className="text-[11px] text-slate-400 font-mono">
                         {futureData.targetPrice3}
                       </div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-rose-300 dark:border-rose-950/60 space-y-1">
-                      <div className="flex items-center gap-1.5 text-xs text-rose-600 dark:text-rose-400 font-bold">
+                    <div className="p-4 rounded-xl bg-[#0f1225] border border-rose-950/60 space-y-1">
+                      <div className="flex items-center gap-1.5 text-xs text-rose-400 font-bold">
                         <ShieldAlert className="w-3.5 h-3.5" />
                         <span>STOP LOSS / LIQ PRICE</span>
                       </div>
-                      <div className="text-base font-black text-rose-600 dark:text-rose-400 font-mono pt-1">
+                      <div className="text-base font-black text-rose-400 font-mono pt-1">
                         {futureData.stopLoss}
                       </div>
-                      <div className="text-[11px] text-slate-500 font-mono">
+                      <div className="text-[11px] text-slate-400 font-mono">
                         Giá thanh lý: {futureData.estLiquidationPrice}
                       </div>
                     </div>
@@ -1416,27 +1593,27 @@ export function ScannerPage({
 
                   {/* 2 Wide Technical Modules */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-300 dark:border-indigo-950/80 space-y-3">
+                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-3">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
-                          <BarChart2 className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                        <div className="flex items-center gap-2 text-xs font-bold text-white">
+                          <BarChart2 className="w-4 h-4 text-cyan-400" />
                           <span>Tỷ lệ Long / Short Ratio</span>
                         </div>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 border border-emerald-500/30">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                           {futureData.metrics.longShortRatio.sentiment || "Bullish"}
                         </span>
                       </div>
 
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs font-mono font-bold">
-                          <span className="text-emerald-600 dark:text-emerald-400">
+                          <span className="text-emerald-400">
                             LONG: {futureData.metrics.longShortRatio.longPercent}%
                           </span>
-                          <span className="text-rose-600 dark:text-rose-400">
+                          <span className="text-rose-400">
                             SHORT: {futureData.metrics.longShortRatio.shortPercent}%
                           </span>
                         </div>
-                        <div className="h-2 w-full flex rounded-full overflow-hidden bg-slate-200 dark:bg-[#141830]">
+                        <div className="h-2 w-full flex rounded-full overflow-hidden bg-[#141830]">
                           <div
                             className="h-full bg-emerald-500"
                             style={{ width: `${futureData.metrics.longShortRatio.longPercent}%` }}
@@ -1448,44 +1625,44 @@ export function ScannerPage({
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 dark:bg-[#141830] border border-slate-200 dark:border-indigo-950/60 text-xs">
+                      <div className="flex items-center justify-between p-2.5 rounded-lg bg-[#141830] border border-indigo-950/60 text-xs">
                         <div className="flex items-center gap-2">
-                          <Droplets className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
-                          <span className="text-slate-500 dark:text-slate-400">Funding Rate:</span>
+                          <Droplets className="w-3.5 h-3.5 text-cyan-400" />
+                          <span className="text-slate-400">Funding Rate:</span>
                         </div>
                         <div className="flex items-center gap-2 font-mono">
-                          <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                          <span className="font-bold text-emerald-400">
                             {futureData.metrics.fundingRate.rate}
                           </span>
-                          <span className="text-[10px] text-slate-500">
+                          <span className="text-[10px] text-slate-400">
                             ({futureData.metrics.fundingRate.status})
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-300 dark:border-indigo-950/80 space-y-3">
+                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-3">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
-                          <Layers className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                        <div className="flex items-center gap-2 text-xs font-bold text-white">
+                          <Layers className="w-4 h-4 text-indigo-400" />
                           <span>Bản đồ Cụm Thanh Lý</span>
                         </div>
-                        <span className="text-[11px] text-slate-500">OI: {futureData.metrics.openInterest}</span>
+                        <span className="text-[11px] text-slate-400">OI: {futureData.metrics.openInterest}</span>
                       </div>
 
-                      <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#141830] border border-rose-200 dark:border-rose-950/40 space-y-1">
+                      <div className="p-2.5 rounded-lg bg-[#141830] border border-rose-950/40 space-y-1">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-rose-700 dark:text-rose-300 text-[11px]">Thanh Lý Short</span>
-                          <span className="font-mono font-bold text-rose-600 dark:text-rose-400">
+                          <span className="text-rose-300 text-[11px]">Thanh Lý Short</span>
+                          <span className="font-mono font-bold text-rose-400">
                             {futureData.metrics.liquidationHeatmap.shortLiquidationPool}
                           </span>
                         </div>
                       </div>
 
-                      <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#141830] border border-emerald-200 dark:border-emerald-950/40 space-y-1">
+                      <div className="p-2.5 rounded-lg bg-[#141830] border border-emerald-950/40 space-y-1">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-emerald-700 dark:text-emerald-300 text-[11px]">Thanh Lý Long</span>
-                          <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                          <span className="text-emerald-300 text-[11px]">Thanh Lý Long</span>
+                          <span className="font-mono font-bold text-emerald-400">
                             {futureData.metrics.liquidationHeatmap.longLiquidationPool}
                           </span>
                         </div>
@@ -1494,19 +1671,19 @@ export function ScannerPage({
                   </div>
 
                   {/* Final Verdict Banner (Futures) */}
-                  <div className="p-4 sm:p-5 rounded-xl bg-emerald-50 dark:bg-[#0c2221] border border-emerald-500/40 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="p-4 sm:p-5 rounded-xl bg-[#0c2221] border border-emerald-500/40 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-start gap-3">
-                      <div className="p-2.5 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shrink-0 mt-0.5">
+                      <div className="p-2.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shrink-0 mt-0.5">
                         <Zap className="w-5 h-5" />
                       </div>
                       <div>
-                        <div className="text-[10px] uppercase font-bold tracking-wider text-emerald-600 dark:text-emerald-400 font-mono">
+                        <div className="text-[10px] uppercase font-bold tracking-wider text-emerald-400 font-mono">
                           KẾT LUẬN HIỆN TẠI (FUTURES & MARGIN)
                         </div>
-                        <h3 className="text-base font-bold text-slate-900 dark:text-white mt-0.5">
+                        <h3 className="text-base font-bold text-white mt-0.5">
                           Khuyến Nghị Vị Thế Phái Sinh
                         </h3>
-                        <p className="text-xs text-slate-700 dark:text-slate-300 mt-1 max-w-2xl leading-relaxed">
+                        <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
                           {futureData.finalVerdict.summaryText}
                         </p>
                       </div>
@@ -1530,15 +1707,15 @@ export function ScannerPage({
 
                   {/* 3 KPI Cards */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-300 dark:border-indigo-950/80 space-y-2">
-                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
-                        <Gauge className="w-4 h-4 text-emerald-500" />
+                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-2">
+                      <div className="flex items-center gap-2 text-slate-400 text-xs">
+                        <Gauge className="w-4 h-4 text-emerald-400" />
                         <span>Chỉ số Winrate Spot Kỳ Vọng</span>
                       </div>
-                      <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
+                      <div className="text-2xl font-black text-emerald-400 font-mono">
                         {spotData.winRatePercent}%
                       </div>
-                      <div className="w-full h-1.5 bg-slate-200 dark:bg-[#141830] rounded-full overflow-hidden">
+                      <div className="w-full h-1.5 bg-[#141830] rounded-full overflow-hidden">
                         <div
                           className="h-full bg-gradient-to-r from-emerald-400 to-teal-300 rounded-full"
                           style={{ width: `${spotData.winRatePercent}%` }}
@@ -1546,28 +1723,28 @@ export function ScannerPage({
                       </div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-300 dark:border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
-                        <TrendingUp className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
+                      <div className="flex items-center gap-2 text-slate-400 text-xs">
+                        <TrendingUp className="w-4 h-4 text-cyan-400" />
                         <span>Xu Hướng Chính (Trend)</span>
                       </div>
-                      <div className="text-base font-black text-cyan-700 dark:text-cyan-300 pt-1">
+                      <div className="text-base font-black text-cyan-300 pt-1">
                         {spotData.trend}
                       </div>
-                      <div className="text-[11px] text-slate-500">
+                      <div className="text-[11px] text-slate-400">
                         {spotData.indicators.emaTrend}
                       </div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-300 dark:border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
-                        <Scale className="w-4 h-4 text-amber-500" />
+                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
+                      <div className="flex items-center gap-2 text-slate-400 text-xs">
+                        <Scale className="w-4 h-4 text-amber-400" />
                         <span>Tỷ lệ Risk / Reward (R:R)</span>
                       </div>
-                      <div className="text-2xl font-black text-amber-600 dark:text-amber-400 font-mono">
+                      <div className="text-2xl font-black text-amber-400 font-mono">
                         {spotData.riskRewardRatio}
                       </div>
-                      <div className="text-[11px] text-slate-500">
+                      <div className="text-[11px] text-slate-400">
                         Được tính toán theo phân bổ DCA
                       </div>
                     </div>
@@ -1575,105 +1752,105 @@ export function ScannerPage({
 
                   {/* 4 Spot Execution Strategy Cards */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-300 dark:border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold">
+                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
+                      <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-bold">
                         <Target className="w-3.5 h-3.5" />
                         <span>VÙNG MUA GOM (BUY)</span>
                       </div>
-                      <div className="text-base font-black text-slate-900 dark:text-white font-mono pt-1">
+                      <div className="text-base font-black text-white font-mono pt-1">
                         {spotData.entryZone}
                       </div>
-                      <div className="text-[11px] text-slate-500">Chia vốn mua 3 đợt</div>
+                      <div className="text-[11px] text-slate-400">Chia vốn mua 3 đợt</div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-300 dark:border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-1.5 text-xs text-cyan-600 dark:text-cyan-400 font-bold">
+                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
+                      <div className="flex items-center gap-1.5 text-xs text-cyan-400 font-bold">
                         <TrendingUp className="w-3.5 h-3.5" />
                         <span>CHỐT LỜI TP1</span>
                       </div>
-                      <div className="text-base font-black text-cyan-600 dark:text-cyan-400 font-mono pt-1">
+                      <div className="text-base font-black text-cyan-400 font-mono pt-1">
                         {spotData.targetPrice1}
                       </div>
-                      <div className="text-[11px] text-slate-500">Chốt 30-40% gốc</div>
+                      <div className="text-[11px] text-slate-400">Chốt 30-40% gốc</div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-300 dark:border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-1.5 text-xs text-cyan-600 dark:text-cyan-300 font-bold">
+                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
+                      <div className="flex items-center gap-1.5 text-xs text-cyan-300 font-bold">
                         <Crown className="w-3.5 h-3.5" />
                         <span>CHỐT LỜI TP2 / TP3</span>
                       </div>
-                      <div className="text-base font-black text-cyan-600 dark:text-cyan-300 font-mono pt-1">
+                      <div className="text-base font-black text-cyan-300 font-mono pt-1">
                         {spotData.targetPrice2}
                       </div>
-                      <div className="text-[11px] text-slate-500 font-mono">
+                      <div className="text-[11px] text-slate-400 font-mono">
                         {spotData.targetPrice3}
                       </div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-rose-300 dark:border-rose-950/60 space-y-1">
-                      <div className="flex items-center gap-1.5 text-xs text-rose-600 dark:text-rose-400 font-bold">
+                    <div className="p-4 rounded-xl bg-[#0f1225] border border-rose-950/60 space-y-1">
+                      <div className="flex items-center gap-1.5 text-xs text-rose-400 font-bold">
                         <ShieldAlert className="w-3.5 h-3.5" />
                         <span>CẮT LỖ AN TOÀN (SL)</span>
                       </div>
-                      <div className="text-base font-black text-rose-600 dark:text-rose-400 font-mono pt-1">
+                      <div className="text-base font-black text-rose-400 font-mono pt-1">
                         {spotData.stopLoss}
                       </div>
-                      <div className="text-[11px] text-slate-500">Bảo toàn vốn danh mục</div>
+                      <div className="text-[11px] text-slate-400">Bảo toàn vốn danh mục</div>
                     </div>
                   </div>
 
                   {/* 2 Spot Technical Modules */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-300 dark:border-indigo-950/80 space-y-3">
+                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-3">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
-                          <BarChart2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                        <div className="flex items-center gap-2 text-xs font-bold text-white">
+                          <BarChart2 className="w-4 h-4 text-emerald-400" />
                           <span>Vùng Thanh Khoản & Order Block</span>
                         </div>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 border border-indigo-500/30">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                           RSI: {spotData.indicators.rsi.value}
                         </span>
                       </div>
 
                       <div className="space-y-2">
-                        <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#141830] border border-emerald-200 dark:border-emerald-950/40">
-                          <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">Vùng Cầu Mua:</div>
-                          <div className="text-xs font-mono font-bold text-slate-900 dark:text-white mt-0.5">
+                        <div className="p-2.5 rounded-lg bg-[#141830] border border-emerald-950/40">
+                          <div className="text-[11px] text-emerald-400 font-semibold">Vùng Cầu Mua:</div>
+                          <div className="text-xs font-mono font-bold text-white mt-0.5">
                             {spotData.liquidity.highLiquidityZone}
                           </div>
                         </div>
 
-                        <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#141830] border border-rose-200 dark:border-rose-950/40">
-                          <div className="text-[11px] text-rose-600 dark:text-rose-400 font-semibold">Vùng Cung Bán:</div>
-                          <div className="text-xs font-mono font-bold text-slate-900 dark:text-white mt-0.5">
+                        <div className="p-2.5 rounded-lg bg-[#141830] border border-rose-950/40">
+                          <div className="text-[11px] text-rose-400 font-semibold">Vùng Cung Bán:</div>
+                          <div className="text-xs font-mono font-bold text-white mt-0.5">
                             {spotData.liquidity.supplyZone}
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-300 dark:border-indigo-950/80 space-y-3">
+                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-3">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
-                          <Layers className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                        <div className="flex items-center gap-2 text-xs font-bold text-white">
+                          <Layers className="w-4 h-4 text-cyan-400" />
                           <span>Hỗ Trợ & Kháng Cự</span>
                         </div>
-                        <span className="text-xs text-emerald-600 dark:text-emerald-400 font-mono font-bold">
+                        <span className="text-xs text-emerald-400 font-mono font-bold">
                           {spotData.indicators.volumeProfile}
                         </span>
                       </div>
 
                       <div className="space-y-2">
-                        <div className="flex justify-between p-2.5 rounded-lg bg-slate-50 dark:bg-[#141830] border border-slate-200 dark:border-indigo-950/60 text-xs">
-                          <span className="text-slate-500 dark:text-slate-400">Hỗ trợ quan trọng:</span>
-                          <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                        <div className="flex justify-between p-2.5 rounded-lg bg-[#141830] border border-indigo-950/60 text-xs">
+                          <span className="text-slate-400">Hỗ trợ quan trọng:</span>
+                          <span className="font-mono font-bold text-emerald-400">
                             {spotData.indicators.supportResistance.support}
                           </span>
                         </div>
 
-                        <div className="flex justify-between p-2.5 rounded-lg bg-slate-50 dark:bg-[#141830] border border-slate-200 dark:border-indigo-950/60 text-xs">
-                          <span className="text-slate-500 dark:text-slate-400">Kháng cự then chốt:</span>
-                          <span className="font-mono font-bold text-rose-600 dark:text-rose-400">
+                        <div className="flex justify-between p-2.5 rounded-lg bg-[#141830] border border-indigo-950/60 text-xs">
+                          <span className="text-slate-400">Kháng cự then chốt:</span>
+                          <span className="font-mono font-bold text-rose-400">
                             {spotData.indicators.supportResistance.resistance}
                           </span>
                         </div>
@@ -1682,19 +1859,19 @@ export function ScannerPage({
                   </div>
 
                   {/* Final Verdict Banner (Spot) */}
-                  <div className="p-4 sm:p-5 rounded-xl bg-emerald-50 dark:bg-[#0c2221] border border-emerald-500/40 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="p-4 sm:p-5 rounded-xl bg-[#0c2221] border border-emerald-500/40 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-start gap-3">
-                      <div className="p-2.5 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shrink-0 mt-0.5">
+                      <div className="p-2.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shrink-0 mt-0.5">
                         <Zap className="w-5 h-5" />
                       </div>
                       <div>
-                        <div className="text-[10px] uppercase font-bold tracking-wider text-emerald-600 dark:text-emerald-400 font-mono">
+                        <div className="text-[10px] uppercase font-bold tracking-wider text-emerald-400 font-mono">
                           KẾT LUẬN HIỆN TẠI (SPOT TRADING)
                         </div>
-                        <h3 className="text-base font-bold text-slate-900 dark:text-white mt-0.5">
+                        <h3 className="text-base font-bold text-white mt-0.5">
                           Khuyến Nghị Tích Lũy Spot
                         </h3>
-                        <p className="text-xs text-slate-700 dark:text-slate-300 mt-1 max-w-2xl leading-relaxed">
+                        <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
                           {spotData.finalVerdict.summaryText}
                         </p>
                       </div>
@@ -1716,33 +1893,33 @@ export function ScannerPage({
 
       {/* ================= USER ANALYSIS HISTORY TABLE ================= */}
       {user && (
-        <div className="bg-white dark:bg-[#0f1225] border border-slate-300 dark:border-indigo-950/80 rounded-xl p-4 sm:p-5 shadow-md space-y-4 mt-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-indigo-950/80 pb-3">
+        <div id="analysis-history-section" className="bg-[#0f1225] border border-indigo-950/80 rounded-xl p-4 sm:p-5 shadow-md space-y-4 mt-6 scroll-mt-20">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-indigo-950/80 pb-3">
             <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+              <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
                 <History className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                <h3 className="text-base font-bold text-white">
                   Bảng Lịch Sử Phân Tích Cá Nhân
                 </h3>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                <p className="text-[11px] text-slate-400">
                   Danh sách các đồng crypto bạn đã phân tích kèm nội dung nhận định và thời điểm
                 </p>
               </div>
             </div>
 
-            <div className="text-xs text-slate-500">
-              Tổng cộng: <span className="font-bold text-slate-900 dark:text-white">{history.length}</span> lượt phân tích
+            <div className="text-xs text-slate-400">
+              Tổng cộng: <span className="font-bold text-white">{history.length}</span> lượt phân tích
             </div>
           </div>
 
           {history.length === 0 ? (
             <div className="py-10 text-center space-y-2">
-              <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-[#141830] flex items-center justify-center mx-auto text-slate-400">
+              <div className="w-12 h-12 rounded-full bg-[#141830] flex items-center justify-center mx-auto text-slate-400">
                 <Clock className="w-6 h-6" />
               </div>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-400">
                 Bạn chưa thực hiện lượt phân tích nào. Nhấn nút "Phân tích" ở trên để lưu lịch sử!
               </p>
             </div>
@@ -1750,7 +1927,7 @@ export function ScannerPage({
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-200 dark:border-indigo-950/80 text-[11px] text-slate-500 uppercase font-semibold">
+                  <tr className="border-b border-indigo-950/80 text-[11px] text-slate-400 uppercase font-semibold">
                     <th className="py-2.5 px-3">Crypto</th>
                     <th className="py-2.5 px-3">Giá Lúc Quét</th>
                     <th className="py-2.5 px-3">Tín Hiệu Spot</th>
@@ -1760,11 +1937,11 @@ export function ScannerPage({
                     <th className="py-2.5 px-3 text-right">Thao Tác</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-indigo-950/40">
+                <tbody className="divide-y divide-indigo-950/40">
                   {history.map((item) => (
                     <tr
                       key={item.id}
-                      className="hover:bg-slate-50 dark:hover:bg-[#141830]/60 transition cursor-pointer"
+                      className="hover:bg-[#141830]/60 transition cursor-pointer"
                       onClick={() => handleReloadHistory(item)}
                     >
                       <td className="py-3 px-3">
@@ -1777,39 +1954,39 @@ export function ScannerPage({
                             />
                           )}
                           <div>
-                            <div className="font-bold text-slate-900 dark:text-white">
+                            <div className="font-bold text-white">
                               {item.symbol}
                             </div>
-                            <div className="text-[10px] text-slate-500 truncate max-w-[100px]">
+                            <div className="text-[10px] text-slate-400 truncate max-w-[100px]">
                               {item.name}
                             </div>
                           </div>
                         </div>
                       </td>
 
-                      <td className="py-3 px-3 font-mono font-semibold text-slate-900 dark:text-white">
+                      <td className="py-3 px-3 font-mono font-semibold text-white">
                         ${item.price_at_analysis ? item.price_at_analysis.toLocaleString("en-US", { maximumFractionDigits: item.price_at_analysis < 1 ? 4 : 2 }) : "---"}
                       </td>
 
                       <td className="py-3 px-3">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 border border-emerald-500/30">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                           {item.spot_action}
                         </span>
                       </td>
 
                       <td className="py-3 px-3">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-cyan-500/10 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-400 border border-cyan-500/30">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
                           {item.future_action}
                         </span>
                       </td>
 
                       <td className="py-3 px-3 max-w-[280px]">
-                        <p className="text-[11px] text-slate-600 dark:text-slate-300 truncate" title={item.summary_text}>
+                        <p className="text-[11px] text-slate-300 truncate" title={item.summary_text}>
                           {item.summary_text || "Đã phân tích các chỉ số kỹ thuật và dòng tiền."}
                         </p>
                       </td>
 
-                      <td className="py-3 px-3 font-mono text-[11px] text-slate-500 whitespace-nowrap">
+                      <td className="py-3 px-3 font-mono text-[11px] text-slate-400 whitespace-nowrap">
                         {formatTime(item.created_at)}
                       </td>
 
@@ -1817,7 +1994,7 @@ export function ScannerPage({
                         <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
                           <button
                             onClick={() => handleReloadHistory(item)}
-                            className="px-2.5 py-1 rounded bg-indigo-50 dark:bg-indigo-900/40 hover:bg-indigo-100 dark:hover:bg-indigo-800/60 text-indigo-700 dark:text-indigo-300 text-[11px] font-semibold border border-indigo-200 dark:border-indigo-700/40 transition flex items-center gap-1"
+                            className="px-2.5 py-1 rounded bg-indigo-900/40 hover:bg-indigo-800/60 text-indigo-300 text-[11px] font-semibold border border-indigo-700/40 transition flex items-center gap-1"
                             title="Tải lại kết quả phân tích"
                           >
                             <Eye className="w-3 h-3" />
@@ -1825,7 +2002,7 @@ export function ScannerPage({
                           </button>
                           <button
                             onClick={(e) => handleDeleteHistory(item.id, e)}
-                            className="p-1 rounded text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition"
+                            className="p-1 rounded text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 transition"
                             title="Xóa khỏi lịch sử"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
