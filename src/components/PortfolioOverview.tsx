@@ -61,10 +61,10 @@ export function PortfolioOverview({ onOpenAddModal }: PortfolioOverviewProps) {
 
           <div className="mt-3">
             <div className="text-3xl font-extrabold text-white tracking-tight font-mono">
-              ${Math.round(totalValueUSD).toLocaleString("en-US")}
+              ${Math.round(totalValueUSD ?? 0).toLocaleString("en-US")}
             </div>
             <div className="text-xs text-zinc-400 mt-1 font-mono">
-              ≈ {Math.round(totalValueVND).toLocaleString("vi-VN")} VNĐ
+              ≈ {Math.round(totalValueVND ?? 0).toLocaleString("vi-VN")} VNĐ
             </div>
           </div>
 
@@ -82,8 +82,8 @@ export function PortfolioOverview({ onOpenAddModal }: PortfolioOverviewProps) {
                   <TrendingDown className="w-3.5 h-3.5" />
                 )}
                 {isProfitable ? "+" : ""}
-                ${Math.round(totalPnLUSD).toLocaleString("en-US")} ({isProfitable ? "+" : ""}
-                {pnlPercent.toFixed(2)}%)
+                ${Math.round(totalPnLUSD ?? 0).toLocaleString("en-US")} ({isProfitable ? "+" : ""}
+                {(pnlPercent ?? 0).toFixed(2)}%)
               </span>
             </div>
 

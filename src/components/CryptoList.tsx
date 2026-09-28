@@ -61,7 +61,12 @@ export function CryptoList({
           </thead>
           <tbody className="divide-y divide-zinc-800/60 font-sans">
             {cryptos.map((coin) => {
-              const isPositive = coin.price_change_percentage_24h >= 0;
+              const change24h = coin.price_change_percentage_24h ?? 0;
+              const isPositive = change24h >= 0;
+              const price = coin.current_price ?? 0;
+              const volume = coin.total_volume ?? 0;
+              const marketCap = coin.market_cap ?? 0;
+
               return (
                 <tr key={coin.id} className="hover:bg-zinc-800/40 transition">
                   <td className="py-3.5 flex items-center gap-3">
@@ -75,7 +80,7 @@ export function CryptoList({
                     </div>
                   </td>
                   <td className="py-3.5 text-right font-medium text-zinc-100 font-mono">
-                    ${coin.current_price.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                    ${price.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                   </td>
                   <td className="py-3.5 text-right font-mono">
                     <span
@@ -91,14 +96,14 @@ export function CryptoList({
                         <TrendingDown className="w-3.5 h-3.5" />
                       )}
                       {isPositive ? "+" : ""}
-                      {coin.price_change_percentage_24h.toFixed(2)}%
+                      {change24h.toFixed(2)}%
                     </span>
                   </td>
                   <td className="py-3.5 text-right text-xs text-zinc-400 hidden sm:table-cell font-mono">
-                    ${(coin.total_volume / 1e6).toLocaleString("en-US", { maximumFractionDigits: 1 })}M
+                    ${(volume / 1e6).toLocaleString("en-US", { maximumFractionDigits: 1 })}M
                   </td>
                   <td className="py-3.5 text-right text-xs text-zinc-400 hidden md:table-cell font-mono">
-                    ${(coin.market_cap / 1e9).toLocaleString("en-US", { maximumFractionDigits: 2 })}B
+                    ${(marketCap / 1e9).toLocaleString("en-US", { maximumFractionDigits: 2 })}B
                   </td>
                   <td className="py-3.5 text-center">
                     <div className="flex items-center justify-center gap-1.5">

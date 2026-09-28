@@ -89,13 +89,19 @@ export function ScannerPage({
 
     // Sort
     if (sortBy === "gainers") {
-      list.sort((a, b) => b.price_change_percentage_24h - a.price_change_percentage_24h);
+      list.sort(
+        (a, b) =>
+          (b.price_change_percentage_24h ?? 0) - (a.price_change_percentage_24h ?? 0)
+      );
     } else if (sortBy === "losers") {
-      list.sort((a, b) => a.price_change_percentage_24h - b.price_change_percentage_24h);
+      list.sort(
+        (a, b) =>
+          (a.price_change_percentage_24h ?? 0) - (b.price_change_percentage_24h ?? 0)
+      );
     } else if (sortBy === "volume") {
-      list.sort((a, b) => b.total_volume - a.total_volume);
+      list.sort((a, b) => (b.total_volume ?? 0) - (a.total_volume ?? 0));
     } else {
-      list.sort((a, b) => (b.market_cap || 0) - (a.market_cap || 0));
+      list.sort((a, b) => (b.market_cap ?? 0) - (a.market_cap ?? 0));
     }
 
     return list;
@@ -321,7 +327,9 @@ export function ScannerPage({
             <div className="space-y-1.5 max-h-[620px] overflow-y-auto pr-1 scrollbar-thin">
               {filteredCoins.map((coin) => {
                 const isSelected = selectedCoin?.symbol.toUpperCase() === coin.symbol.toUpperCase();
-                const isPositive = coin.price_change_percentage_24h >= 0;
+                const change24h = coin.price_change_percentage_24h ?? 0;
+                const isPositive = change24h >= 0;
+                const price = coin.current_price ?? 0;
 
                 return (
                   <div
@@ -361,7 +369,7 @@ export function ScannerPage({
 
                     <div className="text-right shrink-0">
                       <div className="font-bold text-xs text-zinc-100 font-mono">
-                        ${coin.current_price.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                        ${price.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                       </div>
                       <div
                         className={`text-[10px] font-semibold font-mono flex items-center justify-end gap-0.5 ${
@@ -369,7 +377,7 @@ export function ScannerPage({
                         }`}
                       >
                         {isPositive ? "+" : ""}
-                        {coin.price_change_percentage_24h.toFixed(2)}%
+                        {change24h.toFixed(2)}%
                       </div>
                     </div>
                   </div>
@@ -401,17 +409,17 @@ export function ScannerPage({
                     </div>
                     <div className="flex items-center gap-3 mt-1 text-xs">
                       <span className="text-xl font-black text-white font-mono">
-                        ${selectedCoin.current_price.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                        ${(selectedCoin.current_price ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                       </span>
                       <span
                         className={`font-bold font-mono px-2 py-0.5 rounded-md ${
-                          selectedCoin.price_change_percentage_24h >= 0
+                          (selectedCoin.price_change_percentage_24h ?? 0) >= 0
                             ? "bg-emerald-500/10 text-emerald-400"
                             : "bg-rose-500/10 text-rose-400"
                         }`}
                       >
-                        {selectedCoin.price_change_percentage_24h >= 0 ? "+" : ""}
-                        {selectedCoin.price_change_percentage_24h.toFixed(2)}% (24h)
+                        {(selectedCoin.price_change_percentage_24h ?? 0) >= 0 ? "+" : ""}
+                        {(selectedCoin.price_change_percentage_24h ?? 0).toFixed(2)}% (24h)
                       </span>
                     </div>
                   </div>

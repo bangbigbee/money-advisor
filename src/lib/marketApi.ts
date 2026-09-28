@@ -87,7 +87,22 @@ export async function fetchTopCryptos(perPage: number = 100): Promise<CryptoItem
       { next: { revalidate: 60 } }
     );
     if (!res.ok) throw new Error("Failed to fetch CoinGecko API");
-    const data: CryptoItem[] = await res.json();
+    const rawData: any[] = await res.json();
+    const data: CryptoItem[] = rawData.map((c) => ({
+      id: c.id || "",
+      symbol: c.symbol || "",
+      name: c.name || "",
+      current_price: typeof c.current_price === "number" ? c.current_price : 0,
+      price_change_percentage_24h:
+        typeof c.price_change_percentage_24h === "number"
+          ? c.price_change_percentage_24h
+          : 0,
+      total_volume: typeof c.total_volume === "number" ? c.total_volume : 0,
+      market_cap: typeof c.market_cap === "number" ? c.market_cap : 0,
+      market_cap_rank: c.market_cap_rank || undefined,
+      image: c.image || "",
+      sparkline_in_7d: c.sparkline_in_7d,
+    }));
     return data;
   } catch (err) {
     console.warn("CoinGecko rate limit or offline, using extensive top coins fallback");

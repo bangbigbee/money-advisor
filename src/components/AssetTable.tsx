@@ -154,7 +154,7 @@ export function AssetTable({ onOpenAddModal }: { onOpenAddModal: () => void }) {
 
                     {/* Amount */}
                     <td className="py-3.5 px-4 text-right font-mono font-medium text-zinc-200">
-                      {asset.amount.toLocaleString("en-US", { maximumFractionDigits: 6 })}
+                      {(asset.amount ?? 0).toLocaleString("en-US", { maximumFractionDigits: 6 })}
                     </td>
 
                     {/* Prices */}
@@ -162,22 +162,22 @@ export function AssetTable({ onOpenAddModal }: { onOpenAddModal: () => void }) {
                       <div className="text-zinc-400">
                         Mua:{" "}
                         {asset.currency === "VND"
-                          ? `${asset.buyPrice.toLocaleString()}₫`
-                          : `$${asset.buyPrice.toLocaleString()}`}
+                          ? `${(asset.buyPrice ?? 0).toLocaleString()}₫`
+                          : `$${(asset.buyPrice ?? 0).toLocaleString()}`}
                       </div>
                       <div className="text-zinc-100 font-semibold">
                         Hiện tại:{" "}
                         {asset.currency === "VND"
-                          ? `${Math.round(asset.currentPrice).toLocaleString()}₫`
-                          : `$${asset.currentPrice.toLocaleString()}`}
+                          ? `${Math.round(asset.currentPrice ?? 0).toLocaleString()}₫`
+                          : `$${(asset.currentPrice ?? 0).toLocaleString()}`}
                       </div>
                     </td>
 
                     {/* Total Value */}
                     <td className="py-3.5 px-4 text-right font-mono font-bold text-zinc-100">
-                      ${Math.round(asset.totalValueUSD).toLocaleString("en-US")}
+                      ${Math.round(asset.totalValueUSD ?? 0).toLocaleString("en-US")}
                       <div className="text-[10px] text-zinc-500 font-normal">
-                        ≈ {Math.round(asset.totalValueVND).toLocaleString("vi-VN")}₫
+                        ≈ {Math.round(asset.totalValueVND ?? 0).toLocaleString("vi-VN")}₫
                       </div>
                     </td>
 
@@ -195,7 +195,7 @@ export function AssetTable({ onOpenAddModal }: { onOpenAddModal: () => void }) {
                         )}
                         <span>
                           {isProfitable ? "+" : ""}
-                          ${Math.round(asset.pnlUSD).toLocaleString("en-US")}
+                          ${Math.round(asset.pnlUSD ?? 0).toLocaleString("en-US")}
                         </span>
                       </div>
                       <div
@@ -204,13 +204,13 @@ export function AssetTable({ onOpenAddModal }: { onOpenAddModal: () => void }) {
                         }`}
                       >
                         {isProfitable ? "+" : ""}
-                        {asset.pnlPercent.toFixed(2)}%
+                        {(asset.pnlPercent ?? 0).toFixed(2)}%
                       </div>
                     </td>
 
                     {/* Share percent */}
                     <td className="py-3.5 px-4 text-center font-mono text-zinc-300">
-                      {asset.sharePercent.toFixed(1)}%
+                      {(asset.sharePercent ?? 0).toFixed(1)}%
                     </td>
 
                     {/* Actions */}
