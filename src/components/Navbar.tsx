@@ -10,11 +10,8 @@ import {
   LogOut,
   User as UserIcon,
   Cloud,
-  Settings,
-  ShieldCheck,
   ChevronDown,
   Scan,
-  Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -22,7 +19,6 @@ interface NavbarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   onOpenAddModal: () => void;
-  onOpenGuideModal: () => void;
   onOpenScanModal?: () => void;
 }
 
@@ -30,10 +26,9 @@ export function Navbar({
   activeTab,
   setActiveTab,
   onOpenAddModal,
-  onOpenGuideModal,
   onOpenScanModal,
 }: NavbarProps) {
-  const { user, isLoading, isConfigured, signInWithGoogle, signOut } = useAuth();
+  const { user, isLoading, signInWithGoogle, signOut } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const navItems = [
@@ -44,7 +39,11 @@ export function Navbar({
   ];
 
   const userAvatar = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
-  const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split("@")[0] || "Người dùng";
+  const userName =
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
+    user?.email?.split("@")[0] ||
+    "Người dùng";
 
   return (
     <header className="sticky top-0 z-40 backdrop-blur-xl bg-zinc-950/80 border-b border-zinc-800/80 text-zinc-100">
@@ -91,7 +90,7 @@ export function Navbar({
           </nav>
 
           {/* Actions & Auth */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3">
             {/* AI Scan Button */}
             {onOpenScanModal && (
               <button
@@ -112,15 +111,6 @@ export function Navbar({
               <PlusCircle className="h-4 w-4" />
               <span className="hidden sm:inline">Giao dịch mới</span>
               <span className="sm:hidden">+ Thêm</span>
-            </button>
-
-            {/* Cloud Config Guide Trigger */}
-            <button
-              onClick={onOpenGuideModal}
-              title="Hướng dẫn cấu hình Cloud & Google OAuth"
-              className="p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800 transition cursor-pointer"
-            >
-              <Settings className="h-4 w-4" />
             </button>
 
             {/* Google Auth / Profile Button */}

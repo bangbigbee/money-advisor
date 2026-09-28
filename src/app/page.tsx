@@ -6,12 +6,10 @@ import { PortfolioOverview } from "@/components/PortfolioOverview";
 import { AssetTable } from "@/components/AssetTable";
 import { AddAssetModal } from "@/components/AddAssetModal";
 import { ScanModal } from "@/components/ScanModal";
-import { SupabaseConfigGuideModal } from "@/components/SupabaseConfigGuideModal";
 import { CryptoList } from "@/components/CryptoList";
 import { GoldForexList } from "@/components/GoldForexList";
 import { TradingViewWidget } from "@/components/TradingViewWidget";
 import { PortfolioProvider } from "@/context/PortfolioContext";
-import { useAuth } from "@/context/AuthContext";
 import {
   fetchTopCryptos,
   initialGoldForexData,
@@ -23,9 +21,6 @@ import {
   RefreshCw,
   Sparkles,
   Scan,
-  TrendingUp,
-  Target,
-  ShieldCheck,
 } from "lucide-react";
 
 export default function Home() {
@@ -39,7 +34,6 @@ export default function Home() {
   // Modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [addModalPrefill, setAddModalPrefill] = useState<any>(null);
-  const [isGuideModalOpen, setIsGuideModalOpen] = useState(false);
   const [isScanModalOpen, setIsScanModalOpen] = useState(false);
   const [selectedScanCoin, setSelectedScanCoin] = useState<CryptoItem | null>(null);
 
@@ -86,7 +80,6 @@ export default function Home() {
             setAddModalPrefill(null);
             setIsAddModalOpen(true);
           }}
-          onOpenGuideModal={() => setIsGuideModalOpen(true)}
           onOpenScanModal={() => {
             setSelectedScanCoin(null);
             setIsScanModalOpen(true);
@@ -295,10 +288,6 @@ export default function Home() {
           cryptos={cryptos}
           initialSelectedCoin={selectedScanCoin}
           onOpenAddAssetModal={handleOpenAddWithPrefill}
-        />
-        <SupabaseConfigGuideModal
-          isOpen={isGuideModalOpen}
-          onClose={() => setIsGuideModalOpen(false)}
         />
 
         {/* Footer */}
