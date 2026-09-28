@@ -13,17 +13,24 @@ export async function POST(req: Request) {
 
     const client = supabaseAdmin && process.env.SUPABASE_SECRET_KEY ? supabaseAdmin : supabase;
 
-    // Check if user already exists
+    // Check if user already exists in DB
     const { data: existingUser } = await client
       .from("user_profiles")
       .select("*")
       .eq("id", id)
-      .single();
+      .maybeSingle();
 
     const isAdmin = email.toLowerCase() === "bangdtbk@gmail.com";
     const userRole = isAdmin ? "ADMIN" : (existingUser?.role || role || "STARTER");
     
-    let currentScans = existingUser ? Number(existingUser.scans_used) || 0 : (typeof scansUsed === "number" ? scansUsed : 0);
+    // Priority: explicitly provided scansUsed > existingUser scans_used > 0
+    let currentScans = 0;
+    if (typeof scansUsed === "number") {
+      currentScans = scansUsed;
+    } else if (existingUser) {
+      currentScans = Number(existingUser.scans_used) || 0;
+    }
+
     if (incrementScan) {
       currentScans += 1;
     }

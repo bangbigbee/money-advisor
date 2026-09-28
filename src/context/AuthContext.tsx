@@ -71,7 +71,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async function syncAndFetchProfile() {
       if (isAdmin) {
         setRoleState("ADMIN");
-        setScansUsed(0);
       }
 
       try {
@@ -87,7 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               email.split("@")[0],
             avatarUrl:
               user?.user_metadata?.avatar_url || user?.user_metadata?.picture,
-            role: isAdmin ? "ADMIN" : "STARTER",
+            role: isAdmin ? "ADMIN" : undefined,
           }),
         });
 
@@ -108,7 +107,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const savedTier = localStorage.getItem(userKey);
       if (isAdmin) {
         setRoleState("ADMIN");
-        setScansUsed(0);
       } else if (savedTier) {
         try {
           const parsed = JSON.parse(savedTier);
@@ -224,10 +222,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const useScanQuota = (): boolean => {
-    if (role === "ADMIN" || role === "ULTRA") {
-      return true;
-    }
-    if (remainingScans <= 0) {
+    // If user has a limited tier and exceeded quota, deny
+    if (role !== "ADMIN" && role !== "ULTRA" && remainingScans <= 0) {
       return false;
     }
 
