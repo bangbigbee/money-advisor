@@ -34,10 +34,18 @@ import {
   Check,
   TrendingDown as TrendDownIcon,
   HelpCircle,
+  Radio,
+  LineChart,
+  Compass,
+  PieChart as PieIcon,
+  Cpu,
+  Eye,
 } from "lucide-react";
 import { CryptoItem } from "@/lib/marketApi";
-import { ScanResult } from "@/app/api/ai-scan/route";
+import { ScanResult, WavePatternAnalysis, CoinglassMetrics } from "@/app/api/ai-scan/route";
 import { useAuth } from "@/context/AuthContext";
+import { TradingViewWidget } from "@/components/TradingViewWidget";
+import { useTheme } from "@/context/ThemeContext";
 
 interface ScannerPageProps {
   cryptos: CryptoItem[];
@@ -45,27 +53,21 @@ interface ScannerPageProps {
   onOpenUpgradeModal?: () => void;
 }
 
-const DEFAULT_CATEGORIES = [
-  { id: "all", label: "Tất cả" },
-  { id: "gainers", label: "Top Gainer" },
-  { id: "losers", label: "Top Loser" },
-  { id: "watchlist", label: "Watchlist +" },
-];
-
 export function ScannerPage({
   cryptos,
   onOpenAddAssetModal,
   onOpenUpgradeModal,
 }: ScannerPageProps) {
   const { role, remainingScans, scansLimit, useScanQuota, canScan } = useAuth();
+  const { theme } = useTheme();
 
   const [selectedCoin, setSelectedCoin] = useState<CryptoItem | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState<string>("all");
   const [timeframe, setTimeframe] = useState<"short" | "medium" | "long">("medium");
   const [tradingMode, setTradingMode] = useState<"spot" | "future">("future");
+  const [chartViewMode, setChartViewMode] = useState<"wave" | "tradingview">("wave");
   const [watchlist, setWatchlist] = useState<string[]>(["BTC", "ETH", "SOL"]);
-  const [mobileView, setMobileView] = useState<"analysis" | "coins">("analysis");
 
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
@@ -169,17 +171,57 @@ export function ScannerPage({
 
   const isUnlimited = role === "ADMIN" || role === "ULTRA";
 
-  // Dynamic fallback calculation if not scanned yet
+  // Dynamic calculations
   const currentCoinPrice = selectedCoin?.current_price ?? 0;
   const currentCoinChange = selectedCoin?.price_change_percentage_24h ?? 0;
   const isPositive = currentCoinChange >= 0;
 
   // Render mock or real scan data
+  const waveData: WavePatternAnalysis = scanResult?.wavePattern || {
+    patternType: "ELLIOTT_IMPULSE_12345",
+    patternName: isPositive
+      ? "Sóng Đẩy Elliott 5 Bước (Wave 3 Impulse Extension)"
+      : "Sóng Hiệu Chỉnh ABC (Zigzag Correction Wave)",
+    currentWave: isPositive
+      ? "Đang ở sóng đẩy 3 (Wave 3) - Pha tăng trưởng mạnh nhất chu kỳ"
+      : "Đang hoàn tất sóng hiệu chỉnh C kiểm định lại hỗ trợ cứng",
+    waveDescription: isPositive
+      ? "Cấu trúc Higher High (HH) và Higher Low (HL) liên tục hình thành. Khối lượng bứt phá xác nhận dòng tiền tổ chức tham gia mạnh."
+      : "Áp lực bán ngắn hạn ép giá về vùng chiết khấu Fibo 0.618. Xuất hiện tín hiệu phân kỳ dương báo hiệu sớm đảo chiều.",
+    swingHigh: `$${(currentCoinPrice * 1.08).toLocaleString("en-US", { maximumFractionDigits: 2 })}`,
+    swingLow: `$${(currentCoinPrice * 0.935).toLocaleString("en-US", { maximumFractionDigits: 2 })}`,
+    keyFibonacciLevel: `Vùng Tỷ Lệ Vàng Fibo 0.618 ($${(currentCoinPrice * 0.965).toFixed(2)}) giữ vững lực đỡ`,
+    projectedTargetWave: `$${(currentCoinPrice * 1.22).toLocaleString("en-US", { maximumFractionDigits: 2 })} (Mục tiêu Sóng 5)`,
+  };
+
+  const coinglassData: CoinglassMetrics = scanResult?.coinglass || {
+    topTradersLongRatio: isPositive ? 68 : 44,
+    topTradersShortRatio: isPositive ? 32 : 56,
+    retailLongRatio: isPositive ? 54 : 48,
+    retailShortRatio: isPositive ? 46 : 52,
+    fundingRateBinance: isPositive ? "+0.015%" : "-0.008%",
+    fundingRateOKX: isPositive ? "+0.012%" : "-0.005%",
+    fundingRateBybit: isPositive ? "+0.016%" : "-0.009%",
+    openInterestTotalUSD: `$${((currentCoinPrice * 2.85) / 100).toFixed(2)}B`,
+    openInterestDelta24h: isPositive ? "+14.6%" : "-6.2%",
+    takerBuyRatio: isPositive ? 58 : 42,
+    cvdStatus: isPositive
+      ? "Phân kỳ tích cực (Bullish CVD Divergence)"
+      : "Phân kỳ âm (Bearish CVD Divergence)",
+    squeezeMomentum: isPositive
+      ? "Đang bung xung lượng tăng (Firing Bullish Momentum)"
+      : "Độ nén cao (Squeeze ON) - Sắp bùng nổ",
+    fearGreedIndex: {
+      score: isPositive ? 74 : 46,
+      label: isPositive ? "Tham lam (Greed)" : "Trung lập (Neutral)",
+    },
+  };
+
   const spotData = scanResult?.spot || {
     signal: isPositive ? "BUY" : "HOLD",
     signalLabel: isPositive ? "MUA GOM" : "QUAN SÁT",
-    winRatePercent: 72,
-    overallScore: 8.2,
+    winRatePercent: 74,
+    overallScore: 8.4,
     riskRewardRatio: "1 : 2.8",
     trend: isPositive ? "Tăng trưởng Bullish" : "Tích lũy Sideway",
     entryZone: `$${(currentCoinPrice * 0.97).toLocaleString("en-US", { maximumFractionDigits: 4 })} - $${(currentCoinPrice * 0.99).toLocaleString("en-US", { maximumFractionDigits: 4 })}`,
@@ -189,29 +231,29 @@ export function ScannerPage({
     stopLoss: `$${(currentCoinPrice * 0.92).toLocaleString("en-US", { maximumFractionDigits: 4 })}`,
     liquidity: {
       highLiquidityZone: `$${(currentCoinPrice * 0.95).toLocaleString("en-US", { maximumFractionDigits: 2 })} (Order Block Mua)`,
-      thinLiquidityZone: `$${(currentCoinPrice * 1.08).toLocaleString("en-US", { maximumFractionDigits: 2 })}`,
-      supplyZone: `$${(currentCoinPrice * 1.18).toLocaleString("en-US", { maximumFractionDigits: 2 })} (Vùng Chốt Lời Kháng Cự)`,
+      thinLiquidityZone: `$${(currentCoinPrice * 1.08).toLocaleString("en-US", { maximumFractionDigits: 2 })} (Fair Value Gap)`,
+      supplyZone: `$${(currentCoinPrice * 1.18).toLocaleString("en-US", { maximumFractionDigits: 2 })} (Vùng Cung Chốt Lời)`,
     },
     indicators: {
-      emaTrend: "Nằm trên EMA 50 & 200",
-      rsi: { value: 58, status: "Vùng Tích Lũy Lành Mạnh" },
-      macd: "Giao cắt MACD hướng lên (Bullish Cross)",
-      volumeProfile: "Khối lượng mua chủ động tăng 28%",
+      emaTrend: "Giá vận động phía trên dải EMA Ribbon (20/50/200)",
+      rsi: { value: 62, status: "Vùng tích lũy xung lực tăng (Bullish Momentum)" },
+      macd: "MACD Histogram dương, đường Signal cắt lên",
+      volumeProfile: "Khối lượng mua chủ động chiếm 64%",
       supportResistance: {
         support: `$${(currentCoinPrice * 0.94).toFixed(2)}`,
         resistance: `$${(currentCoinPrice * 1.12).toFixed(2)}`,
       },
     },
-    strategyAdvice: "Chiến lược Spot: Phân bổ vốn DCA 3 đợt tại vùng hỗ trợ. Giữ kỷ luật chốt lời từng phần khi giá tiệm cận kháng cự.",
-    riskWarning: "Không dồn toàn bộ vốn all-in một điểm; đặt Stoploss bảo vệ danh mục.",
+    strategyAdvice: "Chia vốn DCA thành 3 đợt tại vùng hỗ trợ Order Block. Đạt TP1 dời SL về hòa vốn.",
+    riskWarning: "Đặt Stoploss bảo vệ tài khoản, tránh rủi ro biến động toàn thị trường.",
     finalVerdict: {
       action: isPositive ? "NÊN MUA" : "QUAN SÁT",
       actionType: isPositive ? "BUY" : "WAIT",
       summaryText: isPositive
-        ? "Cấu trúc thị trường Spot duy trì đà tăng trưởng ổn định. Dòng tiền tích lũy tốt tại các vùng giá hỗ trợ cứng."
+        ? "Cấu trúc dòng tiền tích lũy mạnh mẽ trên đồ thị Spot. Các chỉ số kỹ thuật duy trì đà tăng trưởng ổn định."
         : "Thị trường đang tích lũy đi ngang. Nên quan sát thêm tín hiệu xác nhận dòng tiền trước khi giải ngân lớn.",
-      keyReason: "Chỉ báo RSI & EMA đồng thuận hỗ trợ xu hướng tăng trung hạn.",
-      recommendedAction: "DCA vùng entry, chia chốt lời tại TP1 & TP2.",
+      keyReason: "Dải EMA và RSI đồng thuận hỗ trợ xu hướng tăng trung hạn với khối lượng gom hàng đều đặn.",
+      recommendedAction: "DCA mua gom theo vùng entry, hiện thực hóa lợi nhuận tại TP1 & TP2.",
     },
   };
 
@@ -219,9 +261,9 @@ export function ScannerPage({
     position: isPositive ? "LONG" : "SHORT",
     positionLabel: isPositive ? "LONG" : "SHORT",
     recommendedLeverage: "3x - 5x (An Toàn)",
-    capitalRiskPercent: "3%",
-    winRatePercent: 65,
-    overallScore: 8.5,
+    capitalRiskPercent: "2 - 3%",
+    winRatePercent: 68,
+    overallScore: 8.6,
     riskRewardRatio: "1 : 3",
     entryZone: `$${(currentCoinPrice * 0.985).toLocaleString("en-US", { maximumFractionDigits: 4 })} - $${currentCoinPrice.toLocaleString("en-US", { maximumFractionDigits: 4 })}`,
     targetPrice1: `$${(currentCoinPrice * 1.058).toLocaleString("en-US", { maximumFractionDigits: 4 })}`,
@@ -231,16 +273,16 @@ export function ScannerPage({
     estLiquidationPrice: `$${(currentCoinPrice * 0.82).toLocaleString("en-US", { maximumFractionDigits: 4 })}`,
     metrics: {
       longShortRatio: {
-        longPercent: 62,
-        shortPercent: 38,
-        ratioText: "1.63",
-        sentiment: "Bullish",
+        longPercent: isPositive ? 64 : 38,
+        shortPercent: isPositive ? 36 : 62,
+        ratioText: isPositive ? "1.77" : "0.61",
+        sentiment: isPositive ? "Bullish" : "Bearish",
       },
       fundingRate: {
-        rate: "+0.016%",
-        status: "Longs trả phí cho Shorts",
+        rate: isPositive ? "+0.016%" : "-0.008%",
+        status: isPositive ? "Longs trả phí cho Shorts" : "Shorts trả phí cho Longs",
       },
-      openInterest: "Tăng 18%",
+      openInterest: isPositive ? "Tăng 18%" : "Giảm 6%",
       liquidationHeatmap: {
         shortLiquidationPool: `$${(currentCoinPrice * 1.04).toFixed(1)} - $${(currentCoinPrice * 1.07).toFixed(1)}`,
         longLiquidationPool: `$${(currentCoinPrice * 0.93).toFixed(1)} - $${(currentCoinPrice * 0.96).toFixed(1)}`,
@@ -257,12 +299,16 @@ export function ScannerPage({
       action: isPositive ? "NÊN LONG" : "QUAN SÁT",
       actionType: isPositive ? "LONG" : "WAIT",
       summaryText: isPositive
-        ? "Cấu trúc thị trường futures cho thấy áp lực mua mạnh và tỷ lệ long vượt trội. Ưu tiên canh các nhịp điều chỉnh để vào lệnh theo xu hướng."
+        ? "Cấu trúc thị trường futures cho thấy áp lực mua mạnh và tỷ lệ Top Traders Long vượt trội. Ưu tiên canh nhịp hồi về hỗ trợ để Long thuận xu hướng."
         : "Lực bán ngắn hạn đang chiếm ưu thế nhẹ. Thận trọng với các bẫy quét thanh lý hai đầu.",
-      keyReason: "Tỷ lệ Long/Short 62% kết hợp Funding Rate dương nhẹ và Open Interest tăng trưởng vững chắc.",
-      recommendedAction: "Vào vị thế Long theo vùng Entry, đặt SL bảo toàn vốn.",
+      keyReason: "Open Interest tăng mạnh cùng Funding Rate dương lành mạnh và tỷ lệ Long/Short 62% ủng hộ đà bứt phá.",
+      recommendedAction: "Mở vị thế Long tại vùng Entry kỷ luật, cài Stoploss và chốt lời từng phần.",
     },
   };
+
+  const tradingViewSymbol = selectedCoin
+    ? `BINANCE:${selectedCoin.symbol.toUpperCase()}USDT`
+    : "BINANCE:BTCUSDT";
 
   return (
     <div className="space-y-5 bg-[#090b14] min-h-screen text-slate-100 p-2 sm:p-4 rounded-3xl">
@@ -275,14 +321,14 @@ export function ScannerPage({
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-base sm:text-lg font-black text-white tracking-tight">
-                AI Crypto Scanner 2.0
+                AI Crypto Scanner 2.0 Pro
               </h1>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                Spot & Phái Sinh
+                Sóng Elliott & Coinglass Analytics
               </span>
             </div>
             <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
-              Phân tích đa chiều: Tín hiệu Mua/Bán Spot, Vùng thanh khoản Order Block, Tỷ lệ Long/Short & Bản đồ Thanh lý Futures
+              Tích hợp Dạng sóng Động, Biểu đồ Nến Live, Tỷ lệ Long/Short Top Traders & Bản đồ thanh lý đa sàn
             </p>
           </div>
         </div>
@@ -376,7 +422,7 @@ export function ScannerPage({
           </div>
 
           {/* Coins List Table Body */}
-          <div className="space-y-1 max-h-[560px] overflow-y-auto scrollbar-thin pr-1">
+          <div className="space-y-1 max-h-[580px] overflow-y-auto scrollbar-thin pr-1">
             {filteredCoins.length === 0 ? (
               <div className="py-8 text-center text-xs text-slate-500">
                 Không tìm thấy coin phù hợp
@@ -398,12 +444,10 @@ export function ScannerPage({
                         : "hover:bg-[#141830]/80 border border-transparent"
                     }`}
                   >
-                    {/* Index */}
                     <span className="col-span-1 text-[11px] font-mono text-slate-500">
                       {index + 1}
                     </span>
 
-                    {/* Coin Icon & Info */}
                     <div className="col-span-5 flex items-center gap-2">
                       <img
                         src={coin.image}
@@ -420,14 +464,12 @@ export function ScannerPage({
                       </div>
                     </div>
 
-                    {/* Price */}
                     <div className="col-span-3 text-right font-mono text-xs font-semibold text-white">
                       ${coin.current_price?.toLocaleString("en-US", {
                         maximumFractionDigits: coin.current_price < 1 ? 4 : 2,
                       })}
                     </div>
 
-                    {/* 24h Change & Star */}
                     <div className="col-span-3 flex items-center justify-end gap-1.5">
                       <span
                         className={`font-mono text-xs font-bold ${
@@ -438,7 +480,7 @@ export function ScannerPage({
                       </span>
                       <button
                         onClick={(e) => toggleWatchlist(coin.symbol, e)}
-                        className="text-slate-600 hover:text-amber-400 transition"
+                        className="text-slate-600 hover:text-amber-400 transition cursor-pointer"
                       >
                         <Star
                           className={`w-3.5 h-3.5 ${
@@ -478,7 +520,6 @@ export function ScannerPage({
           {/* Top Coin Header Card with Sparkline & Scan Button */}
           {selectedCoin && (
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-[#0f1225] border border-indigo-950/80 shadow-xl">
-              {/* Coin identity & price */}
               <div className="flex items-center gap-3.5">
                 <img
                   src={selectedCoin.image}
@@ -579,9 +620,288 @@ export function ScannerPage({
             </div>
           )}
 
+          {/* ================= WAVEFORM & TRADINGVIEW CHART SWITCHER SECTION ================= */}
+          <div className="bg-[#0f1225] border border-indigo-950/80 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Compass className="w-5 h-5 text-indigo-400" />
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                    Mô Hình Dạng Sóng & Biểu Đồ Trực Tuyến
+                  </h3>
+                  <p className="text-[11px] text-slate-400">
+                    Phân tích chu kỳ sóng Elliott, cấu trúc đỉnh đáy và nến trực tiếp
+                  </p>
+                </div>
+              </div>
+
+              {/* View mode toggle */}
+              <div className="flex items-center bg-[#141830] p-1 rounded-xl border border-indigo-900/50 text-xs">
+                <button
+                  onClick={() => setChartViewMode("wave")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition cursor-pointer ${
+                    chartViewMode === "wave"
+                      ? "bg-indigo-600 text-white shadow-sm"
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  <Radio className="w-3.5 h-3.5 text-indigo-300" />
+                  <span>Sơ Đồ Sóng AI</span>
+                </button>
+                <button
+                  onClick={() => setChartViewMode("tradingview")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition cursor-pointer ${
+                    chartViewMode === "tradingview"
+                      ? "bg-indigo-600 text-white shadow-sm"
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  <LineChart className="w-3.5 h-3.5 text-emerald-300" />
+                  <span>Nến Sống TradingView</span>
+                </button>
+              </div>
+            </div>
+
+            {chartViewMode === "wave" ? (
+              /* DYNAMIC WAVE PATTERN SVG VISUALIZER */
+              <div className="space-y-3.5">
+                <div className="p-4 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider font-mono">
+                        DẠNG SÓNG HIỆN TẠI (WAVE CYCLE)
+                      </span>
+                      <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
+                        <span>{waveData.patternName}</span>
+                      </h4>
+                    </div>
+                    <div className="px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-300 text-[11px] font-bold border border-indigo-500/30">
+                      {waveData.currentWave}
+                    </div>
+                  </div>
+
+                  {/* SVG Wave Visual Rendering */}
+                  <div className="relative h-44 sm:h-52 w-full bg-[#0b0e1b] rounded-xl border border-indigo-950/80 p-2 overflow-hidden flex items-center justify-center">
+                    <svg
+                      className="w-full h-full overflow-visible"
+                      viewBox="0 0 700 200"
+                      preserveAspectRatio="none"
+                    >
+                      <defs>
+                        <linearGradient id="waveGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.35" />
+                          <stop offset="100%" stopColor="#06b6d4" stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+
+                      {/* Grid lines */}
+                      <line x1="0" y1="50" x2="700" y2="50" stroke="#1e293b" strokeDasharray="3 3" />
+                      <line x1="0" y1="100" x2="700" y2="100" stroke="#1e293b" strokeDasharray="3 3" />
+                      <line x1="0" y1="150" x2="700" y2="150" stroke="#1e293b" strokeDasharray="3 3" />
+
+                      {/* Fill area */}
+                      <path
+                        d={
+                          isPositive
+                            ? "M 50 160 L 150 100 L 250 140 L 420 40 L 520 80 L 650 20 L 650 190 L 50 190 Z"
+                            : "M 50 40 L 180 140 L 320 80 L 480 170 L 650 120 L 650 190 L 50 190 Z"
+                        }
+                        fill="url(#waveGradient)"
+                      />
+
+                      {/* Stroke Line */}
+                      <path
+                        d={
+                          isPositive
+                            ? "M 50 160 L 150 100 L 250 140 L 420 40 L 520 80 L 650 20"
+                            : "M 50 40 L 180 140 L 320 80 L 480 170 L 650 120"
+                        }
+                        fill="none"
+                        stroke="#06b6d4"
+                        strokeWidth="3.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+
+                      {/* Wave Nodes & Labels */}
+                      {isPositive ? (
+                        <>
+                          <circle cx="50" cy="160" r="5" fill="#3b82f6" />
+                          <text x="50" y="180" fill="#94a3b8" fontSize="11" textAnchor="middle" fontWeight="bold">Start</text>
+
+                          <circle cx="150" cy="100" r="5" fill="#10b981" />
+                          <text x="150" y="90" fill="#10b981" fontSize="11" textAnchor="middle" fontWeight="bold">Wave 1</text>
+
+                          <circle cx="250" cy="140" r="5" fill="#f59e0b" />
+                          <text x="250" y="160" fill="#f59e0b" fontSize="11" textAnchor="middle" fontWeight="bold">Wave 2 (HL)</text>
+
+                          <circle cx="420" cy="40" r="7" fill="#06b6d4" className="animate-ping" />
+                          <circle cx="420" cy="40" r="6" fill="#06b6d4" />
+                          <text x="420" y="25" fill="#06b6d4" fontSize="12" textAnchor="middle" fontWeight="black">Wave 3 (Đang chạy 🔥)</text>
+
+                          <circle cx="520" cy="80" r="5" fill="#a855f7" strokeDasharray="2 2" />
+                          <text x="520" y="100" fill="#a855f7" fontSize="11" textAnchor="middle" fontWeight="bold">Wave 4 (Dự phóng)</text>
+
+                          <circle cx="650" cy="20" r="6" fill="#ec4899" />
+                          <text x="650" y="15" fill="#ec4899" fontSize="12" textAnchor="middle" fontWeight="black">Wave 5 (Target $)</text>
+                        </>
+                      ) : (
+                        <>
+                          <circle cx="50" cy="40" r="5" fill="#f43f5e" />
+                          <text x="50" y="30" fill="#f43f5e" fontSize="11" textAnchor="middle" fontWeight="bold">Top (HH)</text>
+
+                          <circle cx="180" cy="140" r="5" fill="#f43f5e" />
+                          <text x="180" y="160" fill="#f43f5e" fontSize="11" textAnchor="middle" fontWeight="bold">Sóng A</text>
+
+                          <circle cx="320" cy="80" r="5" fill="#f59e0b" />
+                          <text x="320" y="70" fill="#f59e0b" fontSize="11" textAnchor="middle" fontWeight="bold">Sóng B (Pullback)</text>
+
+                          <circle cx="480" cy="170" r="6" fill="#06b6d4" />
+                          <text x="480" y="190" fill="#06b6d4" fontSize="12" textAnchor="middle" fontWeight="black">Sóng C (Đáy Fibo 0.618)</text>
+
+                          <circle cx="650" cy="120" r="5" fill="#10b981" />
+                          <text x="650" y="110" fill="#10b981" fontSize="11" textAnchor="middle" fontWeight="bold">Rebound Mới</text>
+                        </>
+                      )}
+                    </svg>
+                  </div>
+
+                  {/* Wave Pattern details & targets */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 text-xs">
+                    <div className="p-2.5 rounded-lg bg-[#0b0e1b] border border-indigo-950/60">
+                      <span className="text-[10px] text-slate-400">Đỉnh / Đáy Swing:</span>
+                      <div className="font-mono font-bold text-white mt-0.5">
+                        High: {waveData.swingHigh} • Low: {waveData.swingLow}
+                      </div>
+                    </div>
+
+                    <div className="p-2.5 rounded-lg bg-[#0b0e1b] border border-indigo-950/60">
+                      <span className="text-[10px] text-amber-400">Fibo Key Level:</span>
+                      <div className="font-mono font-bold text-amber-300 mt-0.5 truncate">
+                        {waveData.keyFibonacciLevel}
+                      </div>
+                    </div>
+
+                    <div className="p-2.5 rounded-lg bg-[#0b0e1b] border border-indigo-950/60">
+                      <span className="text-[10px] text-emerald-400">Mục tiêu mở rộng:</span>
+                      <div className="font-mono font-bold text-emerald-300 mt-0.5 truncate">
+                        {waveData.projectedTargetWave}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* LIVE TRADINGVIEW CANDLESTICK CHART */
+              <div className="h-[420px] w-full rounded-xl overflow-hidden border border-indigo-950/80">
+                <TradingViewWidget symbol={tradingViewSymbol} theme={theme === "light" ? "light" : "dark"} />
+              </div>
+            )}
+          </div>
+
+          {/* ================= COINGLASS METRICS & ON-CHAIN DERIVATIVES SUITE ================= */}
+          <div className="bg-[#0f1225] border border-indigo-950/80 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Cpu className="w-5 h-5 text-cyan-400" />
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                    Chỉ Số Phái Sinh Coinglass & Dòng Tiền (Derivatives Intelligence)
+                  </h3>
+                  <p className="text-[11px] text-slate-400">
+                    Theo dõi tỷ lệ cá mập (Top Traders), hợp đồng mở OI, Funding đa sàn và độ nén Squeeze
+                  </p>
+                </div>
+              </div>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                Coinglass Live
+              </span>
+            </div>
+
+            {/* Grid 4 cards of Coinglass metrics */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {/* 1. Top Traders Long/Short Ratio */}
+              <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-400 font-medium">Top Traders L/S (Whales)</span>
+                  <span className="font-mono font-bold text-emerald-400">
+                    {coinglassData.topTradersLongRatio}% Long
+                  </span>
+                </div>
+                <div className="h-2 w-full flex rounded-full overflow-hidden bg-[#090b14]">
+                  <div
+                    className="h-full bg-emerald-400"
+                    style={{ width: `${coinglassData.topTradersLongRatio}%` }}
+                  />
+                  <div
+                    className="h-full bg-rose-500"
+                    style={{ width: `${coinglassData.topTradersShortRatio}%` }}
+                  />
+                </div>
+                <div className="flex justify-between text-[10px] font-mono text-slate-500">
+                  <span>Retail: {coinglassData.retailLongRatio}% L</span>
+                  <span>{coinglassData.retailShortRatio}% S</span>
+                </div>
+              </div>
+
+              {/* 2. Open Interest Total & 24h Delta */}
+              <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-400 font-medium">Open Interest (OI)</span>
+                  <span className="text-[10px] font-bold font-mono text-emerald-400">
+                    {coinglassData.openInterestDelta24h}
+                  </span>
+                </div>
+                <div className="text-lg font-black text-white font-mono">
+                  {coinglassData.openInterestTotalUSD}
+                </div>
+                <div className="text-[10px] text-slate-500">
+                  Dòng tiền đòn bẩy đang gia tăng
+                </div>
+              </div>
+
+              {/* 3. Multi-Exchange Funding Rates */}
+              <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-400 font-medium">Funding Đa Sàn (8h)</span>
+                  <span className="text-[10px] text-cyan-400 font-mono">Real-time</span>
+                </div>
+                <div className="grid grid-cols-3 gap-1 text-center font-mono text-[10px]">
+                  <div className="p-1 rounded bg-[#090b14] border border-indigo-950/60">
+                    <div className="text-slate-400 text-[9px]">Binance</div>
+                    <div className="font-bold text-emerald-400">{coinglassData.fundingRateBinance}</div>
+                  </div>
+                  <div className="p-1 rounded bg-[#090b14] border border-indigo-950/60">
+                    <div className="text-slate-400 text-[9px]">OKX</div>
+                    <div className="font-bold text-emerald-400">{coinglassData.fundingRateOKX}</div>
+                  </div>
+                  <div className="p-1 rounded bg-[#090b14] border border-indigo-950/60">
+                    <div className="text-slate-400 text-[9px]">Bybit</div>
+                    <div className="font-bold text-emerald-400">{coinglassData.fundingRateBybit}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 4. Fear & Greed + Squeeze Momentum */}
+              <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-400 font-medium">Fear & Greed Index</span>
+                  <span className="font-mono font-bold text-amber-400">
+                    {coinglassData.fearGreedIndex.score}/100
+                  </span>
+                </div>
+                <div className="text-xs font-bold text-amber-300">
+                  {coinglassData.fearGreedIndex.label}
+                </div>
+                <div className="text-[10px] text-cyan-400 font-mono truncate">
+                  {coinglassData.squeezeMomentum}
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* ================= DUAL-STREAM SWITCHER (SPOT vs FUTURE) ================= */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* Stream 1: SPOT (Nắm Giữ) */}
             <button
               onClick={() => setTradingMode("spot")}
               className={`flex items-center justify-between p-3.5 rounded-2xl border transition-all cursor-pointer text-left ${
@@ -607,7 +927,6 @@ export function ScannerPage({
               </span>
             </button>
 
-            {/* Stream 2: FUTURE / MARGIN (Đòn Bẩy) */}
             <button
               onClick={() => setTradingMode("future")}
               className={`flex items-center justify-between p-3.5 rounded-2xl border transition-all cursor-pointer text-left ${
@@ -638,15 +957,13 @@ export function ScannerPage({
           {tradingMode === "future" ? (
             /* ==================== FUTURE / MARGIN STREAM VIEW ==================== */
             <div className="space-y-4">
-              {/* Section Header */}
               <div className="flex items-center gap-2 text-xs font-bold text-slate-300 px-1 pt-1">
                 <Target className="w-4 h-4 text-cyan-400" />
                 <span className="uppercase tracking-wider">TỔNG QUAN PHÂN TÍCH PHÁI SINH</span>
               </div>
 
-              {/* 3 KPI Cards: Winrate, Capital Risk, Risk/Reward */}
+              {/* 3 KPI Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {/* 1. Winrate */}
                 <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-2">
                   <div className="flex items-center gap-2 text-slate-400 text-xs">
                     <Flame className="w-4 h-4 text-amber-400" />
@@ -663,7 +980,6 @@ export function ScannerPage({
                   </div>
                 </div>
 
-                {/* 2. Capital Risk */}
                 <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
                   <div className="flex items-center gap-2 text-slate-400 text-xs">
                     <Shield className="w-4 h-4 text-amber-400" />
@@ -677,7 +993,6 @@ export function ScannerPage({
                   </div>
                 </div>
 
-                {/* 3. Risk / Reward */}
                 <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
                   <div className="flex items-center gap-2 text-slate-400 text-xs">
                     <Scale className="w-4 h-4 text-emerald-400" />
@@ -692,9 +1007,8 @@ export function ScannerPage({
                 </div>
               </div>
 
-              {/* 4 Execution Strategy Cards: Entry, TP1, TP2/TP3, Stop Loss/Liq */}
+              {/* 4 Execution Strategy Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {/* Entry Zone */}
                 <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
                   <div className="flex items-center gap-1.5 text-xs text-cyan-400 font-bold">
                     <Target className="w-3.5 h-3.5" />
@@ -706,7 +1020,6 @@ export function ScannerPage({
                   <div className="text-[11px] text-slate-500">Vào lệnh có kỷ luật</div>
                 </div>
 
-                {/* TP1 */}
                 <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
                   <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-bold">
                     <TrendingUp className="w-3.5 h-3.5" />
@@ -718,7 +1031,6 @@ export function ScannerPage({
                   <div className="text-[11px] text-slate-500">Đạt L1 về hòa vốn</div>
                 </div>
 
-                {/* TP2 / TP3 */}
                 <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
                   <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-bold">
                     <Crown className="w-3.5 h-3.5" />
@@ -732,7 +1044,6 @@ export function ScannerPage({
                   </div>
                 </div>
 
-                {/* Stop Loss / Liq Price */}
                 <div className="p-4 rounded-2xl bg-[#0f1225] border border-rose-950/60 space-y-1">
                   <div className="flex items-center gap-1.5 text-xs text-rose-400 font-bold">
                     <ShieldAlert className="w-3.5 h-3.5" />
@@ -747,9 +1058,8 @@ export function ScannerPage({
                 </div>
               </div>
 
-              {/* 2 Wide Technical Modules: Long/Short Ratio & Liquidation Heatmap */}
+              {/* 2 Wide Technical Modules */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* 1. Long/Short Ratio Module */}
                 <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-xs font-bold text-white">
@@ -761,7 +1071,6 @@ export function ScannerPage({
                     </span>
                   </div>
 
-                  {/* Dual color progress bar */}
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs font-mono font-bold">
                       <span className="text-emerald-400">
@@ -783,12 +1092,10 @@ export function ScannerPage({
                     </div>
                   </div>
 
-                  {/* Warning / Explanation Text */}
                   <p className="text-[11px] text-slate-400 leading-relaxed">
                     Hệ số: {futureData.metrics.longShortRatio.ratioText} Long / Short. Cảnh báo: Nếu tỷ lệ Long quá áp đảo (&gt;65%), nguy cơ bị thị trường đảo giá quét thanh lý Long (Long Squeeze) là rất cao.
                   </p>
 
-                  {/* Bottom Submetric: Funding Rate */}
                   <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#141830] border border-indigo-950/60 text-xs">
                     <div className="flex items-center gap-2">
                       <Droplets className="w-3.5 h-3.5 text-cyan-400" />
@@ -805,7 +1112,6 @@ export function ScannerPage({
                   </div>
                 </div>
 
-                {/* 2. Liquidation Heatmap Module */}
                 <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-xs font-bold text-white">
@@ -818,7 +1124,6 @@ export function ScannerPage({
                     </button>
                   </div>
 
-                  {/* Short Liquidation Pool */}
                   <div className="p-2.5 rounded-xl bg-[#141830] border border-rose-950/40 space-y-1">
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-rose-300 text-[11px]">Cụm Thanh Lý Phía Short</span>
@@ -831,7 +1136,6 @@ export function ScannerPage({
                     </div>
                   </div>
 
-                  {/* Long Liquidation Pool */}
                   <div className="p-2.5 rounded-xl bg-[#141830] border border-emerald-950/40 space-y-1">
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-emerald-300 text-[11px]">Cụm Thanh Lý Phía Long</span>
@@ -844,7 +1148,6 @@ export function ScannerPage({
                     </div>
                   </div>
 
-                  {/* Open Interest Submetric */}
                   <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#141830] border border-indigo-950/60 text-xs">
                     <div className="flex items-center gap-1.5 text-slate-400">
                       <Activity className="w-3.5 h-3.5 text-indigo-400" />
@@ -892,15 +1195,13 @@ export function ScannerPage({
           ) : (
             /* ==================== SPOT TRADING STREAM VIEW ==================== */
             <div className="space-y-4">
-              {/* Section Header */}
               <div className="flex items-center gap-2 text-xs font-bold text-slate-300 px-1 pt-1">
                 <Target className="w-4 h-4 text-emerald-400" />
                 <span className="uppercase tracking-wider">TỔNG QUAN PHÂN TÍCH SPOT (NẮM GIỮ DÀI HẠN)</span>
               </div>
 
-              {/* 3 KPI Cards for Spot */}
+              {/* 3 KPI Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {/* 1. Winrate */}
                 <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-2">
                   <div className="flex items-center gap-2 text-slate-400 text-xs">
                     <Gauge className="w-4 h-4 text-emerald-400" />
@@ -917,7 +1218,6 @@ export function ScannerPage({
                   </div>
                 </div>
 
-                {/* 2. Primary Trend */}
                 <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
                   <div className="flex items-center gap-2 text-slate-400 text-xs">
                     <TrendingUp className="w-4 h-4 text-cyan-400" />
@@ -931,7 +1231,6 @@ export function ScannerPage({
                   </div>
                 </div>
 
-                {/* 3. Risk / Reward */}
                 <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
                   <div className="flex items-center gap-2 text-slate-400 text-xs">
                     <Scale className="w-4 h-4 text-amber-400" />
@@ -948,7 +1247,6 @@ export function ScannerPage({
 
               {/* 4 Spot Execution Strategy Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {/* Entry Zone */}
                 <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
                   <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-bold">
                     <Target className="w-3.5 h-3.5" />
@@ -960,7 +1258,6 @@ export function ScannerPage({
                   <div className="text-[11px] text-slate-500">Chia vốn mua 3 đợt</div>
                 </div>
 
-                {/* TP1 */}
                 <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
                   <div className="flex items-center gap-1.5 text-xs text-cyan-400 font-bold">
                     <TrendingUp className="w-3.5 h-3.5" />
@@ -972,7 +1269,6 @@ export function ScannerPage({
                   <div className="text-[11px] text-slate-500">Chốt 30-40% gốc</div>
                 </div>
 
-                {/* TP2 / TP3 */}
                 <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
                   <div className="flex items-center gap-1.5 text-xs text-cyan-300 font-bold">
                     <Crown className="w-3.5 h-3.5" />
@@ -986,7 +1282,6 @@ export function ScannerPage({
                   </div>
                 </div>
 
-                {/* Stop Loss */}
                 <div className="p-4 rounded-2xl bg-[#0f1225] border border-rose-950/60 space-y-1">
                   <div className="flex items-center gap-1.5 text-xs text-rose-400 font-bold">
                     <ShieldAlert className="w-3.5 h-3.5" />
@@ -999,9 +1294,8 @@ export function ScannerPage({
                 </div>
               </div>
 
-              {/* 2 Spot Technical Modules: Order Block & Liquidity Zones */}
+              {/* 2 Spot Technical Modules */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* 1. Order Block & FVG */}
                 <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-xs font-bold text-white">
@@ -1035,7 +1329,6 @@ export function ScannerPage({
                   </div>
                 </div>
 
-                {/* 2. Spot Liquidity & Volume */}
                 <div className="p-4 rounded-2xl bg-[#0f1225] border border-indigo-950/80 space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-xs font-bold text-white">
