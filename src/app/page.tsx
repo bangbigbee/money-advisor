@@ -28,7 +28,7 @@ import {
 } from "lucide-react";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeTab, setActiveTab] = useState("scan");
   const [selectedChartSymbol, setSelectedChartSymbol] = useState("BINANCE:BTCUSDT");
   const [cryptos, setCryptos] = useState<CryptoItem[]>([]);
   const [goldForex, setGoldForex] = useState<GoldForexItem[]>(initialGoldForexData);
@@ -146,7 +146,7 @@ export default function Home() {
 
           {/* Tab: Quét AI Chuyên sâu */}
           {activeTab === "scan" && (
-            <ScannerPage
+            <ScannerPage goldForex={goldForex}
               cryptos={cryptos}
               onOpenAddAssetModal={handleOpenAddWithPrefill}
               onOpenUpgradeModal={() => setIsUpgradeModalOpen(true)}

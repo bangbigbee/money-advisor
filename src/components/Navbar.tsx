@@ -39,7 +39,7 @@ export function Navbar({
   const isAdmin = role === "ADMIN" || user?.email?.toLowerCase() === "bangdtbk@gmail.com";
 
   const navItems = [
-    { id: "dashboard", label: "Tổng quan", icon: Wallet },
+    
     { id: "scan", label: "Phân tích", icon: Scan, isSpecial: true },
     { id: "crypto", label: "Crypto Market", icon: Coins },
     { id: "forex-gold", label: "Vàng & Ngoại hối", icon: TrendingUp },
@@ -64,7 +64,7 @@ export function Navbar({
           <div className="flex items-center justify-between h-14 sm:h-16 gap-2 sm:gap-4">
             {/* Logo & Brand */}
             <div
-              onClick={() => setActiveTab("dashboard")}
+              onClick={() => setActiveTab("scan")}
               className="flex items-center gap-2 sm:gap-3 cursor-pointer select-none shrink-0"
             >
               <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 shrink-0">

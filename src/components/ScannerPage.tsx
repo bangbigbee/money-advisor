@@ -54,6 +54,7 @@ import {
   AdvancedIndicators,
 } from "@/app/api/ai-scan/route";
 import { useAuth } from "@/context/AuthContext";
+import { GoldForexList } from "./GoldForexList";
 import { TradingViewWidget } from "@/components/TradingViewWidget";
 import { useTheme } from "@/context/ThemeContext";
 
@@ -73,6 +74,7 @@ export interface AnalysisHistoryItem {
 
 interface ScannerPageProps {
   cryptos: CryptoItem[];
+  goldForex: any[];
   onOpenAddAssetModal?: (prefill?: { symbol: string; name: string; price: number }) => void;
   onOpenUpgradeModal?: () => void;
 }
@@ -112,6 +114,7 @@ function deepMerge<T>(fallback: T, incoming: any): T {
 
 export function ScannerPage({
   cryptos,
+  goldForex,
   onOpenAddAssetModal,
   onOpenUpgradeModal,
 }: ScannerPageProps) {
@@ -1612,132 +1615,10 @@ export function ScannerPage({
         </div>
       </div>
 
-      {/* ================= USER ANALYSIS HISTORY TABLE ================= */}
-      {user && (
-        <div id="analysis-history-section" className="bg-[#0f1225] border border-indigo-950/80 rounded-xl p-4 sm:p-5 shadow-md space-y-4 mt-6 scroll-mt-20">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-indigo-950/80 pb-3">
-            <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                <History className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-white">
-                  Bảng Lịch Sử Phân Tích Cá Nhân
-                </h3>
-                <p className="text-[11px] text-slate-400">
-                  Danh sách các đồng crypto bạn đã phân tích kèm nội dung nhận định và thời điểm
-                </p>
-              </div>
-            </div>
-
-            <div className="text-xs text-slate-400">
-              Tổng cộng: <span className="font-bold text-white">{history.length}</span> lượt phân tích
-            </div>
-          </div>
-
-          {history.length === 0 ? (
-            <div className="py-10 text-center space-y-2">
-              <div className="w-12 h-12 rounded-full bg-[#141830] flex items-center justify-center mx-auto text-slate-400">
-                <Clock className="w-6 h-6" />
-              </div>
-              <p className="text-xs text-slate-400">
-                Bạn chưa thực hiện lượt phân tích nào. Nhấn nút "Phân tích" ở trên để lưu lịch sử!
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="border-b border-indigo-950/80 text-[11px] text-slate-400 uppercase font-semibold">
-                    <th className="py-2.5 px-3">Crypto</th>
-                    <th className="py-2.5 px-3">Giá Lúc Quét</th>
-                    <th className="py-2.5 px-3">Tín Hiệu Spot</th>
-                    <th className="py-2.5 px-3">Tín Hiệu Future</th>
-                    <th className="py-2.5 px-3">Nội Dung Nhận Định</th>
-                    <th className="py-2.5 px-3">Thời Điểm</th>
-                    <th className="py-2.5 px-3 text-right">Thao Tác</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-indigo-950/40">
-                  {history.map((item) => (
-                    <tr
-                      key={item.id}
-                      className="hover:bg-[#141830]/60 transition cursor-pointer"
-                      onClick={() => handleReloadHistory(item)}
-                    >
-                      <td className="py-3 px-3">
-                        <div className="flex items-center gap-2.5">
-                          {item.coin_image && (
-                            <img
-                              src={item.coin_image}
-                              alt={item.name}
-                              className="w-6 h-6 rounded-full shrink-0"
-                            />
-                          )}
-                          <div>
-                            <div className="font-bold text-white">
-                              {item.symbol}
-                            </div>
-                            <div className="text-[10px] text-slate-400 truncate max-w-[100px]">
-                              {item.name}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-
-                      <td className="py-3 px-3 font-mono font-semibold text-white">
-                        ${item.price_at_analysis ? item.price_at_analysis.toLocaleString("en-US", { maximumFractionDigits: item.price_at_analysis < 1 ? 4 : 2 }) : "---"}
-                      </td>
-
-                      <td className="py-3 px-3">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                          {item.spot_action}
-                        </span>
-                      </td>
-
-                      <td className="py-3 px-3">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
-                          {item.future_action}
-                        </span>
-                      </td>
-
-                      <td className="py-3 px-3 max-w-[280px]">
-                        <p className="text-[11px] text-slate-300 truncate" title={item.summary_text}>
-                          {item.summary_text || "Đã phân tích các chỉ số kỹ thuật và dòng tiền."}
-                        </p>
-                      </td>
-
-                      <td className="py-3 px-3 font-mono text-[11px] text-slate-400 whitespace-nowrap">
-                        {formatTime(item.created_at)}
-                      </td>
-
-                      <td className="py-3 px-3 text-right">
-                        <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
-                          <button
-                            onClick={() => handleReloadHistory(item)}
-                            className="px-2.5 py-1 rounded bg-indigo-900/40 hover:bg-indigo-800/60 text-indigo-300 text-[11px] font-semibold border border-indigo-700/40 transition flex items-center gap-1"
-                            title="Tải lại kết quả phân tích"
-                          >
-                            <Eye className="w-3 h-3" />
-                            <span>Xem lại</span>
-                          </button>
-                          <button
-                            onClick={(e) => handleDeleteHistory(item.id, e)}
-                            className="p-1 rounded text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 transition"
-                            title="Xóa khỏi lịch sử"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      )}
+      {/* ================= VÀNG & NGOẠI TỆ ================= */}
+      <div className="mt-6">
+        <GoldForexList items={goldForex} onSelectSymbol={() => {}} />
+      </div>
     </div>
   );
 }
