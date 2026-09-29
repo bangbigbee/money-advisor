@@ -1172,7 +1172,7 @@ export function ScannerPage({
                       }`}
                     />
                     <span className="font-bold text-xs sm:text-sm text-white">
-                      GIAO D???CH SPOT
+                      GIAO DỊCH SPOT
                     </span>
                   </div>
                   <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/40">
@@ -1197,7 +1197,7 @@ export function ScannerPage({
                       }`}
                     />
                     <span className="font-bold text-xs sm:text-sm text-white">
-                      GIAO D???CH FUTURE
+                      GIAO DỊCH FUTURE
                     </span>
                   </div>
                   <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/40">
@@ -1212,7 +1212,7 @@ export function ScannerPage({
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-xs font-bold text-slate-300 px-1 pt-1">
                     <Target className="w-4 h-4 text-cyan-400" />
-                    <span className="uppercase tracking-wider">T???NG QUAN PH??N T??CH PH??I SINH</span>
+                    <span className="uppercase tracking-wider">TỔNG QUAN PHÂN TÍCH PHÁI SINH</span>
                   </div>
 
                   {/* 3 KPI Cards */}
@@ -1220,7 +1220,7 @@ export function ScannerPage({
                     <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-2">
                       <div className="flex items-center gap-2 text-slate-400 text-xs">
                         <Flame className="w-4 h-4 text-amber-400" />
-                        <span>T??? l??? Th???ng (Winrate Futures)</span>
+                        <span>Tỷ lệ Thắng (Winrate Futures)</span>
                       </div>
                       <div className="text-2xl font-black text-cyan-400 font-mono">
                         {futureData.winRatePercent}%
@@ -1236,26 +1236,26 @@ export function ScannerPage({
                     <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
                       <div className="flex items-center gap-2 text-slate-400 text-xs">
                         <Shield className="w-4 h-4 text-amber-400" />
-                        <span>M???c R???i Ro V???n (Risk per Trade)</span>
+                        <span>Mức Rủi Ro Vốn (Risk per Trade)</span>
                       </div>
                       <div className="text-2xl font-black text-amber-400 font-mono">
                         {futureData.capitalRiskPercent}
                       </div>
                       <div className="text-[11px] text-slate-400">
-                        Gi???i h???n t???i ??a kh??ng ch??y t??i kho???n
+                        Giới hạn tối đa không cháy tài khoản
                       </div>
                     </div>
 
                     <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
                       <div className="flex items-center gap-2 text-slate-400 text-xs">
                         <Scale className="w-4 h-4 text-emerald-400" />
-                        <span>T??? l??? Risk / Reward (R:R)</span>
+                        <span>Tỷ lệ Risk / Reward (R:R)</span>
                       </div>
                       <div className="text-2xl font-black text-emerald-400 font-mono">
                         {futureData.riskRewardRatio}
                       </div>
                       <div className="text-[11px] text-slate-400">
-                        T??? l??? k??? v???ng l???i nhu???n tr??n v???n
+                        Tỷ lệ kỳ vọng lợi nhuận trên vốn
                       </div>
                     </div>
                   </div>
@@ -1265,29 +1265,29 @@ export function ScannerPage({
                     <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
                       <div className="flex items-center gap-1.5 text-xs text-cyan-400 font-bold">
                         <Target className="w-3.5 h-3.5" />
-                        <span>V??NG ENTRY L???NH</span>
+                        <span>VÙNG ENTRY LỆNH</span>
                       </div>
                       <div className="text-base font-black text-white font-mono pt-1">
                         {futureData.entryZone}
                       </div>
-                      <div className="text-[11px] text-slate-400">V??o l???nh c?? k??? lu???t</div>
+                      <div className="text-[11px] text-slate-400">Vào lệnh có kỷ luật</div>
                     </div>
 
                     <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
                       <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-bold">
                         <TrendingUp className="w-3.5 h-3.5" />
-                        <span>CH???T L???I TP1</span>
+                        <span>CHỐT LỜI TP1</span>
                       </div>
                       <div className="text-base font-black text-emerald-400 font-mono pt-1">
                         {futureData.targetPrice1}
                       </div>
-                      <div className="text-[11px] text-slate-400">?????t L1 v??? h??a v???n</div>
+                      <div className="text-[11px] text-slate-400">Đạt L1 về hòa vốn</div>
                     </div>
 
                     <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
                       <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-bold">
                         <Crown className="w-3.5 h-3.5" />
-                        <span>CH???T L???I TP2 / TP3</span>
+                        <span>CHỐT LỜI TP2 / TP3</span>
                       </div>
                       <div className="text-base font-black text-emerald-300 font-mono pt-1">
                         {futureData.targetPrice2}
@@ -1306,7 +1306,7 @@ export function ScannerPage({
                         {futureData.stopLoss}
                       </div>
                       <div className="text-[11px] text-slate-400 font-mono">
-                        Gi?? thanh l??: {futureData.estLiquidationPrice}
+                        Giá thanh lý: {futureData.estLiquidationPrice}
                       </div>
                     </div>
                   </div>
@@ -1317,7 +1317,7 @@ export function ScannerPage({
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-xs font-bold text-white">
                           <BarChart2 className="w-4 h-4 text-cyan-400" />
-                          <span>T??? l??? Long / Short Ratio</span>
+                          <span>Tỷ lệ Long / Short Ratio</span>
                         </div>
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                           {futureData.metrics.longShortRatio.sentiment || "Bullish"}
@@ -1365,14 +1365,14 @@ export function ScannerPage({
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-xs font-bold text-white">
                           <Layers className="w-4 h-4 text-indigo-400" />
-                          <span>B???n ????? C???m Thanh L??</span>
+                          <span>Bản đồ Cụm Thanh Lý</span>
                         </div>
                         <span className="text-[11px] text-slate-400">OI: {futureData.metrics.openInterest}</span>
                       </div>
 
                       <div className="p-2.5 rounded-lg bg-[#141830] border border-rose-950/40 space-y-1">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-rose-300 text-[11px]">Thanh L?? Short</span>
+                          <span className="text-rose-300 text-[11px]">Thanh Lý Short</span>
                           <span className="font-mono font-bold text-rose-400">
                             {futureData.metrics.liquidationHeatmap.shortLiquidationPool}
                           </span>
@@ -1381,7 +1381,7 @@ export function ScannerPage({
 
                       <div className="p-2.5 rounded-lg bg-[#141830] border border-emerald-950/40 space-y-1">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-emerald-300 text-[11px]">Thanh L?? Long</span>
+                          <span className="text-emerald-300 text-[11px]">Thanh Lý Long</span>
                           <span className="font-mono font-bold text-emerald-400">
                             {futureData.metrics.liquidationHeatmap.longLiquidationPool}
                           </span>
@@ -1398,13 +1398,13 @@ export function ScannerPage({
                       </div>
                       <div>
                         <div className="text-[10px] uppercase font-bold tracking-wider text-emerald-400 font-mono">
-                          K???T LU???N HI???N T???I (FUTURES & MARGIN)
+                          KẾT LUẬN HIỆN TẠI (FUTURES & MARGIN)
                         </div>
                         <h3 className="text-base font-bold text-white mt-0.5">
-                          Khuy???n Ngh??? V??? Th??? Ph??i Sinh
+                          Khuyến Nghị Vị Thế Phái Sinh
                         </h3>
                         <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
-                          {futureData?.finalVerdict?.summaryText || "??ang c???p nh???t nh???n ?????nh v??? th??? ph??i sinh chuy??n s??u..."}
+                          {futureData?.finalVerdict?.summaryText || "Đang cập nhật nhận định vị thế phái sinh chuyên sâu..."}
                         </p>
                       </div>
                     </div>
@@ -1422,7 +1422,7 @@ export function ScannerPage({
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 px-1 pt-1">
                     <Target className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                    <span className="uppercase tracking-wider">T???NG QUAN PH??N T??CH SPOT (N???M GI??? D??I H???N)</span>
+                    <span className="uppercase tracking-wider">TỔNG QUAN PHÂN TÍCH SPOT (NẮM GIỮ DÀI HẠN)</span>
                   </div>
 
                   {/* 3 KPI Cards */}
@@ -1430,7 +1430,7 @@ export function ScannerPage({
                     <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-2">
                       <div className="flex items-center gap-2 text-slate-400 text-xs">
                         <Gauge className="w-4 h-4 text-emerald-400" />
-                        <span>Ch??? s??? Winrate Spot K??? V???ng</span>
+                        <span>Chỉ số Winrate Spot Kỳ Vọng</span>
                       </div>
                       <div className="text-2xl font-black text-emerald-400 font-mono">
                         {spotData.winRatePercent}%
@@ -1446,7 +1446,7 @@ export function ScannerPage({
                     <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
                       <div className="flex items-center gap-2 text-slate-400 text-xs">
                         <TrendingUp className="w-4 h-4 text-cyan-400" />
-                        <span>Xu H?????ng Ch??nh (Trend)</span>
+                        <span>Xu Hướng Chính (Trend)</span>
                       </div>
                       <div className="text-base font-black text-cyan-300 pt-1">
                         {spotData.trend}
@@ -1459,13 +1459,13 @@ export function ScannerPage({
                     <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
                       <div className="flex items-center gap-2 text-slate-400 text-xs">
                         <Scale className="w-4 h-4 text-amber-400" />
-                        <span>T??? l??? Risk / Reward (R:R)</span>
+                        <span>Tỷ lệ Risk / Reward (R:R)</span>
                       </div>
                       <div className="text-2xl font-black text-amber-400 font-mono">
                         {spotData.riskRewardRatio}
                       </div>
                       <div className="text-[11px] text-slate-400">
-                        ???????c t??nh to??n theo ph??n b??? DCA
+                        Được tính toán theo phân bổ DCA
                       </div>
                     </div>
                   </div>
@@ -1475,29 +1475,29 @@ export function ScannerPage({
                     <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
                       <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-bold">
                         <Target className="w-3.5 h-3.5" />
-                        <span>V??NG MUA GOM (BUY)</span>
+                        <span>VÙNG MUA GOM (BUY)</span>
                       </div>
                       <div className="text-base font-black text-white font-mono pt-1">
                         {spotData.entryZone}
                       </div>
-                      <div className="text-[11px] text-slate-400">Chia v???n mua 3 ?????t</div>
+                      <div className="text-[11px] text-slate-400">Chia vốn mua 3 đợt</div>
                     </div>
 
                     <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
                       <div className="flex items-center gap-1.5 text-xs text-cyan-400 font-bold">
                         <TrendingUp className="w-3.5 h-3.5" />
-                        <span>CH???T L???I TP1</span>
+                        <span>CHỐT LỜI TP1</span>
                       </div>
                       <div className="text-base font-black text-cyan-400 font-mono pt-1">
                         {spotData.targetPrice1}
                       </div>
-                      <div className="text-[11px] text-slate-400">Ch???t 30-40% g???c</div>
+                      <div className="text-[11px] text-slate-400">Chốt 30-40% gốc</div>
                     </div>
 
                     <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
                       <div className="flex items-center gap-1.5 text-xs text-cyan-300 font-bold">
                         <Crown className="w-3.5 h-3.5" />
-                        <span>CH???T L???I TP2 / TP3</span>
+                        <span>CHỐT LỜI TP2 / TP3</span>
                       </div>
                       <div className="text-base font-black text-cyan-300 font-mono pt-1">
                         {spotData.targetPrice2}
@@ -1510,12 +1510,12 @@ export function ScannerPage({
                     <div className="p-4 rounded-xl bg-[#0f1225] border border-rose-950/60 space-y-1">
                       <div className="flex items-center gap-1.5 text-xs text-rose-400 font-bold">
                         <ShieldAlert className="w-3.5 h-3.5" />
-                        <span>C???T L??? AN TO??N (SL)</span>
+                        <span>CẮT LỖ AN TOÀN (SL)</span>
                       </div>
                       <div className="text-base font-black text-rose-400 font-mono pt-1">
                         {spotData.stopLoss}
                       </div>
-                      <div className="text-[11px] text-slate-400">B???o to??n v???n danh m???c</div>
+                      <div className="text-[11px] text-slate-400">Bảo toàn vốn danh mục</div>
                     </div>
                   </div>
 
@@ -1525,7 +1525,7 @@ export function ScannerPage({
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-xs font-bold text-white">
                           <BarChart2 className="w-4 h-4 text-emerald-400" />
-                          <span>V??ng Thanh Kho???n & Order Block</span>
+                          <span>Vùng Thanh Khoản & Order Block</span>
                         </div>
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                           RSI: {spotData.indicators.rsi.value}
@@ -1534,14 +1534,14 @@ export function ScannerPage({
 
                       <div className="space-y-2">
                         <div className="p-2.5 rounded-lg bg-[#141830] border border-emerald-950/40">
-                          <div className="text-[11px] text-emerald-400 font-semibold">V??ng C???u Mua:</div>
+                          <div className="text-[11px] text-emerald-400 font-semibold">Vùng Cầu Mua:</div>
                           <div className="text-xs font-mono font-bold text-white mt-0.5">
                             {spotData.liquidity.highLiquidityZone}
                           </div>
                         </div>
 
                         <div className="p-2.5 rounded-lg bg-[#141830] border border-rose-950/40">
-                          <div className="text-[11px] text-rose-400 font-semibold">V??ng Cung B??n:</div>
+                          <div className="text-[11px] text-rose-400 font-semibold">Vùng Cung Bán:</div>
                           <div className="text-xs font-mono font-bold text-white mt-0.5">
                             {spotData.liquidity.supplyZone}
                           </div>
@@ -1553,7 +1553,7 @@ export function ScannerPage({
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-xs font-bold text-white">
                           <Layers className="w-4 h-4 text-cyan-400" />
-                          <span>H??? Tr??? & Kh??ng C???</span>
+                          <span>Hỗ Trợ & Kháng Cự</span>
                         </div>
                         <span className="text-xs text-emerald-400 font-mono font-bold">
                           {spotData.indicators.volumeProfile}
@@ -1562,14 +1562,14 @@ export function ScannerPage({
 
                       <div className="space-y-2">
                         <div className="flex justify-between p-2.5 rounded-lg bg-[#141830] border border-indigo-950/60 text-xs">
-                          <span className="text-slate-400">H??? tr??? quan tr???ng:</span>
+                          <span className="text-slate-400">Hỗ trợ quan trọng:</span>
                           <span className="font-mono font-bold text-emerald-400">
                             {spotData.indicators.supportResistance.support}
                           </span>
                         </div>
 
                         <div className="flex justify-between p-2.5 rounded-lg bg-[#141830] border border-indigo-950/60 text-xs">
-                          <span className="text-slate-400">Kh??ng c??? then ch???t:</span>
+                          <span className="text-slate-400">Kháng cự then chốt:</span>
                           <span className="font-mono font-bold text-rose-400">
                             {spotData.indicators.supportResistance.resistance}
                           </span>
@@ -1586,13 +1586,13 @@ export function ScannerPage({
                       </div>
                       <div>
                         <div className="text-[10px] uppercase font-bold tracking-wider text-emerald-400 font-mono">
-                          K???T LU???N HI???N T???I (SPOT TRADING)
+                          KẾT LUẬN HIỆN TẠI (SPOT TRADING)
                         </div>
                         <h3 className="text-base font-bold text-white mt-0.5">
-                          Khuy???n Ngh??? T??ch L??y Spot
+                          Khuyến Nghị Tích Lũy Spot
                         </h3>
                         <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
-                          {spotData?.finalVerdict?.summaryText || "??ang c???p nh???t nh???n ?????nh t??ch l??y Spot chuy??n s??u..."}
+                          {spotData?.finalVerdict?.summaryText || "Đang cập nhật nhận định tích lũy Spot chuyên sâu..."}
                         </p>
                       </div>
                     </div>
@@ -1600,7 +1600,7 @@ export function ScannerPage({
                     <div className="shrink-0 self-start sm:self-center">
                       <button className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-600 text-white font-black text-xs sm:text-sm shadow-md tracking-wider uppercase cursor-default">
                         <TrendingUp className="w-4 h-4" />
-                        <span>{spotData?.finalVerdict?.action || spotData?.signalLabel || "N??N MUA"}</span>
+                        <span>{spotData?.finalVerdict?.action || spotData?.signalLabel || "NÊN MUA"}</span>
                       </button>
                     </div>
                   </div>
