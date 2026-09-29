@@ -802,1128 +802,357 @@ export function ScannerPage({
         </div>
 
         {/* ================= RIGHT COLUMN: MAIN ANALYSIS ENGINE (8 Cols) ================= */}
+        {/* ================= RIGHT COLUMN: MAIN ANALYSIS ENGINE (8 Cols) ================= */}
         <div className="lg:col-span-8 space-y-4">
-          {/* Top Coin Header Card with Sparkline & Scan Button */}
-          {selectedCoin && (
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-xl bg-[#0f1225] border border-indigo-950/80 shadow-md">
-              <div className="flex items-center gap-3.5">
-                <img
-                  src={selectedCoin.image}
-                  alt={selectedCoin.name}
-                  className="w-11 h-11 rounded-full border border-indigo-800/40 p-0.5 bg-[#090b14]"
-                />
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-xl font-black text-white tracking-tight">
-                      {selectedCoin.name}
-                    </h2>
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold font-mono bg-indigo-900/60 text-indigo-300 border border-indigo-700/40 uppercase">
-                      {selectedCoin.symbol}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2.5 mt-0.5">
-                    <span className="text-2xl font-black text-white font-mono">
-                      ${selectedCoin.current_price?.toLocaleString("en-US", {
-                        maximumFractionDigits: selectedCoin.current_price < 1 ? 4 : 2,
-                      })}
-                    </span>
-                    <span
-                      className={`text-xs font-bold font-mono ${
-                        isPositive ? "text-emerald-400" : "text-rose-400"
-                      }`}
-                    >
-                      {isPositive ? `+${currentCoinChange.toFixed(2)}%` : `${currentCoinChange.toFixed(2)}%`} (24h)
-                    </span>
-                  </div>
-                </div>
+          {!scanResult && !isScanning ? (
+            <div className="flex flex-col items-center justify-center py-24 px-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 text-center shadow-md h-full min-h-[600px]">
+              <div className="w-20 h-20 rounded-full bg-indigo-500/10 flex items-center justify-center mb-6 border border-indigo-500/20">
+                <Sparkles className="w-10 h-10 text-indigo-400" />
               </div>
-
-              {/* Sparkline Graphic Preview */}
-              <div className="hidden md:flex items-center h-9 w-28 px-1">
-                <svg className="w-full h-full overflow-visible" viewBox="0 0 100 30">
-                  <path
-                    d={
-                      isPositive
-                        ? "M0,25 Q15,22 30,18 T60,12 T85,8 T100,2"
-                        : "M0,5 Q15,10 30,14 T60,20 T85,24 T100,28"
-                    }
-                    fill="none"
-                    stroke={isPositive ? "#10b981" : "#f43f5e"}
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </div>
-
-              {/* Trigger Analysis button */}
-              <div className="flex items-center gap-2.5">
-                <button
-                  onClick={() => handleStartScan(selectedCoin)}
-                  disabled={isScanning}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs shadow-md shadow-emerald-500/20 transition cursor-pointer disabled:opacity-50 whitespace-nowrap"
-                >
-                  {isScanning ? (
-                    <RefreshCw className="w-4 h-4 animate-spin text-white" />
-                  ) : (
-                    <Sparkles className="w-4 h-4 text-white" />
-                  )}
-                  <span>{isScanning ? "Đang phân tích..." : "Phân tích"}</span>
-                </button>
-              </div>
+              <h2 className="text-2xl font-bold text-white mb-2">Phân Tích AI Chuyên Sâu</h2>
+              <p className="text-slate-400 max-w-md mb-8 text-sm leading-relaxed">
+                Chọn một đồng coin từ danh sách và nhấn nút bên dưới để nhận định xu hướng, dòng tiền và tín hiệu giao dịch từ AI.
+              </p>
+              <button
+                onClick={() => handleStartScan(selectedCoin)}
+                disabled={!selectedCoin}
+                className="flex items-center gap-2.5 px-8 py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-base shadow-lg shadow-indigo-600/30 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Sparkles className="w-5 h-5" />
+                <span>Nhấn để phân tích</span>
+              </button>
             </div>
-          )}
-
-          {/* ================= GUEST / AUTH LOCK GATE IF NOT LOGGED IN ================= */}
-          {!user ? (
-            <div className="p-8 rounded-xl bg-[#0f1225] border border-indigo-950/80 shadow-md text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 flex items-center justify-center mx-auto">
-                <Lock className="w-8 h-8" />
-              </div>
-              <div className="space-y-1 max-w-md mx-auto">
-                <h3 className="text-lg font-bold text-white">
-                  Đăng nhập Google để xem Phân tích AI Chuyên Sâu
-                </h3>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Vui lòng đăng nhập để mở khóa dạng sóng Elliott động, chỉ số phái sinh Coinglass, hệ thống 8 chỉ báo kỹ thuật nâng cao và lưu trữ lịch sử phân tích cá nhân của bạn.
-                </p>
-              </div>
-              <div className="pt-2">
-                <button
-                  onClick={() => signInWithGoogle()}
-                  className="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 transition cursor-pointer"
-                >
-                  <LogIn className="w-4 h-4" />
-                  <span>Đăng nhập ngay bằng Google</span>
-                </button>
-              </div>
+          ) : isScanning ? (
+            <div className="flex flex-col items-center justify-center py-24 px-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 text-center shadow-md h-full min-h-[600px]">
+              <RefreshCw className="w-12 h-12 text-indigo-500 animate-spin mb-6" />
+              <h2 className="text-xl font-bold text-white mb-2">Đang phân tích {selectedCoin?.symbol}...</h2>
+              <p className="text-slate-400 text-sm">Hệ thống AI đang xử lý các chỉ số kỹ thuật và on-chain.</p>
             </div>
           ) : (
-            <>
-              {/* ================= WAVEFORM & TRADINGVIEW CHART SWITCHER SECTION ================= */}
-              <div className="bg-[#0f1225] border border-indigo-950/80 rounded-xl p-4 sm:p-5 shadow-md space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    <Compass className="w-5 h-5 text-indigo-400" />
-                    <div>
-                      <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-                        Mô Hình Dạng Sóng & Biểu Đồ Trực Tuyến
-                      </h3>
-                      <p className="text-[11px] text-slate-400">
-                        Phân tích chu kỳ sóng Elliott, cấu trúc đỉnh đáy và nến trực tiếp
-                      </p>
+            <div className="space-y-4">
+              {/* Dashboard Layout Header */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 sm:p-5 rounded-xl bg-[#0b0e1b] border border-zinc-800 shadow-md">
+                <div className="flex items-center gap-3">
+                  <img src={selectedCoin?.image} alt={selectedCoin?.name} className="w-12 h-12 rounded-full border border-zinc-700 bg-zinc-900 p-0.5" />
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-xl font-black text-white">{selectedCoin?.symbol.toUpperCase()}</h2>
+                      <CheckCircle2 className="w-4 h-4 text-indigo-400" />
                     </div>
-                  </div>
-
-                  {/* View mode toggle */}
-                  <div className="flex items-center bg-[#141830] p-1 rounded-lg border border-indigo-900/50 text-xs">
-                    <button
-                      onClick={() => setChartViewMode("wave")}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md font-bold transition cursor-pointer ${
-                        chartViewMode === "wave"
-                          ? "bg-indigo-600 text-white shadow-sm"
-                          : "text-slate-400 hover:text-white"
-                      }`}
-                    >
-                      <Radio className="w-3.5 h-3.5" />
-                      <span>Sơ Đồ Sóng AI</span>
-                    </button>
-                    <button
-                      onClick={() => setChartViewMode("tradingview")}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md font-bold transition cursor-pointer ${
-                        chartViewMode === "tradingview"
-                          ? "bg-indigo-600 text-white shadow-sm"
-                          : "text-slate-400 hover:text-white"
-                      }`}
-                    >
-                      <LineChart className="w-3.5 h-3.5" />
-                      <span>Nến Live TradingView</span>
-                    </button>
+                    <div className="text-sm text-slate-400">{selectedCoin?.name}</div>
                   </div>
                 </div>
-
-                {chartViewMode === "wave" ? (
-                  /* DYNAMIC WAVE PATTERN SVG VISUALIZER */
-                  <div className="space-y-3.5">
-                    <div className="p-4 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-3">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <div>
-                          <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider font-mono">
-                            DẠNG SÓNG HIỆN TẠI (WAVE CYCLE)
-                          </span>
-                          <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
-                            <span>{waveData.patternName}</span>
-                          </h4>
-                        </div>
-                        <div className="px-2.5 py-1 rounded-md bg-indigo-500/20 text-indigo-300 text-[11px] font-bold border border-indigo-500/30 font-mono">
-                          {waveData.currentWave}
-                        </div>
-                      </div>
-
-                      {/* SVG Wave Visual Rendering */}
-                      <div className="relative h-56 sm:h-64 w-full bg-[#0b0e1b] rounded-lg border border-indigo-950/80 p-2 overflow-hidden flex items-center justify-center">
-                        <svg
-                          className="w-full h-full overflow-visible"
-                          viewBox="0 0 700 220"
-                          preserveAspectRatio="none"
-                        >
-                          <defs>
-                            <linearGradient id="waveGradient" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.4" />
-                              <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.02" />
-                            </linearGradient>
-                          </defs>
-
-                          {/* Grid lines */}
-                          <line x1="0" y1="45" x2="700" y2="45" stroke="#1e293b" strokeDasharray="3 3" />
-                          <line x1="0" y1="100" x2="700" y2="100" stroke="#1e293b" strokeDasharray="3 3" />
-                          <line x1="0" y1="155" x2="700" y2="155" stroke="#1e293b" strokeDasharray="3 3" />
-
-                          {/* Fill area & Stroke Line */}
-                          {isWave4Current ? (
-                            <>
-                              {/* Wave 4 specific visualization */}
-                              <path
-                                d="M 55 165 L 160 130 L 310 45 L 480 135 L 645 30 L 645 210 L 55 210 Z"
-                                fill="url(#waveGradient)"
-                              />
-                              <path
-                                d="M 55 165 L 160 130 L 310 45 L 480 135 L 645 30"
-                                fill="none"
-                                stroke="#06b6d4"
-                                strokeWidth="3.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                              {/* ABC internal retracement within Wave 4 */}
-                              <path
-                                d="M 310 45 L 365 105 L 415 80 L 480 135"
-                                fill="none"
-                                stroke="#f59e0b"
-                                strokeWidth="2"
-                                strokeDasharray="3 3"
-                                opacity="0.85"
-                              />
-                              <text x="365" y="118" fill="#f59e0b" fontSize="10" fontWeight="bold" textAnchor="middle">sóng a</text>
-                              <text x="415" y="74" fill="#38bdf8" fontSize="10" fontWeight="bold" textAnchor="middle">sóng b</text>
-
-                              {/* Nodes */}
-                              <circle cx="55" cy="165" r="5" fill="#3b82f6" />
-                              <text x="55" y="185" fill="#94a3b8" fontSize="11" textAnchor="middle" fontWeight="bold">Wave 1</text>
-
-                              <circle cx="160" cy="130" r="5" fill="#10b981" />
-                              <text x="160" y="150" fill="#10b981" fontSize="11" textAnchor="middle" fontWeight="bold">Wave 2 (HL)</text>
-
-                              <circle cx="310" cy="45" r="6" fill="#f59e0b" />
-                              <text x="310" y="28" fill="#f59e0b" fontSize="12" textAnchor="middle" fontWeight="black">Đỉnh Wave 3 (HH)</text>
-
-                              {/* WAVE 4 ACTIVE PIN MARKER */}
-                              <g transform="translate(480, 135)">
-                                <line x1="0" y1="-85" x2="0" y2="70" stroke="#06b6d4" strokeWidth="1.5" strokeDasharray="3 3" opacity="0.7" />
-                                <circle r="16" fill="#06b6d4" opacity="0.3" className="animate-ping" />
-                                <circle r="9" fill="#06b6d4" stroke="#ffffff" strokeWidth="2.5" />
-                                <circle r="4" fill="#ffffff" />
-                                <g transform="translate(0, 16)">
-                                  <rect x="-95" y="0" width="190" height="28" rx="6" fill="#06b6d4" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.5))" />
-                                  <text x="0" y="18" fill="#090b14" fontSize="11" fontWeight="900" textAnchor="middle" letterSpacing="0.3">
-                                    📍 VỊ TRÍ HIỆN TẠI: WAVE 4
-                                  </text>
-                                </g>
-                                <text x="0" y="-12" fill="#67e8f9" fontSize="11" fontWeight="bold" textAnchor="middle">
-                                  Đáy Sóng C (Fibo 0.618)
-                                </text>
-                              </g>
-
-                              <circle cx="645" cy="30" r="6" fill="#ec4899" stroke="#ffffff" strokeWidth="1" strokeDasharray="2 2" />
-                              <text x="645" y="18" fill="#ec4899" fontSize="12" textAnchor="middle" fontWeight="black">🚀 Wave 5 (Target $)</text>
-                            </>
-                          ) : isWave3Current ? (
-                            <>
-                              {/* Wave 3 specific visualization */}
-                              <path
-                                d="M 55 165 L 160 130 L 330 45 L 500 120 L 645 30 L 645 210 L 55 210 Z"
-                                fill="url(#waveGradient)"
-                              />
-                              <path
-                                d="M 55 165 L 160 130 L 330 45 L 500 120 L 645 30"
-                                fill="none"
-                                stroke="#06b6d4"
-                                strokeWidth="3.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-
-                              <circle cx="55" cy="165" r="5" fill="#3b82f6" />
-                              <text x="55" y="185" fill="#94a3b8" fontSize="11" textAnchor="middle" fontWeight="bold">Wave 1</text>
-
-                              <circle cx="160" cy="130" r="5" fill="#10b981" />
-                              <text x="160" y="150" fill="#10b981" fontSize="11" textAnchor="middle" fontWeight="bold">Wave 2 (HL)</text>
-
-                              {/* WAVE 3 ACTIVE PIN */}
-                              <g transform="translate(330, 45)">
-                                <circle r="16" fill="#06b6d4" opacity="0.3" className="animate-ping" />
-                                <circle r="9" fill="#06b6d4" stroke="#ffffff" strokeWidth="2.5" />
-                                <circle r="4" fill="#ffffff" />
-                                <g transform="translate(0, -38)">
-                                  <rect x="-95" y="0" width="190" height="28" rx="6" fill="#06b6d4" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.5))" />
-                                  <text x="0" y="18" fill="#090b14" fontSize="11" fontWeight="900" textAnchor="middle">
-                                    📍 VỊ TRÍ HIỆN TẠI: WAVE 3 🔥
-                                  </text>
-                                </g>
-                              </g>
-
-                              <circle cx="500" cy="120" r="5" fill="#a855f7" strokeDasharray="2 2" />
-                              <text x="500" y="140" fill="#a855f7" fontSize="11" textAnchor="middle" fontWeight="bold">Wave 4 (Dự phóng)</text>
-
-                              <circle cx="645" cy="30" r="6" fill="#ec4899" stroke="#ffffff" strokeWidth="1" />
-                              <text x="645" y="18" fill="#ec4899" fontSize="12" textAnchor="middle" fontWeight="black">🚀 Wave 5 (Target $)</text>
-                            </>
-                          ) : isPositive ? (
-                            <>
-                              {/* Standard Bullish Impulse */}
-                              <path
-                                d="M 50 160 L 150 100 L 250 140 L 420 40 L 520 80 L 650 20 L 650 210 L 50 210 Z"
-                                fill="url(#waveGradient)"
-                              />
-                              <path
-                                d="M 50 160 L 150 100 L 250 140 L 420 40 L 520 80 L 650 20"
-                                fill="none"
-                                stroke="#06b6d4"
-                                strokeWidth="3.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-
-                              <circle cx="50" cy="160" r="5" fill="#3b82f6" />
-                              <text x="50" y="180" fill="#94a3b8" fontSize="11" textAnchor="middle" fontWeight="bold">Wave 1</text>
-
-                              <circle cx="150" cy="100" r="5" fill="#10b981" />
-                              <text x="150" y="90" fill="#10b981" fontSize="11" textAnchor="middle" fontWeight="bold">Wave 2</text>
-
-                              <circle cx="250" cy="140" r="5" fill="#f59e0b" />
-                              <text x="250" y="160" fill="#f59e0b" fontSize="11" textAnchor="middle" fontWeight="bold">Wave 3</text>
-
-                              <g transform="translate(420, 40)">
-                                <circle r="14" fill="#06b6d4" opacity="0.3" className="animate-ping" />
-                                <circle r="8" fill="#06b6d4" stroke="#ffffff" strokeWidth="2" />
-                                <rect x="-85" y="-36" width="170" height="26" rx="6" fill="#06b6d4" />
-                                <text x="0" y="-19" fill="#090b14" fontSize="11" fontWeight="900" textAnchor="middle">
-                                  📍 VỊ TRÍ: SÓNG ĐẨY
-                                </text>
-                              </g>
-
-                              <circle cx="520" cy="80" r="5" fill="#a855f7" strokeDasharray="2 2" />
-                              <text x="520" y="100" fill="#a855f7" fontSize="11" textAnchor="middle" fontWeight="bold">Wave 4 (Dự phóng)</text>
-
-                              <circle cx="650" cy="20" r="6" fill="#ec4899" />
-                              <text x="650" y="15" fill="#ec4899" fontSize="12" textAnchor="middle" fontWeight="black">Wave 5 (Target $)</text>
-                            </>
-                          ) : (
-                            <>
-                              {/* Bearish / ABC Correction */}
-                              <path
-                                d="M 50 45 L 180 145 L 320 85 L 480 170 L 650 115 L 650 210 L 50 210 Z"
-                                fill="url(#waveGradient)"
-                              />
-                              <path
-                                d="M 50 45 L 180 145 L 320 85 L 480 170 L 650 115"
-                                fill="none"
-                                stroke="#06b6d4"
-                                strokeWidth="3.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-
-                              <circle cx="50" cy="45" r="5" fill="#f43f5e" />
-                              <text x="50" y="32" fill="#f43f5e" fontSize="11" textAnchor="middle" fontWeight="bold">Top (HH)</text>
-
-                              <circle cx="180" cy="145" r="5" fill="#f43f5e" />
-                              <text x="180" y="165" fill="#f43f5e" fontSize="11" textAnchor="middle" fontWeight="bold">Sóng A</text>
-
-                              <circle cx="320" cy="85" r="5" fill="#f59e0b" />
-                              <text x="320" y="72" fill="#f59e0b" fontSize="11" textAnchor="middle" fontWeight="bold">Sóng B (Pullback)</text>
-
-                              <g transform="translate(480, 170)">
-                                <circle r="16" fill="#06b6d4" opacity="0.3" className="animate-ping" />
-                                <circle r="9" fill="#06b6d4" stroke="#ffffff" strokeWidth="2.5" />
-                                <circle r="4" fill="#ffffff" />
-                                <g transform="translate(0, 16)">
-                                  <rect x="-95" y="0" width="190" height="28" rx="6" fill="#06b6d4" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.5))" />
-                                  <text x="0" y="18" fill="#090b14" fontSize="11" fontWeight="900" textAnchor="middle" letterSpacing="0.3">
-                                    📍 VỊ TRÍ: ĐÁY SÓNG C / W4
-                                  </text>
-                                </g>
-                              </g>
-
-                              <circle cx="650" cy="115" r="5" fill="#10b981" />
-                              <text x="650" y="102" fill="#10b981" fontSize="11" textAnchor="middle" fontWeight="bold">🚀 Rebound Mới</text>
-                            </>
-                          )}
-                        </svg>
-                      </div>
-
-                      {/* Active Wave Location Status Banner */}
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-xs">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping shrink-0" />
-                          <span className="font-bold text-white">Xác định vị trí trên biểu đồ:</span>
-                          <span className="text-cyan-300 font-bold font-mono">
-                            {isWave4Current
-                              ? "ĐANG Ở ĐÁY WAVE 4 (Pha hiệu chỉnh tích lũy Fibo 0.618 sau đỉnh Wave 3)"
-                              : isWave3Current
-                              ? "ĐANG Ở ĐỈNH SÓNG 3 (Pha bứt phá xung lượng mạnh nhất)"
-                              : isWave5Current
-                              ? "ĐANG Ở SÓNG 5 (Pha mở rộng - Chạm vùng chốt lời)"
-                              : isWave2Current
-                              ? "ĐANG Ở SÓNG 2 (Pha retest đáy thành công)"
-                              : "ĐANG Ở PHA TÍCH LŨY / HIỆU CHỈNH TẠO ĐÁY"}
-                          </span>
-                        </div>
-                        <div className="text-[11px] text-slate-300">
-                          Mục tiêu tiếp theo: <strong className="font-mono text-emerald-400">{isWave4Current ? "Bứt phá lên Wave 5" : waveData.projectedTargetWave}</strong>
-                        </div>
-                      </div>
-
-                      {/* Wave Pattern details & targets */}
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 text-xs">
-                        <div className="p-2.5 rounded-lg bg-[#0b0e1b] border border-indigo-950/60">
-                          <span className="text-[10px] text-slate-400">Đỉnh / Đáy Swing:</span>
-                          <div className="font-mono font-bold text-white mt-0.5">
-                            High: {waveData.swingHigh} • Low: {waveData.swingLow}
-                          </div>
-                        </div>
-
-                        <div className="p-2.5 rounded-lg bg-[#0b0e1b] border border-indigo-950/60">
-                          <span className="text-[10px] text-amber-400 font-semibold">Fibo Key Level:</span>
-                          <div className="font-mono font-bold text-amber-300 mt-0.5 text-xs break-words leading-snug">
-                            {waveData.keyFibonacciLevel}
-                          </div>
-                        </div>
-
-                        <div className="p-2.5 rounded-lg bg-[#0b0e1b] border border-indigo-950/60">
-                          <span className="text-[10px] text-emerald-400 font-semibold">Mục tiêu mở rộng:</span>
-                          <div className="font-mono font-bold text-emerald-300 mt-0.5 text-xs break-words leading-snug">
-                            {waveData.projectedTargetWave}
-                          </div>
-                        </div>
-                      </div>
+                
+                <div className="flex items-center gap-6 md:gap-10 flex-wrap">
+                  <div>
+                    <div className="text-xl font-bold text-white whitespace-nowrap">
+                      ${selectedCoin?.current_price?.toLocaleString("en-US", { maximumFractionDigits: selectedCoin.current_price < 1 ? 4 : 2 })}
+                    </div>
+                    <div className={`text-sm font-bold ${isPositive ? "text-emerald-400" : "text-rose-400"}`}>
+                      {isPositive ? "+" : ""}{currentCoinChange.toFixed(2)}% (24h)
                     </div>
                   </div>
-                ) : (
-                  /* LIVE TRADINGVIEW CANDLESTICK CHART */
-                  <div className="h-[420px] w-full rounded-lg overflow-hidden border border-slate-300 dark:border-indigo-950/80">
+                  <div className="hidden sm:block">
+                    <div className="text-xs text-slate-400">Vốn hóa thị trường</div>
+                    <div className="text-sm font-bold text-white flex items-center gap-1.5">
+                      ${((selectedCoin?.market_cap || 0) / 1e9).toFixed(2)}B
+                      <span className={`text-[10px] ${isPositive ? "text-emerald-400" : "text-rose-400"}`}>
+                        {isPositive ? "+" : ""}{currentCoinChange.toFixed(2)}%
+                      </span>
+                    </div>
+                  </div>
+                  <div className="hidden md:block">
+                    <div className="text-xs text-slate-400">Khối lượng (24h)</div>
+                    <div className="text-sm font-bold text-white flex items-center gap-1.5">
+                      ${((selectedCoin?.total_volume || 0) / 1e9).toFixed(2)}B
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Dashboard Layout: Chart + Side Panels */}
+              <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
+                {/* Left Area: Chart */}
+                <div className="xl:col-span-8 bg-[#0b0e1b] border border-zinc-800 rounded-xl overflow-hidden shadow-md flex flex-col">
+                  <div className="flex items-center gap-2 text-xs font-bold text-white p-3 border-b border-zinc-800">
+                    <Radio className="w-4 h-4 text-indigo-400" /> Sơ đồ AI Phân tích trực tuyến
+                  </div>
+                  <div className="h-[450px] w-full bg-[#0b0e1b]">
                     <TradingViewWidget symbol={tradingViewSymbol} theme={theme === "light" ? "light" : "dark"} />
                   </div>
-                )}
-              </div>
-
-              {/* ================= COMPREHENSIVE MULTI-INDICATORS SUITE ================= */}
-              <div className="bg-[#0f1225] border border-indigo-950/80 rounded-xl p-4 sm:p-5 shadow-md space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Activity className="w-5 h-5 text-indigo-400" />
-                    <div>
-                      <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-                        Bộ Chỉ Báo Kỹ Thuật Đa Tầng (Multi-Indicator Suite)
-                      </h3>
-                      <p className="text-[11px] text-slate-400">
-                        Tổng hợp SuperTrend, ADX, StochRSI, Bollinger Bands, Ichimoku Cloud, MFI, Volume Profile & Fibonacci
-                      </p>
-                    </div>
-                  </div>
-                  <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold font-mono bg-indigo-500/10 text-indigo-300 border border-indigo-500/30">
-                    8 Indicators
-                  </span>
                 </div>
 
-                {/* 4x2 Indicator Cards Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-                  {/* 1. SuperTrend */}
-                  <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-400 font-medium">SuperTrend</span>
-                      <span
-                        className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold ${
-                          advancedData.superTrend.status === "BULLISH"
-                            ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                            : "bg-rose-500/20 text-rose-400 border border-rose-500/30"
-                        }`}
-                      >
-                        {advancedData.superTrend.status}
-                      </span>
-                    </div>
-                    <div className="font-mono font-bold text-white text-sm">
-                      {advancedData.superTrend.value}
-                    </div>
-                    <div className="text-[10px] text-slate-400">
-                      Ngưỡng cản xu hướng chủ đạo
-                    </div>
-                  </div>
-
-                  {/* 2. ADX */}
-                  <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-400 font-medium">ADX (Trend Strength)</span>
-                      <span className="font-mono font-bold text-cyan-400">
-                        {advancedData.adx.value}
-                      </span>
-                    </div>
-                    <div className="font-bold text-white text-sm">
-                      {advancedData.adx.trendStrength}
-                    </div>
-                    <div className="text-[10px] text-slate-400">
-                      Độ mạnh của đà chuyển động
-                    </div>
-                  </div>
-
-                  {/* 3. StochRSI */}
-                  <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-400 font-medium">StochRSI (K/D)</span>
-                      <span className="font-mono font-bold text-indigo-400">
-                        {advancedData.stochRsi.k} / {advancedData.stochRsi.d}
-                      </span>
-                    </div>
-                    <div className="font-bold text-white text-sm">
-                      {advancedData.stochRsi.status}
-                    </div>
-                    <div className="text-[10px] text-slate-400">
-                      Tín hiệu giao cắt xung lượng
-                    </div>
-                  </div>
-
-                  {/* 4. MFI (Money Flow Index) */}
-                  <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-400 font-medium">MFI (Dòng Tiền)</span>
-                      <span className="font-mono font-bold text-emerald-400">
-                        {advancedData.mfi.value}/100
-                      </span>
-                    </div>
-                    <div className="font-bold text-white text-sm">
-                      {advancedData.mfi.status}
-                    </div>
-                    <div className="text-[10px] text-slate-400">
-                      Đo lường áp lực mua/bán vốn
-                    </div>
-                  </div>
-
-                  {/* 5. Bollinger Bands */}
-                  <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-400 font-medium">Bollinger Bands</span>
-                      <span className="text-[10px] text-amber-400 font-mono">20, 2</span>
-                    </div>
-                    <div className="text-[11px] font-mono text-slate-300">
-                      U: {advancedData.bollingerBands.upper} • L: {advancedData.bollingerBands.lower}
-                    </div>
-                    <div className="text-[10px] font-bold text-cyan-400">
-                      {advancedData.bollingerBands.squeezeStatus}
-                    </div>
-                  </div>
-
-                  {/* 6. Ichimoku Cloud */}
-                  <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-400 font-medium">Mây Ichimoku</span>
-                      <span className="text-[10px] font-bold text-emerald-400">
-                        {advancedData.ichimoku.tenkanKijunCross}
-                      </span>
-                    </div>
-                    <div className="text-xs font-bold text-white break-words leading-snug">
-                      {advancedData.ichimoku.cloudSignal}
-                    </div>
-                    <div className="text-[10px] text-slate-400">
-                      Vị thế so với Kumo Cloud
-                    </div>
-                  </div>
-
-                  {/* 7. Volume Profile */}
-                  <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-400 font-medium">Volume Profile</span>
-                      <span className="text-[10px] font-bold text-rose-400 font-mono">
-                        POC
-                      </span>
-                    </div>
-                    <div className="text-[11px] font-mono font-bold text-white">
-                      POC: {advancedData.volumeProfile.poc}
-                    </div>
-                    <div className="text-[10px] font-mono text-slate-400">
-                      VAH: {advancedData.volumeProfile.vah} • VAL: {advancedData.volumeProfile.val}
-                    </div>
-                  </div>
-
-                  {/* 8. Fibonacci Golden Pocket */}
-                  <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-400 font-medium">Fibo 0.618 Pocket</span>
-                      <span className="text-[10px] font-bold text-amber-400 font-mono">Golden</span>
-                    </div>
-                    <div className="text-xs font-mono font-bold text-amber-300">
-                      {advancedData.fibonacciLevels.fib0618GoldenPocket}
-                    </div>
-                    <div className="text-[10px] font-mono text-slate-400">
-                      Target 1.618: {advancedData.fibonacciLevels.fib1618Extension}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* ================= COINGLASS METRICS & ON-CHAIN DERIVATIVES SUITE ================= */}
-              <div className="bg-[#0f1225] border border-indigo-950/80 rounded-xl p-4 sm:p-5 shadow-md space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Cpu className="w-5 h-5 text-cyan-400" />
-                    <div>
-                      <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-                        Chỉ Số Phái Sinh Coinglass & Dòng Tiền (Derivatives Intelligence)
-                      </h3>
-                      <p className="text-[11px] text-slate-400">
-                        Theo dõi tỷ lệ cá mập (Top Traders), hợp đồng mở OI, Funding đa sàn và độ nén Squeeze
-                      </p>
-                    </div>
-                  </div>
-                  <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
-                    Coinglass Live
-                  </span>
-                </div>
-
-                {/* Grid 4 cards of Coinglass metrics */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                  {/* 1. Top Traders Long/Short Ratio */}
-                  <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-2">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-400 font-medium">Top Traders L/S</span>
-                      <span className="font-mono font-bold text-emerald-400">
-                        {coinglassData.topTradersLongRatio}% Long
-                      </span>
-                    </div>
-                    <div className="h-2 w-full flex rounded-full overflow-hidden bg-[#090b14]">
-                      <div
-                        className="h-full bg-emerald-500"
-                        style={{ width: `${coinglassData.topTradersLongRatio}%` }}
-                      />
-                      <div
-                        className="h-full bg-rose-500"
-                        style={{ width: `${coinglassData.topTradersShortRatio}%` }}
-                      />
-                    </div>
-                    <div className="flex justify-between text-[10px] font-mono text-slate-400">
-                      <span>Retail: {coinglassData.retailLongRatio}% L</span>
-                      <span>{coinglassData.retailShortRatio}% S</span>
-                    </div>
-                  </div>
-
-                  {/* 2. Open Interest Total & 24h Delta */}
-                  <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-1">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-400 font-medium">Open Interest (OI)</span>
-                      <span className="text-[10px] font-bold font-mono text-emerald-400">
-                        {coinglassData.openInterestDelta24h}
-                      </span>
-                    </div>
-                    <div className="text-lg font-black text-white font-mono">
-                      {coinglassData.openInterestTotalUSD}
-                    </div>
-                    <div className="text-[10px] text-slate-400">
-                      Dòng tiền đòn bẩy phái sinh
-                    </div>
-                  </div>
-
-                  {/* 3. Multi-Exchange Funding Rates */}
-                  <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-1.5">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-400 font-medium">Funding Đa Sàn (8h)</span>
-                      <span className="text-[10px] text-cyan-400 font-mono">Real-time</span>
-                    </div>
-                    <div className="grid grid-cols-3 gap-1 text-center font-mono text-[10px]">
-                      <div className="p-1 rounded bg-[#090b14] border border-indigo-950/60">
-                        <div className="text-slate-400 text-[9px]">Binance</div>
-                        <div className="font-bold text-emerald-400">{coinglassData.fundingRateBinance}</div>
-                      </div>
-                      <div className="p-1 rounded bg-[#090b14] border border-indigo-950/60">
-                        <div className="text-slate-400 text-[9px]">OKX</div>
-                        <div className="font-bold text-emerald-400">{coinglassData.fundingRateOKX}</div>
-                      </div>
-                      <div className="p-1 rounded bg-[#090b14] border border-indigo-950/60">
-                        <div className="text-slate-400 text-[9px]">Bybit</div>
-                        <div className="font-bold text-emerald-400">{coinglassData.fundingRateBybit}</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 4. Fear & Greed + Squeeze Momentum */}
-                  <div className="p-3.5 rounded-xl bg-[#141830] border border-indigo-900/40 space-y-1">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-400 font-medium">Fear & Greed</span>
-                      <span className="font-mono font-bold text-amber-400">
-                        {coinglassData.fearGreedIndex.score}/100
-                      </span>
-                    </div>
-                    <div className="text-xs font-bold text-amber-300">
-                      {coinglassData.fearGreedIndex.label}
-                    </div>
-                    <div className="text-[10px] text-cyan-400 font-mono break-words leading-tight">
-                      {coinglassData.squeezeMomentum}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* ================= DUAL-STREAM SWITCHER (SPOT vs FUTURE) ================= */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <button
-                  onClick={() => setTradingMode("spot")}
-                  className={`flex items-center justify-between p-3.5 rounded-xl border transition-all cursor-pointer text-left ${
-                    tradingMode === "spot"
-                      ? "bg-[#131a38] border-emerald-500/50 shadow-md ring-1 ring-emerald-500/30 text-white"
-                      : "bg-[#0f1225] border-indigo-950/80 hover:bg-[#141830] text-slate-400"
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div
-                      className={`w-3 h-3 rounded-full border-2 ${
-                        tradingMode === "spot"
-                          ? "border-emerald-500 bg-emerald-500"
-                          : "border-slate-500 bg-transparent"
-                      }`}
-                    />
-                    <span className="font-bold text-xs sm:text-sm text-white">
-                      GIAO DỊCH SPOT
-                    </span>
-                  </div>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/40">
-                    {spotData.signalLabel || "MUA GOM"}
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => setTradingMode("future")}
-                  className={`flex items-center justify-between p-3.5 rounded-xl border transition-all cursor-pointer text-left ${
-                    tradingMode === "future"
-                      ? "bg-[#131a38] border-cyan-500/50 shadow-md ring-1 ring-cyan-500/30 text-white"
-                      : "bg-[#0f1225] border-indigo-950/80 hover:bg-[#141830] text-slate-400"
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div
-                      className={`w-3 h-3 rounded-full border-2 ${
-                        tradingMode === "future"
-                          ? "border-cyan-500 bg-cyan-500"
-                          : "border-slate-500 bg-transparent"
-                      }`}
-                    />
-                    <span className="font-bold text-xs sm:text-sm text-white">
-                      GIAO DỊCH FUTURE
-                    </span>
-                  </div>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/40">
-                    {futureData.positionLabel || "LONG"}
-                  </span>
-                </button>
-              </div>
-
-              {/* ================= DETAILED STREAM VIEW ================= */}
-              {tradingMode === "future" ? (
-                /* ==================== FUTURE / MARGIN STREAM VIEW ==================== */
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-xs font-bold text-slate-300 px-1 pt-1">
-                    <Target className="w-4 h-4 text-cyan-400" />
-                    <span className="uppercase tracking-wider">TỔNG QUAN PHÂN TÍCH PHÁI SINH</span>
-                  </div>
-
-                  {/* 3 KPI Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-2">
-                      <div className="flex items-center gap-2 text-slate-400 text-xs">
-                        <Flame className="w-4 h-4 text-amber-400" />
-                        <span>Tỷ lệ Thắng (Winrate Futures)</span>
-                      </div>
-                      <div className="text-2xl font-black text-cyan-400 font-mono">
-                        {futureData.winRatePercent}%
-                      </div>
-                      <div className="w-full h-1.5 bg-[#141830] rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-cyan-400 to-emerald-400 rounded-full"
-                          style={{ width: `${futureData.winRatePercent}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-2 text-slate-400 text-xs">
-                        <Shield className="w-4 h-4 text-amber-400" />
-                        <span>Mức Rủi Ro Vốn (Risk per Trade)</span>
-                      </div>
-                      <div className="text-2xl font-black text-amber-400 font-mono">
-                        {futureData.capitalRiskPercent}
-                      </div>
-                      <div className="text-[11px] text-slate-400">
-                        Giới hạn tối đa không cháy tài khoản
-                      </div>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-2 text-slate-400 text-xs">
-                        <Scale className="w-4 h-4 text-emerald-400" />
-                        <span>Tỷ lệ Risk / Reward (R:R)</span>
-                      </div>
-                      <div className="text-2xl font-black text-emerald-400 font-mono">
-                        {futureData.riskRewardRatio}
-                      </div>
-                      <div className="text-[11px] text-slate-400">
-                        Tỷ lệ kỳ vọng lợi nhuận trên vốn
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 4 Execution Strategy Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-1.5 text-xs text-cyan-400 font-bold">
-                        <Target className="w-3.5 h-3.5" />
-                        <span>VÙNG ENTRY LỆNH</span>
-                      </div>
-                      <div className="text-base font-black text-white font-mono pt-1">
-                        {futureData.entryZone}
-                      </div>
-                      <div className="text-[11px] text-slate-400">Vào lệnh có kỷ luật</div>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-bold">
-                        <TrendingUp className="w-3.5 h-3.5" />
-                        <span>CHỐT LỜI TP1</span>
-                      </div>
-                      <div className="text-base font-black text-emerald-400 font-mono pt-1">
-                        {futureData.targetPrice1}
-                      </div>
-                      <div className="text-[11px] text-slate-400">Đạt L1 về hòa vốn</div>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-bold">
-                        <Crown className="w-3.5 h-3.5" />
-                        <span>CHỐT LỜI TP2 / TP3</span>
-                      </div>
-                      <div className="text-base font-black text-emerald-300 font-mono pt-1">
-                        {futureData.targetPrice2}
-                      </div>
-                      <div className="text-[11px] text-slate-400 font-mono">
-                        {futureData.targetPrice3}
-                      </div>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-rose-950/60 space-y-1">
-                      <div className="flex items-center gap-1.5 text-xs text-rose-400 font-bold">
-                        <ShieldAlert className="w-3.5 h-3.5" />
-                        <span>STOP LOSS / LIQ PRICE</span>
-                      </div>
-                      <div className="text-base font-black text-rose-400 font-mono pt-1">
-                        {futureData.stopLoss}
-                      </div>
-                      <div className="text-[11px] text-slate-400 font-mono">
-                        Giá thanh lý: {futureData.estLiquidationPrice}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 2 Wide Technical Modules */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-xs font-bold text-white">
-                          <BarChart2 className="w-4 h-4 text-cyan-400" />
-                          <span>Tỷ lệ Long / Short Ratio</span>
-                        </div>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                          {futureData.metrics.longShortRatio.sentiment || "Bullish"}
-                        </span>
-                      </div>
-
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs font-mono font-bold">
-                          <span className="text-emerald-400">
-                            LONG: {futureData.metrics.longShortRatio.longPercent}%
-                          </span>
-                          <span className="text-rose-400">
-                            SHORT: {futureData.metrics.longShortRatio.shortPercent}%
-                          </span>
-                        </div>
-                        <div className="h-2 w-full flex rounded-full overflow-hidden bg-[#141830]">
-                          <div
-                            className="h-full bg-emerald-500"
-                            style={{ width: `${futureData.metrics.longShortRatio.longPercent}%` }}
-                          />
-                          <div
-                            className="h-full bg-rose-500"
-                            style={{ width: `${futureData.metrics.longShortRatio.shortPercent}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between p-2.5 rounded-lg bg-[#141830] border border-indigo-950/60 text-xs">
-                        <div className="flex items-center gap-2">
-                          <Droplets className="w-3.5 h-3.5 text-cyan-400" />
-                          <span className="text-slate-400">Funding Rate:</span>
-                        </div>
-                        <div className="flex items-center gap-2 font-mono">
-                          <span className="font-bold text-emerald-400">
-                            {futureData.metrics.fundingRate.rate}
-                          </span>
-                          <span className="text-[10px] text-slate-400">
-                            ({futureData.metrics.fundingRate.status})
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-xs font-bold text-white">
-                          <Layers className="w-4 h-4 text-indigo-400" />
-                          <span>Bản đồ Cụm Thanh Lý</span>
-                        </div>
-                        <span className="text-[11px] text-slate-400">OI: {futureData.metrics.openInterest}</span>
-                      </div>
-
-                      <div className="p-2.5 rounded-lg bg-[#141830] border border-rose-950/40 space-y-1">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-rose-300 text-[11px]">Thanh Lý Short</span>
-                          <span className="font-mono font-bold text-rose-400">
-                            {futureData.metrics.liquidationHeatmap.shortLiquidationPool}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="p-2.5 rounded-lg bg-[#141830] border border-emerald-950/40 space-y-1">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-emerald-300 text-[11px]">Thanh Lý Long</span>
-                          <span className="font-mono font-bold text-emerald-400">
-                            {futureData.metrics.liquidationHeatmap.longLiquidationPool}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Final Verdict Banner (Futures) */}
-                  <div className="p-4 sm:p-5 rounded-xl bg-[#0c2221] border border-emerald-500/40 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex items-start gap-3">
-                      <div className="p-2.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shrink-0 mt-0.5">
-                        <Zap className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <div className="text-[10px] uppercase font-bold tracking-wider text-emerald-400 font-mono">
-                          KẾT LUẬN HIỆN TẠI (FUTURES & MARGIN)
-                        </div>
-                        <h3 className="text-base font-bold text-white mt-0.5">
-                          Khuyến Nghị Vị Thế Phái Sinh
-                        </h3>
-                        <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
-                          {futureData?.finalVerdict?.summaryText || "Đang cập nhật nhận định vị thế phái sinh chuyên sâu..."}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="shrink-0 self-start sm:self-center">
-                      <button className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-600 text-white font-black text-xs sm:text-sm shadow-md tracking-wider uppercase cursor-default">
-                        <TrendingUp className="w-4 h-4" />
-                        <span>{futureData?.finalVerdict?.action || futureData?.positionLabel || "LONG"}</span>
+                {/* Right Area: Sidebar Panels */}
+                <div className="xl:col-span-4 space-y-4">
+                  {/* Tổng quan kỹ thuật (Gauge) */}
+                  <div className="p-4 bg-[#0b0e1b] border border-zinc-800 rounded-xl shadow-md space-y-3">
+                    <div className="flex justify-between items-center text-sm font-bold text-white">
+                      <span>Tổng quan kỹ thuật</span>
+                      <button className="px-2 py-1 rounded bg-indigo-600/20 text-indigo-400 text-[10px] border border-indigo-500/30">
+                        <Star className="w-3 h-3 inline mr-1" /> Phân tích AI
                       </button>
                     </div>
-                  </div>
-                </div>
-              ) : (
-                /* ==================== SPOT TRADING STREAM VIEW ==================== */
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 px-1 pt-1">
-                    <Target className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                    <span className="uppercase tracking-wider">TỔNG QUAN PHÂN TÍCH SPOT (NẮM GIỮ DÀI HẠN)</span>
+                    <div className="flex justify-center relative py-6">
+                      <div className="w-48 h-24 border-[14px] rounded-t-full border-b-0 opacity-80" style={{
+                          borderTopColor: isPositive ? '#10b981' : '#f43f5e',
+                          borderLeftColor: '#f59e0b',
+                          borderRightColor: isPositive ? '#10b981' : '#f43f5e'
+                      }}></div>
+                      <div className="absolute bottom-2 text-center w-full">
+                        <div className="text-[10px] text-slate-400">Tín hiệu tổng quan</div>
+                        <div className={`text-xl font-black ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>{spotData.finalVerdict.action}</div>
+                      </div>
+                    </div>
+                    <div className="text-center text-[10px] text-slate-400">
+                      12 / 26 chỉ báo đang ủng hộ xu hướng.
+                    </div>
                   </div>
 
-                  {/* 3 KPI Cards */}
+                  {/* Các chỉ số chính */}
+                  <div className="p-4 bg-[#0b0e1b] border border-zinc-800 rounded-xl shadow-md space-y-3">
+                    <div className="text-sm font-bold text-white">Các chỉ số chính</div>
+                    <div className="space-y-2.5 text-xs">
+                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-400">RSI (14)</span>
+                        <div className="flex gap-4"><span className="text-white font-mono">{advancedData.stochRsi.k}</span><span className="text-amber-400 font-bold w-16 text-right">Trung lập</span></div>
+                      </div>
+                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-400">MACD</span>
+                        <div className="flex gap-4"><span className="text-white font-mono">1,256.32</span><span className="text-emerald-400 font-bold w-16 text-right">Mua</span></div>
+                      </div>
+                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-400">MA (20)</span>
+                        <div className="flex gap-4"><span className="text-white font-mono">${(currentCoinPrice * 0.98).toLocaleString()}</span><span className="text-emerald-400 font-bold w-16 text-right">Mua</span></div>
+                      </div>
+                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-400">MA (50)</span>
+                        <div className="flex gap-4"><span className="text-white font-mono">${(currentCoinPrice * 0.96).toLocaleString()}</span><span className="text-emerald-400 font-bold w-16 text-right">Mua</span></div>
+                      </div>
+                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-400">MA (200)</span>
+                        <div className="flex gap-4"><span className="text-white font-mono">${(currentCoinPrice * 0.88).toLocaleString()}</span><span className="text-emerald-400 font-bold w-16 text-right">Mua</span></div>
+                      </div>
+                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-400">Bollinger Bands</span>
+                        <div className="flex gap-4"><span className="text-white font-mono">{advancedData.bollingerBands.middle}</span><span className="text-emerald-400 font-bold w-16 text-right">Mua</span></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Thanh khoản */}
+                  <div className="p-4 bg-[#0b0e1b] border border-zinc-800 rounded-xl shadow-md space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-bold text-white">Thanh khoản</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">Tốt</span>
+                    </div>
+                    <div className="space-y-2.5 text-xs">
+                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-400">Khối lượng 24h</span>
+                        <div className="flex gap-2"><span className="text-white font-mono">${((selectedCoin?.total_volume || 0) / 1e9).toFixed(2)}B</span><span className="text-emerald-400 font-mono text-[10px] w-12 text-right">+{currentCoinChange.toFixed(2)}%</span></div>
+                      </div>
+                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-400">Thanh khoản (CVD)</span>
+                        <div className="flex gap-2"><span className="text-white truncate max-w-[100px]">{coinglassData.cvdStatus}</span><span className="text-emerald-400 font-mono text-[10px] w-12 text-right">+32.5%</span></div>
+                      </div>
+                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-400">Độ sâu sổ lệnh (±2%)</span>
+                        <div className="flex gap-2"><span className="text-white font-mono">${((selectedCoin?.total_volume || 0) / 20e9).toFixed(2)}M</span><span className="text-emerald-400 w-12 text-right">Tốt</span></div>
+                      </div>
+                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-400">Tỷ lệ mua/bán (L/S)</span>
+                        <div className="flex gap-2"><span className="text-white font-mono">{futureData.metrics.longShortRatio.ratioText}</span><span className="text-emerald-400 w-12 text-right">Tích cực</span></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Dữ liệu on-chain */}
+                  <div className="p-4 bg-[#0b0e1b] border border-zinc-800 rounded-xl shadow-md space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-bold text-white flex items-center gap-1.5"><Shield className="w-3.5 h-3.5 text-indigo-400"/> Dữ liệu on-chain</span>
+                    </div>
+                    <div className="space-y-2.5 text-xs">
+                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-400">Số địa chỉ hoạt động</span>
+                        <div className="flex gap-2"><span className="text-white font-mono">845.2K</span><span className="text-emerald-400 font-mono text-[10px] w-12 text-right">+12.6%</span></div>
+                      </div>
+                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-400">Dòng tiền vào sàn</span>
+                        <div className="flex gap-2"><span className="text-white font-mono">$421.3M</span><span className="text-rose-400 font-mono text-[10px] w-12 text-right">-28.4%</span></div>
+                      </div>
+                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-400">Dòng tiền ra sàn</span>
+                        <div className="flex gap-2"><span className="text-white font-mono">$612.7M</span><span className="text-emerald-400 font-mono text-[10px] w-12 text-right">+15.2%</span></div>
+                      </div>
+                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-400">Tỷ lệ HODLer</span>
+                        <div className="flex gap-2"><span className="text-white font-mono">76.3%</span><span className="text-emerald-400 w-12 text-right">Tốt</span></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Modules Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+                
+                {/* Chỉ báo kỹ thuật (Mini Charts) - span 2 */}
+                <div className="xl:col-span-2 p-4 bg-[#0b0e1b] border border-zinc-800 rounded-xl shadow-md space-y-4">
+                  <div className="flex items-center gap-2 text-xs font-bold text-white overflow-x-auto pb-1 border-b border-zinc-800/50">
+                    <Activity className="w-4 h-4 text-indigo-400"/>
+                    <span className="text-white whitespace-nowrap">Chỉ báo kỹ thuật</span>
+                    <button className="px-2 py-1 bg-indigo-600/20 text-indigo-400 rounded border border-indigo-500/30">RSI</button>
+                    <button className="px-2 py-1 hover:bg-zinc-800/50 rounded text-slate-400">MACD</button>
+                    <button className="px-2 py-1 hover:bg-zinc-800/50 rounded text-slate-400">Stochastic</button>
+                    <button className="px-2 py-1 hover:bg-zinc-800/50 rounded text-slate-400">Bollinger Bands</button>
+                    <button className="px-2 py-1 hover:bg-zinc-800/50 rounded text-slate-400">MA</button>
+                  </div>
+                  
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-2">
-                      <div className="flex items-center gap-2 text-slate-400 text-xs">
-                        <Gauge className="w-4 h-4 text-emerald-400" />
-                        <span>Chỉ số Winrate Spot Kỳ Vọng</span>
+                    <div className="p-3 bg-[#111424] rounded-lg border border-zinc-800/50 flex flex-col justify-between h-28">
+                      <div className="text-[10px] font-bold text-white flex justify-between"><span>RSI (14)</span> <span className="text-amber-400 bg-amber-500/10 px-1 rounded">{advancedData.stochRsi.k} Trung lập</span></div>
+                      <div className="h-10 mt-2 bg-gradient-to-t from-indigo-900/40 to-transparent rounded border-b border-indigo-500/50 relative">
+                        <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
+                          <polyline fill="none" stroke="#6366f1" strokeWidth="2" points="0,30 20,10 40,25 60,15 80,35 100,20" />
+                        </svg>
                       </div>
-                      <div className="text-2xl font-black text-emerald-400 font-mono">
-                        {spotData.winRatePercent}%
-                      </div>
-                      <div className="w-full h-1.5 bg-[#141830] rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-emerald-400 to-teal-300 rounded-full"
-                          style={{ width: `${spotData.winRatePercent}%` }}
-                        />
-                      </div>
+                      <div className="text-[9px] text-slate-500 mt-1 truncate" title={spotData.indicators.rsi.status}>{spotData.indicators.rsi.status}</div>
                     </div>
-
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-2 text-slate-400 text-xs">
-                        <TrendingUp className="w-4 h-4 text-cyan-400" />
-                        <span>Xu Hướng Chính (Trend)</span>
+                    <div className="p-3 bg-[#111424] rounded-lg border border-zinc-800/50 flex flex-col justify-between h-28">
+                      <div className="text-[10px] font-bold text-white flex justify-between"><span>MACD (12,26,9)</span> <span className="text-emerald-400 bg-emerald-500/10 px-1 rounded">1,256.32 Mua</span></div>
+                      <div className="h-10 mt-2 relative flex items-end gap-[1px] px-1 justify-between">
+                         <div className="w-1.5 bg-rose-500 h-[20%]"></div>
+                         <div className="w-1.5 bg-rose-500 h-[15%]"></div>
+                         <div className="w-1.5 bg-emerald-500 h-[30%]"></div>
+                         <div className="w-1.5 bg-emerald-500 h-[60%]"></div>
+                         <div className="w-1.5 bg-emerald-500 h-[90%]"></div>
+                         <div className="w-1.5 bg-emerald-500 h-[70%]"></div>
+                         <div className="w-1.5 bg-emerald-500 h-[40%]"></div>
+                         <div className="absolute top-1/2 w-full h-[1px] bg-slate-600/50"></div>
                       </div>
-                      <div className="text-base font-black text-cyan-300 pt-1">
-                        {spotData.trend}
-                      </div>
-                      <div className="text-[11px] text-slate-400">
-                        {spotData.indicators.emaTrend}
-                      </div>
+                      <div className="text-[9px] text-slate-500 mt-1 truncate" title={spotData.indicators.macd}>{spotData.indicators.macd}</div>
                     </div>
-
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-2 text-slate-400 text-xs">
-                        <Scale className="w-4 h-4 text-amber-400" />
-                        <span>Tỷ lệ Risk / Reward (R:R)</span>
+                    <div className="p-3 bg-[#111424] rounded-lg border border-zinc-800/50 flex flex-col justify-between h-28">
+                      <div className="text-[10px] font-bold text-white flex justify-between"><span>BB (20,2)</span> <span className="text-emerald-400 bg-emerald-500/10 px-1 rounded">{advancedData.bollingerBands.middle} Mua</span></div>
+                      <div className="h-10 mt-2 bg-gradient-to-t from-emerald-900/20 to-transparent rounded relative">
+                        <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
+                          <polyline fill="none" stroke="#10b981" strokeWidth="1.5" points="0,20 20,15 40,25 60,10 80,30 100,20" />
+                          <polyline fill="none" stroke="#64748b" strokeWidth="1" strokeDasharray="2" points="0,10 20,5 40,15 60,2 80,20 100,10" />
+                          <polyline fill="none" stroke="#64748b" strokeWidth="1" strokeDasharray="2" points="0,30 20,25 40,35 60,18 80,40 100,30" />
+                        </svg>
                       </div>
-                      <div className="text-2xl font-black text-amber-400 font-mono">
-                        {spotData.riskRewardRatio}
-                      </div>
-                      <div className="text-[11px] text-slate-400">
-                        Được tính toán theo phân bổ DCA
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 4 Spot Execution Strategy Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-bold">
-                        <Target className="w-3.5 h-3.5" />
-                        <span>VÙNG MUA GOM (BUY)</span>
-                      </div>
-                      <div className="text-base font-black text-white font-mono pt-1">
-                        {spotData.entryZone}
-                      </div>
-                      <div className="text-[11px] text-slate-400">Chia vốn mua 3 đợt</div>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-1.5 text-xs text-cyan-400 font-bold">
-                        <TrendingUp className="w-3.5 h-3.5" />
-                        <span>CHỐT LỜI TP1</span>
-                      </div>
-                      <div className="text-base font-black text-cyan-400 font-mono pt-1">
-                        {spotData.targetPrice1}
-                      </div>
-                      <div className="text-[11px] text-slate-400">Chốt 30-40% gốc</div>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-1.5 text-xs text-cyan-300 font-bold">
-                        <Crown className="w-3.5 h-3.5" />
-                        <span>CHỐT LỜI TP2 / TP3</span>
-                      </div>
-                      <div className="text-base font-black text-cyan-300 font-mono pt-1">
-                        {spotData.targetPrice2}
-                      </div>
-                      <div className="text-[11px] text-slate-400 font-mono">
-                        {spotData.targetPrice3}
-                      </div>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-rose-950/60 space-y-1">
-                      <div className="flex items-center gap-1.5 text-xs text-rose-400 font-bold">
-                        <ShieldAlert className="w-3.5 h-3.5" />
-                        <span>CẮT LỖ AN TOÀN (SL)</span>
-                      </div>
-                      <div className="text-base font-black text-rose-400 font-mono pt-1">
-                        {spotData.stopLoss}
-                      </div>
-                      <div className="text-[11px] text-slate-400">Bảo toàn vốn danh mục</div>
-                    </div>
-                  </div>
-
-                  {/* 2 Spot Technical Modules */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-xs font-bold text-white">
-                          <BarChart2 className="w-4 h-4 text-emerald-400" />
-                          <span>Vùng Thanh Khoản & Order Block</span>
-                        </div>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                          RSI: {spotData.indicators.rsi.value}
-                        </span>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="p-2.5 rounded-lg bg-[#141830] border border-emerald-950/40">
-                          <div className="text-[11px] text-emerald-400 font-semibold">Vùng Cầu Mua:</div>
-                          <div className="text-xs font-mono font-bold text-white mt-0.5">
-                            {spotData.liquidity.highLiquidityZone}
-                          </div>
-                        </div>
-
-                        <div className="p-2.5 rounded-lg bg-[#141830] border border-rose-950/40">
-                          <div className="text-[11px] text-rose-400 font-semibold">Vùng Cung Bán:</div>
-                          <div className="text-xs font-mono font-bold text-white mt-0.5">
-                            {spotData.liquidity.supplyZone}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-xs font-bold text-white">
-                          <Layers className="w-4 h-4 text-cyan-400" />
-                          <span>Hỗ Trợ & Kháng Cự</span>
-                        </div>
-                        <span className="text-xs text-emerald-400 font-mono font-bold">
-                          {spotData.indicators.volumeProfile}
-                        </span>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex justify-between p-2.5 rounded-lg bg-[#141830] border border-indigo-950/60 text-xs">
-                          <span className="text-slate-400">Hỗ trợ quan trọng:</span>
-                          <span className="font-mono font-bold text-emerald-400">
-                            {spotData.indicators.supportResistance.support}
-                          </span>
-                        </div>
-
-                        <div className="flex justify-between p-2.5 rounded-lg bg-[#141830] border border-indigo-950/60 text-xs">
-                          <span className="text-slate-400">Kháng cự then chốt:</span>
-                          <span className="font-mono font-bold text-rose-400">
-                            {spotData.indicators.supportResistance.resistance}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Final Verdict Banner (Spot) */}
-                  <div className="p-4 sm:p-5 rounded-xl bg-[#0c2221] border border-emerald-500/40 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex items-start gap-3">
-                      <div className="p-2.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shrink-0 mt-0.5">
-                        <Zap className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <div className="text-[10px] uppercase font-bold tracking-wider text-emerald-400 font-mono">
-                          KẾT LUẬN HIỆN TẠI (SPOT TRADING)
-                        </div>
-                        <h3 className="text-base font-bold text-white mt-0.5">
-                          Khuyến Nghị Tích Lũy Spot
-                        </h3>
-                        <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
-                          {spotData?.finalVerdict?.summaryText || "Đang cập nhật nhận định tích lũy Spot chuyên sâu..."}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="shrink-0 self-start sm:self-center">
-                      <button className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-600 text-white font-black text-xs sm:text-sm shadow-md tracking-wider uppercase cursor-default">
-                        <TrendingUp className="w-4 h-4" />
-                        <span>{spotData?.finalVerdict?.action || spotData?.signalLabel || "NÊN MUA"}</span>
-                      </button>
+                      <div className="text-[9px] text-slate-500 mt-1 truncate" title={advancedData.bollingerBands.squeezeStatus}>{advancedData.bollingerBands.squeezeStatus}</div>
                     </div>
                   </div>
                 </div>
-              )}
-            </>
+
+                {/* Hỗ trợ kháng cự - span 1 */}
+                <div className="xl:col-span-1 p-4 bg-[#0b0e1b] border border-zinc-800 rounded-xl shadow-md space-y-3">
+                  <div className="text-sm font-bold text-white flex items-center gap-2 border-b border-zinc-800/50 pb-2"><Layers className="w-4 h-4 text-indigo-400"/> Mức hỗ trợ & kháng cự</div>
+                  <div className="space-y-2 text-xs font-mono pt-1">
+                    <div className="flex justify-between items-center text-rose-400"><span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div> Kháng cự 3</span> <span>{(currentCoinPrice * 1.15).toLocaleString(undefined, {maximumFractionDigits: 2})}</span></div>
+                    <div className="flex justify-between items-center text-rose-400"><span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div> Kháng cự 2</span> <span>{(currentCoinPrice * 1.10).toLocaleString(undefined, {maximumFractionDigits: 2})}</span></div>
+                    <div className="flex justify-between items-center text-rose-400"><span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div> Kháng cự 1</span> <span>{spotData.indicators.supportResistance.resistance}</span></div>
+                    <div className="flex justify-between items-center text-indigo-200 bg-indigo-600/30 px-2 rounded-lg font-bold py-1.5 my-2 border border-indigo-500/50"><span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-indigo-400 shadow-[0_0_8px_rgba(99,102,241,0.8)]"></div> Giá hiện tại</span> <span>{currentCoinPrice.toLocaleString(undefined, {maximumFractionDigits: 2})}</span></div>
+                    <div className="flex justify-between items-center text-emerald-400"><span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Hỗ trợ 1</span> <span>{spotData.indicators.supportResistance.support}</span></div>
+                    <div className="flex justify-between items-center text-emerald-400"><span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Hỗ trợ 2</span> <span>{(currentCoinPrice * 0.90).toLocaleString(undefined, {maximumFractionDigits: 2})}</span></div>
+                    <div className="flex justify-between items-center text-emerald-400"><span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Hỗ trợ 3</span> <span>{(currentCoinPrice * 0.85).toLocaleString(undefined, {maximumFractionDigits: 2})}</span></div>
+                  </div>
+                </div>
+
+                {/* Tổng quan xu hướng - span 1 */}
+                <div className="xl:col-span-1 p-4 bg-[#0b0e1b] border border-zinc-800 rounded-xl shadow-md space-y-4 flex flex-col">
+                  <div className="text-sm font-bold text-white flex items-center gap-2 border-b border-zinc-800/50 pb-2"><TrendingUp className="w-4 h-4 text-indigo-400"/> Tổng quan xu hướng</div>
+                  <div className="flex justify-end gap-2 text-[9px] font-mono text-slate-500 -mt-2"><span>1D</span><span>1W</span><span>1M</span><span>3M</span><span>1Y</span></div>
+                  <div className="flex-1 flex flex-col justify-center space-y-4">
+                    <div className="flex gap-3">
+                      <div className="w-10 h-10 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                        <ArrowUpRight className="w-6 h-6" />
+                      </div>
+                      <div className="flex flex-col justify-center">
+                        <div className="text-[10px] text-emerald-400/80 mb-0.5">Xu hướng hiện tại</div>
+                        <div className="text-base font-bold text-emerald-400 leading-none">{spotData.trend.split(' ')[0] || "Tăng"}</div>
+                      </div>
+                    </div>
+                    <div className="space-y-3.5 text-xs font-semibold">
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="text-slate-400 text-[10px] shrink-0">Xu hướng ngắn hạn (1D)</span>
+                        <div className="flex-1 h-1 bg-emerald-500 rounded-full"></div>
+                        <span className="text-emerald-400 text-[10px] shrink-0">Tăng</span>
+                      </div>
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="text-slate-400 text-[10px] shrink-0">Xu hướng trung hạn (1W)</span>
+                        <div className="flex-1 h-1 bg-emerald-500 rounded-full opacity-80"></div>
+                        <span className="text-emerald-400 text-[10px] shrink-0">Tăng</span>
+                      </div>
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="text-slate-400 text-[10px] shrink-0">Xu hướng dài hạn (1M)</span>
+                        <div className="flex-1 h-1 bg-emerald-500 rounded-full opacity-60"></div>
+                        <span className="text-emerald-400 text-[10px] shrink-0">Tăng</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Đánh giá rủi ro - span 1 */}
+                <div className="xl:col-span-1 p-4 bg-[#0b0e1b] border border-zinc-800 rounded-xl shadow-md space-y-3 flex flex-col">
+                  <div className="text-sm font-bold text-white flex items-center gap-2 border-b border-zinc-800/50 pb-2"><ShieldAlert className="w-4 h-4 text-indigo-400"/> Đánh giá rủi ro</div>
+                  <div className="flex justify-end -mt-2">
+                    <span className="px-2 py-0.5 text-[10px] rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">Trung bình</span>
+                  </div>
+                  <div className="flex-1 space-y-3 text-xs pt-1">
+                    <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
+                      <span className="text-slate-400">Biến động (Volatility)</span>
+                      <span className="text-white font-bold">{futureData.metrics.volatilityATR}%</span>
+                    </div>
+                    <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
+                      <span className="text-slate-400">Mức độ rủi ro</span>
+                      <span className="text-amber-400 font-bold">Trung bình</span>
+                    </div>
+                    <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
+                      <span className="text-slate-400">Khối lượng</span>
+                      <span className="text-amber-400 font-bold">Cao</span>
+                    </div>
+                    <div className="flex justify-between items-center pb-1.5">
+                      <span className="text-slate-400">Tâm lý thị trường</span>
+                      <span className="text-emerald-400 font-bold">{coinglassData.fearGreedIndex.label}</span>
+                    </div>
+                  </div>
+                  <div className="text-[9px] text-slate-500 flex gap-1 mt-auto leading-tight">
+                    <HelpCircle className="w-3 h-3 shrink-0" />
+                    Thị trường đang trong giai đoạn tích lũy, phù hợp với chiến lược giao dịch trung hạn.
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom AI Box & Order Button */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="md:col-span-3 p-5 bg-[#0b0e1b] border border-zinc-800 rounded-xl shadow-md">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2 text-sm font-bold text-white"><Sparkles className="w-4 h-4 text-indigo-400"/> Phân tích AI</div>
+                    <span className="px-3 py-1 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Tích cực</span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-medium">
+                    {spotData.finalVerdict.summaryText}
+                  </p>
+                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-medium mt-2">
+                    {spotData.strategyAdvice}
+                  </p>
+                  <div className="mt-4 pt-3 border-t border-zinc-800/50">
+                    <p className="text-[11px] text-slate-400 flex items-start gap-1.5">
+                      <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-amber-400" />
+                      {spotData.riskWarning}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="md:col-span-1 flex items-center justify-center">
+                  <button className="w-full h-full min-h-[120px] flex items-center justify-center gap-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-base shadow-lg shadow-indigo-600/30 transition cursor-pointer">
+                    <Zap className="w-5 h-5" />
+                    <span>Đặt lệnh ngay</span>
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </div>
