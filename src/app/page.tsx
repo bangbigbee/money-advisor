@@ -32,6 +32,7 @@ export default function Home() {
   const [selectedChartSymbol, setSelectedChartSymbol] = useState("BINANCE:BTCUSDT");
   const [cryptos, setCryptos] = useState<CryptoItem[]>([]);
   const [goldForex, setGoldForex] = useState<GoldForexItem[]>(initialGoldForexData);
+  const [selectedAsset, setSelectedAsset] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<string>("");
 
@@ -48,6 +49,9 @@ export default function Home() {
     setIsLoading(true);
     const data = await fetchTopCryptos(250);
     setCryptos(data);
+    if (!selectedAsset && data.length > 0) {
+      setSelectedAsset(data[0]);
+    }
     setLastUpdated(new Date().toLocaleTimeString("vi-VN"));
     setIsLoading(false);
   };
@@ -82,72 +86,25 @@ export default function Home() {
         <Navbar
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          onOpenAddModal={() => {
-            setAddModalPrefill(null);
-            setIsAddModalOpen(true);
-          }}
+          cryptos={cryptos}
+          goldForex={goldForex}
+          selectedAsset={selectedAsset}
+          onSelectAsset={setSelectedAsset}
           onOpenUpgradeModal={() => setIsUpgradeModalOpen(true)}
         />
 
         {/* Main Content Area */}
-        <main className="flex-1 max-w-[1720px] w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 md:pb-8 space-y-6">
-          {/* Market Status Ticker & Banner */}
-          {activeTab !== "scan" && activeTab !== "admin" && (
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-4 rounded-xl bg-zinc-900/80 border border-zinc-800 shadow-md">
-              <div className="flex items-center gap-3">
-                <div className="p-2 sm:p-2.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
-                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
-                </div>
-                <div>
-                  <div className="text-xs sm:text-sm font-semibold text-zinc-100 flex items-center gap-2">
-                    MoneyAdvisor Pro
-                    <span className="text-[9px] sm:text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-mono">
-                      {role === "ADMIN" ? "ADMIN 👑" : `Gói ${role}`}
-                    </span>
-                  </div>
-                  <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5">
-                    Tự động định giá danh mục từ CoinGecko ({cryptos.length} coins), Vàng SJC & Phân tích chuyên sâu
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 self-stretch sm:self-center justify-between sm:justify-end">
-                <button
-                  onClick={() => setActiveTab("scan")}
-                  className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 bg-gradient-to-r from-cyan-500/20 via-emerald-500/20 to-teal-500/20 hover:from-cyan-500/30 hover:to-teal-500/30 text-cyan-300 text-xs font-bold rounded-lg border border-cyan-500/40 transition cursor-pointer shadow-sm whitespace-nowrap"
-                >
-                  <Scan className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Phân tích</span>
-                  <span className="flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-cyan-400 text-zinc-950 text-[9px] sm:text-[10px] font-black font-mono">
-                    {isUnlimited ? "∞" : remainingScans}
-                  </span>
-                </button>
-
-                {lastUpdated && (
-                  <span className="text-[11px] text-zinc-400 font-mono hidden md:inline">
-                    Cập nhật: {lastUpdated}
-                  </span>
-                )}
-
-                <button
-                  onClick={loadCryptoData}
-                  disabled={isLoading}
-                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium rounded-lg border border-zinc-700 transition cursor-pointer disabled:opacity-50 whitespace-nowrap"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
-                  <span>Làm mới</span>
-                </button>
-              </div>
-            </div>
-          )}
-
+        <main className="flex-1 max-w-[1720px] w-full mx-auto px-2 sm:px-4 lg:px-6 py-2 sm:py-4 pb-20 md:pb-6 space-y-4">
           {/* Tab: Admin Dashboard */}
           {activeTab === "admin" && <AdminDashboard />}
 
-          {/* Tab: Quét AI Chuyên sâu */}
+          {/* Tab: Phân tích AI Chuyên sâu */}
           {activeTab === "scan" && (
-            <ScannerPage goldForex={goldForex}
+            <ScannerPage
               cryptos={cryptos}
+              goldForex={goldForex}
+              selectedAsset={selectedAsset}
+              onSelectAsset={setSelectedAsset}
               onOpenAddAssetModal={handleOpenAddWithPrefill}
               onOpenUpgradeModal={() => setIsUpgradeModalOpen(true)}
             />
