@@ -327,6 +327,19 @@ export function Navbar({
               {theme === "dark" ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-cyan-500" />}
             </button>
 
+            {/* Scan Quota Badge in Navbar */}
+            {user && (
+              <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#12162e] border border-indigo-900/60 text-xs font-mono shadow-sm">
+                <span className="text-slate-400 text-[11px]">Quét:</span>
+                <span className={`font-bold ${remainingScans === 0 && !isUnlimited ? "text-rose-400" : "text-emerald-400"}`}>
+                  {isUnlimited ? "∞" : `${remainingScans} lượt`}
+                </span>
+                <span className="px-1 py-0.2 rounded text-[8px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  {isAdmin ? "ADMIN" : role}
+                </span>
+              </div>
+            )}
+
             {/* Google Auth / Profile Button */}
             {isLoading ? (
               <div className="h-8 w-20 bg-zinc-800 animate-pulse rounded-xl" />

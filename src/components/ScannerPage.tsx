@@ -684,6 +684,51 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
               </div>
             )}
 
+            {/* Scan Quota Badge & History */}
+            {user ? (
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5 bg-[#141830] px-3 py-1.5 rounded-xl border border-indigo-900/60 shadow-sm">
+                  <div className="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-xs border border-indigo-500/30">
+                    {role === "ADMIN" ? "👑" : "⚡"}
+                  </div>
+                  <div className="text-xs">
+                    <div className="text-[9px] text-slate-400 leading-none">Số lượt quét còn lại</div>
+                    <div className="flex items-center gap-1.5 font-bold font-mono text-white mt-0.5">
+                      <span className={remainingScans === 0 && !isUnlimited ? "text-rose-400" : "text-emerald-400"}>
+                        {isUnlimited ? "∞ Không giới hạn" : `${remainingScans}/${scansLimit}`}
+                      </span>
+                      <span className="px-1.5 py-0.2 rounded text-[8px] font-mono font-black bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                        {role === "ADMIN" ? "ADMIN" : role}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    const el = document.getElementById("analysis-history-section");
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  title="Xem Lịch sử Phân tích cá nhân"
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#141830] hover:bg-[#1a2040] border border-indigo-900/50 text-slate-200 transition cursor-pointer shadow-sm group text-xs font-bold"
+                >
+                  <History className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+                  <span>Lịch sử</span>
+                  <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    {history.length}
+                  </span>
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => signInWithGoogle()}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/40 text-xs font-bold transition cursor-pointer shadow-sm"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                <span>Đăng nhập để quét</span>
+              </button>
+            )}
+
             {/* Prominent Action Button: Phân tích */}
             <div>
               <button
