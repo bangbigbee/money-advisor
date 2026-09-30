@@ -121,9 +121,18 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
     }[]
   >([]);
 
-  // Format Binance symbol cleanly
+  // Format Binance symbol cleanly (Maps Gold -> PAXGUSDT, Forex -> EURUSDT/GBPUSDT)
   const cleanSymbol = useMemo(() => {
     let s = (symbol || "BTC").replace("BINANCE:", "").replace("/", "").toUpperCase();
+    if (s.includes("XAU") || s === "SJC" || s === "PNJ" || s === "DOJI" || s === "GOLD") {
+      return "PAXGUSDT"; // Binance Live Gold Spot
+    }
+    if (s.includes("EUR")) {
+      return "EURUSDT";
+    }
+    if (s.includes("GBP")) {
+      return "GBPUSDT";
+    }
     if (!s.endsWith("USDT") && !s.endsWith("BUSD") && !s.endsWith("USD")) {
       s = `${s}USDT`;
     }

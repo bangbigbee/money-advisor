@@ -141,6 +141,7 @@ export function ScannerPage({
     const [history, setHistory] = useState<AnalysisHistoryItem[]>([]);
   const [isCoinDropdownOpen, setIsCoinDropdownOpen] = useState(false);
   const [coinSearchQuery, setCoinSearchQuery] = useState("");
+  const [assetCategoryFilter, setAssetCategoryFilter] = useState<"all" | "crypto" | "gold" | "forex">("all");
   const coinDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -152,6 +153,43 @@ export function ScannerPage({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Merge Crypto + Gold + Forex into a unified market asset list
+  const allMarketAssets = useMemo(() => {
+    const cryptoItems = (cryptos || []).map((c) => ({
+      ...c,
+      category: "crypto" as const,
+      chartSymbol: c.chartSymbol || `BINANCE:${c.symbol.toUpperCase()}USDT`,
+    }));
+
+    const goldForexItems = (goldForex || []).map((g) => ({
+      id: g.id || g.code?.toLowerCase() || g.name,
+      symbol: (g.symbol || g.code || "").toUpperCase(),
+      name: g.name,
+      current_price: g.current_price || g.sellPrice || g.buyPrice || 0,
+      price_change_percentage_24h: g.price_change_percentage_24h || g.change24h || 0,
+      total_volume: 1000000000,
+      market_cap: 10000000000,
+      image: g.image || "https://assets.coingecko.com/coins/images/9519/large/paxg.png",
+      category: (g.category || g.type || "gold") as "gold" | "forex",
+      chartSymbol: g.chartSymbol || (g.type === "gold" ? "OANDA:XAUUSD" : "FX:EURUSD"),
+      unit: g.unit,
+    }));
+
+    return [...cryptoItems, ...goldForexItems];
+  }, [cryptos, goldForex]);
+
+  const filteredDropdownAssets = useMemo(() => {
+    let list = allMarketAssets;
+    if (assetCategoryFilter !== "all") {
+      list = list.filter((a) => a.category === assetCategoryFilter);
+    }
+    if (!coinSearchQuery.trim()) return list;
+    const q = coinSearchQuery.toLowerCase();
+    return list.filter(
+      (a) => a.symbol.toLowerCase().includes(q) || a.name.toLowerCase().includes(q)
+    );
+  }, [allMarketAssets, assetCategoryFilter, coinSearchQuery]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
   // Set default selected coin
@@ -370,13 +408,7 @@ export function ScannerPage({
 
   // Dynamic calculations
   const currentCoinPrice = selectedCoin?.current_price ?? 0;
-    const filteredDropdownCoins = useMemo(() => {
-    if (!coinSearchQuery.trim()) return cryptos.slice(0, 30);
-    const q = coinSearchQuery.toLowerCase();
-    return cryptos.filter(
-      (c) => c.symbol.toLowerCase().includes(q) || c.name.toLowerCase().includes(q)
-    ).slice(0, 30);
-  }, [cryptos, coinSearchQuery]);
+    
 
   const currentCoinChange = selectedCoin?.price_change_percentage_24h ?? 0;
   const isPositive = currentCoinChange >= 0;
@@ -568,9 +600,9 @@ export function ScannerPage({
   };
   const futureData = deepMerge(defaultFuture, scanResult?.future);
 
-  const tradingViewSymbol = selectedCoin
+  const tradingViewSymbol = (selectedCoin as any)?.chartSymbol || (selectedCoin
     ? `BINANCE:${selectedCoin.symbol.toUpperCase()}USDT`
-    : "BINANCE:BTCUSDT";
+    : "BINANCE:BTCUSDT");
 
   // Helper format date
   const formatTime = (isoString: string) => {
@@ -664,7 +696,7 @@ export function ScannerPage({
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pt-3 border-t border-indigo-950/80">
           <div className="flex items-center gap-3 flex-1 flex-wrap">
             {/* Custom Dropdown Selector */}
-            <div ref={coinDropdownRef} className="relative min-w-[240px] sm:min-w-[280px]">
+            <div ref={coinDropdownRef} className="relative min-w-[260px] sm:min-w-[320px]">
               <button
                 type="button"
                 onClick={() => setIsCoinDropdownOpen(!isCoinDropdownOpen)}
@@ -675,25 +707,30 @@ export function ScannerPage({
                     <img
                       src={selectedCoin.image}
                       alt={selectedCoin.name}
-                      className="w-6 h-6 rounded-full shrink-0 border border-zinc-700"
+                      className="w-6 h-6 rounded-full shrink-0 border border-zinc-700 bg-zinc-900 p-0.5"
                     />
                   )}
                   <div>
                     <div className="flex items-center gap-1.5">
                       <span className="font-black text-sm text-white">
-                        {selectedCoin?.symbol.toUpperCase() || "CHỌN COIN"}
+                        {selectedCoin?.symbol.toUpperCase() || "CHỌN TÀI SẢN"}
                       </span>
-                      <span className="text-[10px] text-slate-400 font-normal">
-                        ({selectedCoin?.name || "Chọn mã coin"})
+                      <span className="text-[10px] px-1.5 py-0.2 rounded font-bold uppercase bg-indigo-500/20 text-indigo-300">
+                        {selectedCoin?.category === "gold" ? "VÀNG" : selectedCoin?.category === "forex" ? "FOREX" : "CRYPTO"}
                       </span>
+                    </div>
+                    <div className="text-[10px] text-slate-400 truncate max-w-[140px]">
+                      {selectedCoin?.name || "Chọn mã để phân tích"}
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
                   {selectedCoin?.current_price && (
-                    <span className="font-mono font-bold text-xs text-indigo-300">
-                      ${selectedCoin.current_price.toLocaleString("en-US", { maximumFractionDigits: selectedCoin.current_price < 1 ? 4 : 2 })}
+                    <span className="font-mono font-bold text-xs text-emerald-400">
+                      {selectedCoin.unit?.includes("VND")
+                        ? `${selectedCoin.current_price.toLocaleString("vi-VN")} đ`
+                        : `${selectedCoin.current_price.toLocaleString("en-US", { maximumFractionDigits: selectedCoin.current_price < 1 ? 4 : 2 })}`}
                     </span>
                   )}
                   <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isCoinDropdownOpen ? "rotate-180" : ""}`} />
@@ -702,30 +739,74 @@ export function ScannerPage({
 
               {/* Dropdown Menu */}
               {isCoinDropdownOpen && (
-                <div className="absolute top-full left-0 mt-1.5 w-full sm:w-[340px] max-h-80 rounded-xl bg-[#101428] border border-indigo-900/90 shadow-2xl z-50 overflow-hidden flex flex-col backdrop-blur-xl">
+                <div className="absolute top-full left-0 mt-1.5 w-full sm:w-[420px] max-h-96 rounded-2xl bg-[#101428] border border-indigo-900/90 shadow-2xl z-50 overflow-hidden flex flex-col backdrop-blur-2xl">
+                  {/* Category Filter Tabs */}
+                  <div className="flex items-center gap-1 p-2 bg-[#0c0f1f] border-b border-indigo-950 overflow-x-auto text-[11px] font-bold">
+                    <button
+                      onClick={() => setAssetCategoryFilter("all")}
+                      className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${
+                        assetCategoryFilter === "all"
+                          ? "bg-indigo-600 text-white"
+                          : "text-slate-400 hover:text-white hover:bg-zinc-800/60"
+                      }`}
+                    >
+                      🔥 Tất cả ({allMarketAssets.length})
+                    </button>
+                    <button
+                      onClick={() => setAssetCategoryFilter("crypto")}
+                      className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${
+                        assetCategoryFilter === "crypto"
+                          ? "bg-indigo-600 text-white"
+                          : "text-slate-400 hover:text-white hover:bg-zinc-800/60"
+                      }`}
+                    >
+                      🪙 Crypto ({cryptos.length})
+                    </button>
+                    <button
+                      onClick={() => setAssetCategoryFilter("gold")}
+                      className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${
+                        assetCategoryFilter === "gold"
+                          ? "bg-amber-600 text-white"
+                          : "text-slate-400 hover:text-white hover:bg-zinc-800/60"
+                      }`}
+                    >
+                      🥇 Vàng ({goldForex.filter(g => g.type === 'gold').length})
+                    </button>
+                    <button
+                      onClick={() => setAssetCategoryFilter("forex")}
+                      className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${
+                        assetCategoryFilter === "forex"
+                          ? "bg-teal-600 text-white"
+                          : "text-slate-400 hover:text-white hover:bg-zinc-800/60"
+                      }`}
+                    >
+                      💱 Ngoại Tệ ({goldForex.filter(g => g.type === 'forex').length})
+                    </button>
+                  </div>
+
                   {/* Search inside dropdown */}
-                  <div className="p-2 border-b border-indigo-950 flex items-center gap-2 bg-[#0d1020]">
+                  <div className="p-2.5 border-b border-indigo-950 flex items-center gap-2 bg-[#0d1020]">
                     <Search className="w-4 h-4 text-slate-400 shrink-0 ml-1" />
                     <input
                       type="text"
-                      placeholder="Tìm theo tên hoặc mã coin (BTC, ETH...)"
+                      placeholder="Tìm mã hoặc tên (BTC, ETH, XAU/USD, SJC, EUR/USD...)"
                       value={coinSearchQuery}
                       onChange={(e) => setCoinSearchQuery(e.target.value)}
                       autoFocus
-                      className="w-full bg-transparent text-xs text-white placeholder-slate-500 focus:outline-none py-1"
+                      className="w-full bg-transparent text-xs text-white placeholder-slate-500 focus:outline-none py-0.5"
                     />
                   </div>
 
-                  {/* Coin List */}
-                  <div className="overflow-y-auto max-h-64 p-1.5 space-y-1">
-                    {filteredDropdownCoins.map((coin) => {
-                      const isSelected = selectedCoin?.id === coin.id;
-                      const isGain = (coin.price_change_percentage_24h || 0) >= 0;
+                  {/* Asset List (Full scrollable without truncation) */}
+                  <div className="overflow-y-auto max-h-72 p-1.5 space-y-1">
+                    {filteredDropdownAssets.map((asset) => {
+                      const isSelected = selectedCoin?.symbol?.toUpperCase() === asset.symbol?.toUpperCase();
+                      const isGain = (asset.price_change_percentage_24h || 0) >= 0;
                       return (
                         <div
-                          key={coin.id}
+                          key={`${asset.category}-${asset.symbol}-${asset.id}`}
                           onClick={() => {
-                            setSelectedCoin(coin);
+                            setSelectedCoin(asset);
                             setIsCoinDropdownOpen(false);
                             setCoinSearchQuery("");
                           }}
@@ -736,32 +817,45 @@ export function ScannerPage({
                           }`}
                         >
                           <div className="flex items-center gap-2.5">
-                            <img src={coin.image} alt={coin.name} className="w-5 h-5 rounded-full" />
+                            <img src={asset.image} alt={asset.name} className="w-6 h-6 rounded-full shrink-0" />
                             <div>
-                              <span className="text-xs font-bold text-white block leading-tight">
-                                {coin.symbol.toUpperCase()}
-                              </span>
-                              <span className="text-[10px] text-slate-400 block leading-tight">
-                                {coin.name}
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs font-bold text-white block leading-tight">
+                                  {asset.symbol.toUpperCase()}
+                                </span>
+                                <span className={`text-[9px] px-1 rounded uppercase font-bold ${
+                                  asset.category === "gold"
+                                    ? "bg-amber-500/20 text-amber-300"
+                                    : asset.category === "forex"
+                                    ? "bg-teal-500/20 text-teal-300"
+                                    : "bg-indigo-500/20 text-indigo-300"
+                                }`}>
+                                  {asset.category}
+                                </span>
+                              </div>
+                              <span className="text-[10px] text-slate-400 block leading-tight truncate max-w-[180px]">
+                                {asset.name}
                               </span>
                             </div>
                           </div>
 
                           <div className="text-right font-mono">
                             <div className="text-xs font-semibold text-white">
-                              ${coin.current_price?.toLocaleString("en-US", { maximumFractionDigits: coin.current_price < 1 ? 4 : 2 })}
+                              {asset.unit?.includes("VND")
+                                ? `${asset.current_price?.toLocaleString("vi-VN")} đ`
+                                : `${asset.current_price?.toLocaleString("en-US", { maximumFractionDigits: asset.current_price < 1 ? 4 : 2 })}`}
                             </div>
-                            <div className={`text-[10px] ${isGain ? "text-emerald-400" : "text-rose-400"}`}>
-                              {isGain ? "+" : ""}{(coin.price_change_percentage_24h || 0).toFixed(2)}%
+                            <div className={`text-[10px] font-bold ${isGain ? "text-emerald-400" : "text-rose-400"}`}>
+                              {isGain ? "+" : ""}{(asset.price_change_percentage_24h || 0).toFixed(2)}%
                             </div>
                           </div>
                         </div>
                       );
                     })}
 
-                    {filteredDropdownCoins.length === 0 && (
-                      <div className="p-4 text-center text-xs text-slate-400">
-                        Không tìm thấy đồng coin phù hợp
+                    {filteredDropdownAssets.length === 0 && (
+                      <div className="p-6 text-center text-xs text-slate-400">
+                        Không tìm thấy tài sản nào phù hợp với từ khóa
                       </div>
                     )}
                   </div>
@@ -770,6 +864,37 @@ export function ScannerPage({
             </div>
 
             {/* Quick Coin Select Chips */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-[11px] text-slate-400 font-semibold hidden lg:inline mr-1">Phổ biến:</span>
+              {[
+                { sym: "BTC", label: "BTC" },
+                { sym: "ETH", label: "ETH" },
+                { sym: "SOL", label: "SOL" },
+                { sym: "SUI", label: "SUI" },
+                { sym: "XAUUSD", label: "🥇 Vàng XAU" },
+                { sym: "SJC", label: "🏆 Vàng SJC" },
+                { sym: "USDVND", label: "💵 USD/VNĐ" },
+                { sym: "EURUSD", label: "💶 EUR/USD" },
+              ].map((item) => {
+                const isSelected = selectedCoin?.symbol.toUpperCase() === item.sym.toUpperCase();
+                const matchAsset = allMarketAssets.find((a) => a.symbol.toUpperCase() === item.sym.toUpperCase());
+                return (
+                  <button
+                    key={item.sym}
+                    onClick={() => {
+                      if (matchAsset) setSelectedCoin(matchAsset);
+                    }}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                      isSelected
+                        ? "bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-sm border border-indigo-400/40"
+                        : "bg-[#141830] text-slate-400 hover:text-white hover:bg-[#1c2244] border border-indigo-950"
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                );
+              })}
+            </div>
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-[11px] text-slate-400 font-semibold hidden lg:inline mr-1">Phổ biến:</span>
               {["BTC", "ETH", "SOL", "BNB", "XRP", "DOGE", "SUI", "PEPE"].map((sym) => {

@@ -10,173 +10,410 @@ export interface CryptoItem {
   high_24h?: number;
   low_24h?: number;
   image?: string;
+  category?: "crypto" | "gold" | "forex";
+  chartSymbol?: string;
+  unit?: string;
   sparkline_in_7d?: { price: number[] };
 }
 
 export interface GoldForexItem {
+  id?: string;
   name: string;
   code: string;
+  symbol?: string;
   type: "gold" | "forex";
+  category?: "gold" | "forex";
   buyPrice: number;
   sellPrice: number;
+  current_price?: number;
   change24h: number;
+  price_change_percentage_24h?: number;
   unit: string;
+  chartSymbol?: string;
+  image?: string;
 }
 
 export const initialGoldForexData: GoldForexItem[] = [
+  // Vàng & Kim loại quý
   {
-    name: "Vàng SJC 9999 (1L - 10L)",
-    code: "SJC",
-    type: "gold",
-    buyPrice: 88500000,
-    sellPrice: 90500000,
-    change24h: 1.25,
-    unit: "VND/Lượng",
-  },
-  {
-    name: "Vàng Nhẫn PNJ 24K",
-    code: "PNJ",
-    type: "gold",
-    buyPrice: 87200000,
-    sellPrice: 88400000,
-    change24h: 0.85,
-    unit: "VND/Lượng",
-  },
-  {
+    id: "gold-xauusd",
     name: "Vàng Thế Giới (Spot Gold)",
     code: "XAU/USD",
+    symbol: "XAUUSD",
     type: "gold",
+    category: "gold",
     buyPrice: 2748.5,
     sellPrice: 2749.2,
+    current_price: 2748.5,
     change24h: 0.65,
+    price_change_percentage_24h: 0.65,
     unit: "USD/Ounce",
+    chartSymbol: "OANDA:XAUUSD",
+    image: "https://assets.coingecko.com/coins/images/9519/large/paxg.png",
   },
   {
-    name: "Đô la Mỹ (USD/VND)",
+    id: "gold-sjc",
+    name: "Vàng Miếng SJC 9999",
+    code: "SJC",
+    symbol: "SJC",
+    type: "gold",
+    category: "gold",
+    buyPrice: 88500000,
+    sellPrice: 90500000,
+    current_price: 90500000,
+    change24h: 1.25,
+    price_change_percentage_24h: 1.25,
+    unit: "VND/Lượng",
+    chartSymbol: "OANDA:XAUUSD",
+    image: "https://assets.coingecko.com/coins/images/9519/large/paxg.png",
+  },
+  {
+    id: "gold-pnj",
+    name: "Vàng Nhẫn PNJ 24K",
+    code: "PNJ",
+    symbol: "PNJ",
+    type: "gold",
+    category: "gold",
+    buyPrice: 87200000,
+    sellPrice: 88400000,
+    current_price: 88400000,
+    change24h: 0.85,
+    price_change_percentage_24h: 0.85,
+    unit: "VND/Lượng",
+    chartSymbol: "OANDA:XAUUSD",
+    image: "https://assets.coingecko.com/coins/images/9519/large/paxg.png",
+  },
+  {
+    id: "gold-doji",
+    name: "Vàng Nhẫn Doji 9999",
+    code: "DOJI",
+    symbol: "DOJI",
+    type: "gold",
+    category: "gold",
+    buyPrice: 87500000,
+    sellPrice: 88600000,
+    current_price: 88600000,
+    change24h: 0.92,
+    price_change_percentage_24h: 0.92,
+    unit: "VND/Lượng",
+    chartSymbol: "OANDA:XAUUSD",
+    image: "https://assets.coingecko.com/coins/images/9519/large/paxg.png",
+  },
+  {
+    id: "silver-xagusd",
+    name: "Bạc Thế Giới (Spot Silver)",
+    code: "XAG/USD",
+    symbol: "XAGUSD",
+    type: "gold",
+    category: "gold",
+    buyPrice: 33.85,
+    sellPrice: 33.92,
+    current_price: 33.85,
+    change24h: 1.45,
+    price_change_percentage_24h: 1.45,
+    unit: "USD/Ounce",
+    chartSymbol: "OANDA:XAGUSD",
+    image: "https://assets.coingecko.com/coins/images/9519/large/paxg.png",
+  },
+  {
+    id: "platinum-xptusd",
+    name: "Bạch Kim Thế Giới (Platinum)",
+    code: "XPT/USD",
+    symbol: "XPTUSD",
+    type: "gold",
+    category: "gold",
+    buyPrice: 1024.5,
+    sellPrice: 1026.0,
+    current_price: 1024.5,
+    change24h: 0.38,
+    price_change_percentage_24h: 0.38,
+    unit: "USD/Ounce",
+    chartSymbol: "OANDA:XPTUSD",
+    image: "https://assets.coingecko.com/coins/images/9519/large/paxg.png",
+  },
+
+  // Ngoại tệ Forex
+  {
+    id: "forex-usdvnd",
+    name: "Đô la Mỹ (USD / VNĐ)",
     code: "USD",
+    symbol: "USDVND",
     type: "forex",
+    category: "forex",
     buyPrice: 25150,
     sellPrice: 25480,
+    current_price: 25480,
     change24h: 0.05,
+    price_change_percentage_24h: 0.05,
     unit: "VND",
+    chartSymbol: "FX_IDC:USDVND",
+    image: "https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png",
   },
   {
-    name: "Đồng Euro (EUR/VND)",
-    code: "EUR",
+    id: "forex-eurusd",
+    name: "Euro / US Dollar (EUR/USD)",
+    code: "EUR/USD",
+    symbol: "EURUSD",
     type: "forex",
+    category: "forex",
+    buyPrice: 1.0842,
+    sellPrice: 1.0845,
+    current_price: 1.0845,
+    change24h: -0.18,
+    price_change_percentage_24h: -0.18,
+    unit: "USD",
+    chartSymbol: "FX:EURUSD",
+    image: "https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png",
+  },
+  {
+    id: "forex-gbpusd",
+    name: "Bảng Anh / USD (GBP/USD)",
+    code: "GBP/USD",
+    symbol: "GBPUSD",
+    type: "forex",
+    category: "forex",
+    buyPrice: 1.2975,
+    sellPrice: 1.2980,
+    current_price: 1.2980,
+    change24h: 0.22,
+    price_change_percentage_24h: 0.22,
+    unit: "USD",
+    chartSymbol: "FX:GBPUSD",
+    image: "https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png",
+  },
+  {
+    id: "forex-usdjpy",
+    name: "USD / Yên Nhật (USD/JPY)",
+    code: "USD/JPY",
+    symbol: "USDJPY",
+    type: "forex",
+    category: "forex",
+    buyPrice: 153.15,
+    sellPrice: 153.25,
+    current_price: 153.25,
+    change24h: 0.42,
+    price_change_percentage_24h: 0.42,
+    unit: "JPY",
+    chartSymbol: "FX:USDJPY",
+    image: "https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png",
+  },
+  {
+    id: "forex-eurvnd",
+    name: "Đồng Euro (EUR / VNĐ)",
+    code: "EUR",
+    symbol: "EURVND",
+    type: "forex",
+    category: "forex",
     buyPrice: 27200,
     sellPrice: 27650,
+    current_price: 27650,
     change24h: -0.32,
+    price_change_percentage_24h: -0.32,
     unit: "VND",
+    chartSymbol: "FX_IDC:EURVND",
+    image: "https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png",
   },
   {
-    name: "Yên Nhật (JPY/VND)",
+    id: "forex-jpyvnd",
+    name: "Yên Nhật (JPY / VNĐ)",
     code: "JPY",
+    symbol: "JPYVND",
     type: "forex",
+    category: "forex",
     buyPrice: 164.2,
     sellPrice: 169.8,
+    current_price: 169.8,
     change24h: -0.15,
+    price_change_percentage_24h: -0.15,
     unit: "VND",
+    chartSymbol: "FX_IDC:JPYVND",
+    image: "https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png",
+  },
+  {
+    id: "forex-audusd",
+    name: "Đô la Úc (AUD / USD)",
+    code: "AUD/USD",
+    symbol: "AUDUSD",
+    type: "forex",
+    category: "forex",
+    buyPrice: 0.6575,
+    sellPrice: 0.6582,
+    current_price: 0.6582,
+    change24h: 0.15,
+    price_change_percentage_24h: 0.15,
+    unit: "USD",
+    chartSymbol: "FX:AUDUSD",
+    image: "https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png",
+  },
+  {
+    id: "forex-cnyvnd",
+    name: "Nhân Dân Tệ (CNY / VNĐ)",
+    code: "CNY",
+    symbol: "CNYVND",
+    type: "forex",
+    category: "forex",
+    buyPrice: 3520,
+    sellPrice: 3580,
+    current_price: 3580,
+    change24h: 0.08,
+    price_change_percentage_24h: 0.08,
+    unit: "VND",
+    chartSymbol: "FX_IDC:CNYVND",
+    image: "https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png",
   },
 ];
 
+const KNOWN_NAMES: Record<string, string> = {
+  BTC: "Bitcoin",
+  ETH: "Ethereum",
+  SOL: "Solana",
+  BNB: "BNB",
+  XRP: "XRP",
+  DOGE: "Dogecoin",
+  ADA: "Cardano",
+  SUI: "Sui",
+  AVAX: "Avalanche",
+  LINK: "Chainlink",
+  NEAR: "NEAR Protocol",
+  PEPE: "Pepe",
+  SHIB: "Shiba Inu",
+  DOT: "Polkadot",
+  UNI: "Uniswap",
+  TAO: "Bittensor",
+  RENDER: "Render",
+  FET: "Artificial Superintelligence",
+  APT: "Aptos",
+  ICP: "Internet Computer",
+  LTC: "Litecoin",
+  XLM: "Stellar",
+  BCH: "Bitcoin Cash",
+  HBAR: "Hedera",
+  TRX: "TRON",
+  ATOM: "Cosmos",
+  FIL: "Filecoin",
+  ARB: "Arbitrum",
+  OP: "Optimism",
+  INJ: "Injective",
+  KAS: "Kaspa",
+  STX: "Stacks",
+  TIA: "Celestia",
+  SEI: "Sei",
+  WIF: "dogwifhat",
+  BONK: "Bonk",
+  FLOKI: "Floki",
+  POL: "Polygon (POL)",
+  AAVE: "Aave",
+  RUNE: "THORChain",
+  CRV: "Curve DAO",
+  MKR: "Maker",
+  LDO: "Lido DAO",
+  ENA: "Ethena",
+  PENDLE: "Pendle",
+  ONDO: "Ondo Finance",
+  TON: "Toncoin",
+  JUP: "Jupiter",
+  WLD: "Worldcoin",
+  PYTH: "Pyth Network",
+  GALA: "Gala",
+  SAND: "The Sandbox",
+  MANA: "Decentraland",
+  CHZ: "Chiliz",
+  AXS: "Axie Infinity",
+  FLOW: "Flow",
+  DYDX: "dYdX",
+  QNT: "Quant",
+  ALGO: "Algorand",
+  VET: "VeChain",
+  FTM: "Fantom",
+  THETA: "Theta Network",
+};
+
 export async function fetchTopCryptos(count: number = 250): Promise<CryptoItem[]> {
   try {
+    // 1. Try CoinGecko API first
     const perPage = Math.min(250, count);
-    const numPages = Math.ceil(count / perPage);
-
-    // Fetch pages in parallel
-    const pagePromises = Array.from({ length: numPages }, (_, i) =>
-      fetch(
-        `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=${perPage}&page=${
-          i + 1
-        }&sparkline=true&price_change_percentage=24h`,
-        { next: { revalidate: 60 } }
-      )
-        .then((res) => {
-          if (!res.ok) throw new Error(`CoinGecko page ${i + 1} failed: ${res.status}`);
-          return res.json();
-        })
-        .catch((err) => {
-          console.warn(`Could not fetch page ${i + 1}:`, err);
-          return [];
-        })
+    const res = await fetch(
+      `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=${perPage}&page=1&sparkline=true&price_change_percentage=24h`,
+      { next: { revalidate: 60 } }
     );
 
-    const pagesData = await Promise.all(pagePromises);
-    const combinedRaw = pagesData.flat();
-
-    if (combinedRaw.length === 0) {
-      throw new Error("No data returned from CoinGecko");
+    if (res.ok) {
+      const rawData = await res.json();
+      if (Array.isArray(rawData) && rawData.length > 20) {
+        return rawData.map((c: any) => ({
+          id: c.id || c.symbol?.toLowerCase() || "",
+          symbol: (c.symbol || "").toUpperCase(),
+          name: c.name || c.symbol || "",
+          current_price: typeof c.current_price === "number" ? c.current_price : 0,
+          price_change_percentage_24h: typeof c.price_change_percentage_24h === "number" ? c.price_change_percentage_24h : 0,
+          total_volume: typeof c.total_volume === "number" ? c.total_volume : 0,
+          market_cap: typeof c.market_cap === "number" ? c.market_cap : 0,
+          market_cap_rank: c.market_cap_rank || undefined,
+          image: c.image || `https://assets.coingecko.com/coins/images/1/large/${c.id}.png`,
+          category: "crypto",
+          chartSymbol: `BINANCE:${(c.symbol || "").toUpperCase()}USDT`,
+          sparkline_in_7d: c.sparkline_in_7d,
+        }));
+      }
     }
-
-    const data: CryptoItem[] = combinedRaw.map((c: any) => ({
-      id: c.id || "",
-      symbol: c.symbol || "",
-      name: c.name || "",
-      current_price: typeof c.current_price === "number" ? c.current_price : 0,
-      price_change_percentage_24h:
-        typeof c.price_change_percentage_24h === "number"
-          ? c.price_change_percentage_24h
-          : 0,
-      total_volume: typeof c.total_volume === "number" ? c.total_volume : 0,
-      market_cap: typeof c.market_cap === "number" ? c.market_cap : 0,
-      market_cap_rank: c.market_cap_rank || undefined,
-      image: c.image || "",
-      sparkline_in_7d: c.sparkline_in_7d,
-    }));
-
-    return data;
   } catch (err) {
-    console.warn("CoinGecko rate limit or offline, using fallback list + Binance API");
-    // Comprehensive fallback with static metadata
-    const fallbackList = [
-      { id: "bitcoin", symbol: "btc", name: "Bitcoin", current_price: 68421.32, price_change_percentage_24h: 2.48, total_volume: 38500000000, market_cap: 1350000000000, market_cap_rank: 1, image: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png" },
-      { id: "ethereum", symbol: "eth", name: "Ethereum", current_price: 3420, price_change_percentage_24h: 2.12, total_volume: 21500000000, market_cap: 412000000000, market_cap_rank: 2, image: "https://assets.coingecko.com/coins/images/279/large/ethereum.png" },
-      { id: "solana", symbol: "sol", name: "Solana", current_price: 198.6, price_change_percentage_24h: 5.84, total_volume: 7200000000, market_cap: 93500000000, market_cap_rank: 3, image: "https://assets.coingecko.com/coins/images/4128/large/solana.png" },
-      { id: "binancecoin", symbol: "bnb", name: "BNB", current_price: 665.4, price_change_percentage_24h: -0.45, total_volume: 1800000000, market_cap: 97000000000, market_cap_rank: 4, image: "https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png" },
-      { id: "ripple", symbol: "xrp", name: "XRP", current_price: 1.48, price_change_percentage_24h: 8.92, total_volume: 4900000000, market_cap: 84000000000, market_cap_rank: 5, image: "https://assets.coingecko.com/coins/images/44/large/xrp-symbol-white-128.png" },
-      { id: "dogecoin", symbol: "doge", name: "Dogecoin", current_price: 0.385, price_change_percentage_24h: -2.31, total_volume: 3200000000, market_cap: 56000000000, market_cap_rank: 6, image: "https://assets.coingecko.com/coins/images/5/large/dogecoin.png" },
-      { id: "cardano", symbol: "ada", name: "Cardano", current_price: 0.825, price_change_percentage_24h: 4.15, total_volume: 1400000000, market_cap: 29500000000, market_cap_rank: 7, image: "https://assets.coingecko.com/coins/images/975/large/cardano.png" },
-      { id: "sui", symbol: "sui", name: "Sui", current_price: 3.42, price_change_percentage_24h: 7.21, total_volume: 1950000000, market_cap: 9800000000, market_cap_rank: 8, image: "https://assets.coingecko.com/coins/images/26375/large/sui-ocean-square.png" },
-      { id: "avalanche-2", symbol: "avax", name: "Avalanche", current_price: 38.4, price_change_percentage_24h: 1.85, total_volume: 850000000, market_cap: 15600000000, market_cap_rank: 9, image: "https://assets.coingecko.com/coins/images/12559/large/Avalanche_Circle_RedWhite_Trans.png" },
-      { id: "chainlink", symbol: "link", name: "Chainlink", current_price: 18.75, price_change_percentage_24h: 3.12, total_volume: 680000000, market_cap: 11400000000, market_cap_rank: 10, image: "https://assets.coingecko.com/coins/images/877/large/chainlink-new-logo.png" },
-      { id: "near", symbol: "near", name: "NEAR Protocol", current_price: 6.85, price_change_percentage_24h: 4.62, total_volume: 720000000, market_cap: 8300000000, market_cap_rank: 11, image: "https://assets.coingecko.com/coins/images/10365/large/near.png" },
-      { id: "pepe", symbol: "pepe", name: "Pepe", current_price: 0.0000215, price_change_percentage_24h: 12.4, total_volume: 2400000000, market_cap: 9100000000, market_cap_rank: 12, image: "https://assets.coingecko.com/coins/images/29850/large/pepe-token.png" },
-      { id: "shiba-inu", symbol: "shib", name: "Shiba Inu", current_price: 0.0000258, price_change_percentage_24h: -1.45, total_volume: 1100000000, market_cap: 15200000000, market_cap_rank: 13, image: "https://assets.coingecko.com/coins/images/11939/large/shiba.png" },
-      { id: "polkadot", symbol: "dot", name: "Polkadot", current_price: 8.92, price_change_percentage_24h: 2.75, total_volume: 480000000, market_cap: 12800000000, market_cap_rank: 14, image: "https://assets.coingecko.com/coins/images/12171/large/polkadot.png" },
-      { id: "uniswap", symbol: "uni", name: "Uniswap", current_price: 11.45, price_change_percentage_24h: 5.14, total_volume: 380000000, market_cap: 6900000000, market_cap_rank: 15, image: "https://assets.coingecko.com/coins/images/12504/large/uniswap-uni.png" },
-      { id: "quant-network", symbol: "qnt", name: "Quant", current_price: 264.51, price_change_percentage_24h: 52.58, total_volume: 1250000000, market_cap: 3850000000, market_cap_rank: 16, image: "https://assets.coingecko.com/coins/images/3370/large/5F9Sn7Pp_400x400.jpg" }
-    ];
+    console.warn("CoinGecko API unavailable, loading full Binance market tickers...");
+  }
 
-    try {
-      // Fetch live prices from Binance as fallback
-      const binanceRes = await fetch("https://api.binance.com/api/v3/ticker/24hr", { next: { revalidate: 30 } });
-      if (binanceRes.ok) {
-        const binanceData = await binanceRes.json();
-        const binanceMap = new Map();
-        for (const item of binanceData) {
-          binanceMap.set(item.symbol, item);
-        }
+  // 2. Comprehensive Binance Fallback: Fetch ALL 350+ active USDT pairs sorted by 24h volume
+  try {
+    const binanceRes = await fetch("https://api.binance.com/api/v3/ticker/24hr", { next: { revalidate: 30 } });
+    if (binanceRes.ok) {
+      const binanceData = await binanceRes.json();
+      if (Array.isArray(binanceData) && binanceData.length > 0) {
+        const usdtPairs = binanceData
+          .filter(
+            (item: any) =>
+              item.symbol.endsWith("USDT") &&
+              !item.symbol.includes("UP") &&
+              !item.symbol.includes("DOWN") &&
+              !item.symbol.includes("BEAR") &&
+              !item.symbol.includes("BULL")
+          )
+          .sort((a: any, b: any) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume))
+          .slice(0, count);
 
-        return fallbackList.map(coin => {
-          const bSymbol = coin.symbol.toUpperCase() + "USDT";
-          const bData = binanceMap.get(bSymbol);
-          if (bData) {
-            return {
-              ...coin,
-              current_price: parseFloat(bData.lastPrice),
-              price_change_percentage_24h: parseFloat(bData.priceChangePercent),
-              total_volume: parseFloat(bData.quoteVolume),
-            };
-          }
-          return coin;
+        return usdtPairs.map((item: any, index: number) => {
+          const rawSymbol = item.symbol.replace("USDT", "").toUpperCase();
+          const cleanName = KNOWN_NAMES[rawSymbol] || rawSymbol;
+          const price = parseFloat(item.lastPrice);
+          const volume = parseFloat(item.quoteVolume);
+          const change = parseFloat(item.priceChangePercent);
+
+          return {
+            id: rawSymbol.toLowerCase(),
+            symbol: rawSymbol,
+            name: cleanName,
+            current_price: price,
+            price_change_percentage_24h: change,
+            total_volume: volume,
+            market_cap: volume * 15,
+            market_cap_rank: index + 1,
+            image: `https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${rawSymbol.toLowerCase()}.png`,
+            category: "crypto",
+            chartSymbol: `BINANCE:${rawSymbol}USDT`,
+          };
         });
       }
-    } catch (binanceErr) {
-      console.warn("Binance API also failed", binanceErr);
     }
-
-    return fallbackList;
+  } catch (binanceErr) {
+    console.warn("Binance ticker fetch failed", binanceErr);
   }
+
+  // 3. Static Essential Fallback
+  return [
+    { id: "btc", symbol: "BTC", name: "Bitcoin", current_price: 83500, price_change_percentage_24h: 2.4, total_volume: 38000000000, market_cap: 1650000000000, market_cap_rank: 1, image: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png", category: "crypto" },
+    { id: "eth", symbol: "ETH", name: "Ethereum", current_price: 3420, price_change_percentage_24h: 1.8, total_volume: 2100000000, market_cap: 410000000000, market_cap_rank: 2, image: "https://assets.coingecko.com/coins/images/279/large/ethereum.png", category: "crypto" },
+    { id: "sol", symbol: "SOL", name: "Solana", current_price: 198.5, price_change_percentage_24h: 5.2, total_volume: 7200000000, market_cap: 93000000000, market_cap_rank: 3, image: "https://assets.coingecko.com/coins/images/4128/large/solana.png", category: "crypto" },
+    { id: "bnb", symbol: "BNB", name: "BNB", current_price: 665.0, price_change_percentage_24h: -0.4, total_volume: 1800000000, market_cap: 97000000000, market_cap_rank: 4, image: "https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png", category: "crypto" },
+    { id: "xrp", symbol: "XRP", name: "XRP", current_price: 1.48, price_change_percentage_24h: 8.9, total_volume: 4900000000, market_cap: 84000000000, market_cap_rank: 5, image: "https://assets.coingecko.com/coins/images/44/large/xrp-symbol-white-128.png", category: "crypto" },
+    { id: "doge", symbol: "DOGE", name: "Dogecoin", current_price: 0.38, price_change_percentage_24h: -2.1, total_volume: 3200000000, market_cap: 56000000000, market_cap_rank: 6, image: "https://assets.coingecko.com/coins/images/5/large/dogecoin.png", category: "crypto" },
+    { id: "sui", symbol: "SUI", name: "Sui", current_price: 3.42, price_change_percentage_24h: 7.2, total_volume: 1950000000, market_cap: 9800000000, market_cap_rank: 7, image: "https://assets.coingecko.com/coins/images/26375/large/sui-ocean-square.png", category: "crypto" },
+    { id: "pepe", symbol: "PEPE", name: "Pepe", current_price: 0.000021, price_change_percentage_24h: 12.4, total_volume: 2400000000, market_cap: 9100000000, market_cap_rank: 8, image: "https://assets.coingecko.com/coins/images/29850/large/pepe-token.png", category: "crypto" },
+  ];
 }
