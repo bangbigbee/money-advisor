@@ -630,36 +630,36 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
             {/* Main Analysis Engine (Full Width Layout) */}
       <div className="w-full space-y-4">
         {/* 1. Coin Info Header Card with Live Action Button */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-[#0f1225] border border-indigo-950/80 shadow-md">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 shadow-md">
           <div className="flex items-center gap-3.5">
             {selectedCoin?.image && (
               <img
                 src={selectedCoin.image}
                 alt={selectedCoin.name}
-                className="w-12 h-12 rounded-full border border-zinc-700 bg-zinc-900 p-0.5 shadow-sm"
+                className="w-12 h-12 rounded-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-0.5 shadow-sm"
               />
             )}
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-black text-white">{selectedCoin?.symbol?.toUpperCase() || "ASSET"}</h2>
-                <span className="text-[10px] px-1.5 py-0.2 rounded font-bold uppercase bg-indigo-500/20 text-indigo-300">
+                <h2 className="text-xl font-black text-slate-900 dark:text-white">{selectedCoin?.symbol?.toUpperCase() || "ASSET"}</h2>
+                <span className="text-[10px] px-1.5 py-0.2 rounded font-bold uppercase bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300">
                   {selectedCoin?.category === "gold" ? "VÀNG" : selectedCoin?.category === "forex" ? "FOREX" : "CRYPTO"}
                 </span>
-                <CheckCircle2 className="w-4 h-4 text-indigo-400" />
+                <CheckCircle2 className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
               </div>
-              <div className="text-xs text-slate-400">{selectedCoin?.name}</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400">{selectedCoin?.name}</div>
             </div>
           </div>
 
           <div className="flex items-center gap-5 sm:gap-8 flex-wrap">
             {/* Price Info */}
             <div>
-              <div className="text-xl font-black text-white whitespace-nowrap font-mono">
+              <div className="text-xl font-black text-slate-900 dark:text-white whitespace-nowrap font-mono">
                 {selectedCoin?.unit?.includes("VND")
                   ? `${selectedCoin.current_price?.toLocaleString("vi-VN")} đ`
                   : `${selectedCoin?.current_price?.toLocaleString("en-US", { maximumFractionDigits: (selectedCoin?.current_price || 0) < 1 ? 4 : 2 })}`}
               </div>
-              <div className={`text-xs font-bold ${isPositive ? "text-emerald-400" : "text-rose-400"}`}>
+              <div className={`text-xs font-bold ${isPositive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
                 {isPositive ? "+" : ""}{currentCoinChange.toFixed(2)}% (24h)
               </div>
             </div>
@@ -667,8 +667,8 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
             {/* Market Cap (if available) */}
             {selectedCoin?.market_cap && (
               <div className="hidden sm:block">
-                <div className="text-[11px] text-slate-400">Vốn hóa thị trường</div>
-                <div className="text-sm font-bold text-white font-mono">
+                <div className="text-[11px] text-slate-500 dark:text-slate-400">Vốn hóa thị trường</div>
+                <div className="text-sm font-bold text-slate-900 dark:text-white font-mono">
                   ${((selectedCoin.market_cap || 0) / 1e9).toFixed(2)}B
                 </div>
               </div>
@@ -677,8 +677,8 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
             {/* Volume (if available) */}
             {selectedCoin?.total_volume && (
               <div className="hidden md:block">
-                <div className="text-[11px] text-slate-400">Khối lượng 24h</div>
-                <div className="text-sm font-bold text-white font-mono">
+                <div className="text-[11px] text-slate-500 dark:text-slate-400">Khối lượng 24h</div>
+                <div className="text-sm font-bold text-slate-900 dark:text-white font-mono">
                   ${((selectedCoin.total_volume || 0) / 1e9).toFixed(2)}B
                 </div>
               </div>
@@ -687,17 +687,17 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
             {/* Scan Quota Badge & History */}
             {user ? (
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2.5 bg-[#141830] px-3 py-1.5 rounded-xl border border-indigo-900/60 shadow-sm">
-                  <div className="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-xs border border-indigo-500/30">
+                <div className="flex items-center gap-2.5 bg-slate-50 dark:bg-[#141830] px-3 py-1.5 rounded-xl border border-slate-200 dark:border-indigo-900/60 shadow-sm">
+                  <div className="w-6 h-6 rounded-lg bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300 flex items-center justify-center font-bold text-xs border border-indigo-500/30">
                     {role === "ADMIN" ? "👑" : "⚡"}
                   </div>
                   <div className="text-xs">
-                    <div className="text-[9px] text-slate-400 leading-none">Số lượt quét còn lại</div>
-                    <div className="flex items-center gap-1.5 font-bold font-mono text-white mt-0.5">
-                      <span className={remainingScans === 0 && !isUnlimited ? "text-rose-400" : "text-emerald-400"}>
+                    <div className="text-[9px] text-slate-500 dark:text-slate-400 leading-none">Số lượt quét còn lại</div>
+                    <div className="flex items-center gap-1.5 font-bold font-mono text-slate-900 dark:text-white mt-0.5">
+                      <span className={remainingScans === 0 && !isUnlimited ? "text-rose-500 dark:text-rose-400" : "text-emerald-600 dark:text-emerald-400"}>
                         {isUnlimited ? "∞ Không giới hạn" : `${remainingScans}/${scansLimit}`}
                       </span>
-                      <span className="px-1.5 py-0.2 rounded text-[8px] font-mono font-black bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                      <span className="px-1.5 py-0.2 rounded text-[8px] font-mono font-black bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/30">
                         {role === "ADMIN" ? "ADMIN" : role}
                       </span>
                     </div>
@@ -710,11 +710,11 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
                     if (el) el.scrollIntoView({ behavior: "smooth" });
                   }}
                   title="Xem Lịch sử Phân tích cá nhân"
-                  className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#141830] hover:bg-[#1a2040] border border-indigo-900/50 text-slate-200 transition cursor-pointer shadow-sm group text-xs font-bold"
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-50 dark:bg-[#141830] hover:bg-slate-100 dark:hover:bg-[#1a2040] border border-slate-200 dark:border-indigo-900/50 text-slate-700 dark:text-slate-200 transition cursor-pointer shadow-sm group text-xs font-bold"
                 >
-                  <History className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+                  <History className="w-4 h-4 text-amber-500 dark:text-amber-400 group-hover:scale-110 transition-transform" />
                   <span>Lịch sử</span>
-                  <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/30">
                     {history.length}
                   </span>
                 </button>
@@ -722,7 +722,7 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
             ) : (
               <button
                 onClick={() => signInWithGoogle()}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/40 text-xs font-bold transition cursor-pointer shadow-sm"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-600/30 hover:bg-indigo-100 dark:hover:bg-indigo-600/50 text-indigo-700 dark:text-indigo-200 border border-indigo-200 dark:border-indigo-500/40 text-xs font-bold transition cursor-pointer shadow-sm"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 <span>Đăng nhập để quét</span>
@@ -756,21 +756,21 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
         <div className="space-y-4">
           <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
             {/* Left Area: Chart */}
-            <div className="xl:col-span-8 bg-[#0b0e1b] border border-zinc-800 rounded-xl overflow-hidden shadow-md flex flex-col">
-              <div className="flex items-center justify-between gap-2 p-2.5 sm:p-3 border-b border-zinc-800/80 bg-[#0e1222] text-xs font-bold text-white">
+            <div className="xl:col-span-8 bg-white dark:bg-[#0b0e1b] border border-slate-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-md flex flex-col">
+              <div className="flex items-center justify-between gap-2 p-2.5 sm:p-3 border-b border-slate-200 dark:border-zinc-800/80 bg-slate-50 dark:bg-[#0e1222] text-xs font-bold text-slate-800 dark:text-white">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-indigo-400 animate-pulse" />
+                  <Sparkles className="w-4 h-4 text-indigo-500 dark:text-indigo-400 animate-pulse" />
                   <span>Biểu đồ Phân tích SMC & Vùng Tích Lũy / Phân Phối Live ({selectedCoin?.symbol?.toUpperCase()})</span>
                 </div>
 
                 {/* Chart Mode Toggle */}
-                <div className="flex items-center bg-zinc-900/90 p-0.5 rounded-lg border border-zinc-800">
+                <div className="flex items-center bg-slate-200/80 dark:bg-zinc-900/90 p-0.5 rounded-lg border border-slate-300 dark:border-zinc-800">
                   <button
                     onClick={() => setChartMode("smart")}
                     className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
                       chartMode === "smart"
                         ? "bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-sm"
-                        : "text-slate-400 hover:text-white"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                     }`}
                   >
                     ⚡ AI SMC Chart
@@ -779,8 +779,8 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
                     onClick={() => setChartMode("tradingview")}
                     className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
                       chartMode === "tradingview"
-                        ? "bg-zinc-800 text-white shadow-sm"
-                        : "text-slate-400 hover:text-white"
+                        ? "bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                     }`}
                   >
                     TradingView Gốc
@@ -788,7 +788,7 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
                 </div>
               </div>
 
-              <div className="w-full bg-[#090d1a]">
+              <div className="w-full bg-white dark:bg-[#090d1a]">
                 {chartMode === "smart" ? (
                   <SmartTradingChart
                     symbol={selectedCoin?.symbol || "BTC"}
@@ -808,13 +808,13 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
             {/* Right Area: Technical Overview or Call to Action */}
             <div className="xl:col-span-4 space-y-4">
               {!scanResult && !isScanning ? (
-                <div className="p-6 bg-[#0f1225] border border-indigo-950/80 rounded-xl shadow-md h-full flex flex-col items-center justify-center text-center space-y-4">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 flex items-center justify-center">
-                    <Sparkles className="w-7 h-7 text-indigo-400" />
+                <div className="p-6 bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 rounded-xl shadow-md h-full flex flex-col items-center justify-center text-center space-y-4">
+                  <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-gradient-to-br dark:from-indigo-500/20 dark:to-purple-500/20 border border-indigo-200 dark:border-indigo-500/30 flex items-center justify-center">
+                    <Sparkles className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-white mb-1">Chưa phân tích {selectedCoin?.symbol?.toUpperCase()}</h3>
-                    <p className="text-xs text-slate-400 leading-relaxed max-w-xs">
+                    <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">Chưa phân tích {selectedCoin?.symbol?.toUpperCase()}</h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed max-w-xs">
                       Bấm nút bên dưới để AI quét toàn bộ 26 chỉ số kỹ thuật, tỷ lệ Long/Short, vùng Entry và Take Profit cho {selectedCoin?.name}.
                     </p>
                   </div>
@@ -828,19 +828,19 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
                   </button>
                 </div>
               ) : isScanning ? (
-                <div className="p-6 bg-[#0f1225] border border-indigo-950/80 rounded-xl shadow-md h-full flex flex-col items-center justify-center text-center space-y-3">
-                  <RefreshCw className="w-10 h-10 text-indigo-500 animate-spin" />
-                  <h3 className="text-base font-bold text-white">Đang quét {selectedCoin?.symbol?.toUpperCase()}...</h3>
-                  <p className="text-xs text-slate-400">AI đang tính toán hỗ trợ/kháng cự và dòng tiền.</p>
+                <div className="p-6 bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 rounded-xl shadow-md h-full flex flex-col items-center justify-center text-center space-y-3">
+                  <RefreshCw className="w-10 h-10 text-indigo-600 dark:text-indigo-500 animate-spin" />
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">Đang quét {selectedCoin?.symbol?.toUpperCase()}...</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">AI đang tính toán hỗ trợ/kháng cự và dòng tiền.</p>
                 </div>
               ) : (
                 <>
                   {/* Tổng quan kỹ thuật (Gauge) */}
                   {/* Tổng quan kỹ thuật (Gauge) */}
-                  <div className="p-4 bg-[#0b0e1b] border border-zinc-800 rounded-xl shadow-md space-y-3">
-                    <div className="flex justify-between items-center text-sm font-bold text-white">
+                  <div className="p-4 bg-white dark:bg-[#0b0e1b] border border-slate-200 dark:border-zinc-800 rounded-xl shadow-md space-y-3">
+                    <div className="flex justify-between items-center text-sm font-bold text-slate-900 dark:text-white">
                       <span>Tổng quan kỹ thuật</span>
-                      <button className="px-2 py-1 rounded bg-indigo-600/20 text-indigo-400 text-[10px] border border-indigo-500/30">
+                      <button className="px-2 py-1 rounded bg-indigo-50 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 text-[10px] border border-indigo-200 dark:border-indigo-500/30">
                         <Star className="w-3 h-3 inline mr-1" /> Phân tích AI
                       </button>
                     </div>
@@ -851,93 +851,93 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
                           borderRightColor: isPositive ? '#10b981' : '#f43f5e'
                       }}></div>
                       <div className="absolute bottom-2 text-center w-full">
-                        <div className="text-[10px] text-slate-400">Tín hiệu tổng quan</div>
-                        <div className={`text-xl font-black ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>{spotData.finalVerdict.action}</div>
+                        <div className="text-[10px] text-slate-500 dark:text-slate-400">Tín hiệu tổng quan</div>
+                        <div className={`text-xl font-black ${isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>{spotData.finalVerdict.action}</div>
                       </div>
                     </div>
-                    <div className="text-center text-[10px] text-slate-400">
+                    <div className="text-center text-[10px] text-slate-500 dark:text-slate-400">
                       12 / 26 chỉ báo đang ủng hộ xu hướng.
                     </div>
                   </div>
 
                   {/* Các chỉ số chính */}
-                  <div className="p-4 bg-[#0b0e1b] border border-zinc-800 rounded-xl shadow-md space-y-3">
-                    <div className="text-sm font-bold text-white">Các chỉ số chính</div>
+                  <div className="p-4 bg-white dark:bg-[#0b0e1b] border border-slate-200 dark:border-zinc-800 rounded-xl shadow-md space-y-3">
+                    <div className="text-sm font-bold text-slate-900 dark:text-white">Các chỉ số chính</div>
                     <div className="space-y-2.5 text-xs">
-                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
-                        <span className="text-slate-400">RSI (14)</span>
-                        <div className="flex gap-4"><span className="text-white font-mono">{advancedData.stochRsi.k}</span><span className="text-amber-400 font-bold w-16 text-right">Trung lập</span></div>
+                      <div className="flex justify-between items-center border-b border-slate-200 dark:border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-500 dark:text-slate-400">RSI (14)</span>
+                        <div className="flex gap-4"><span className="text-slate-900 dark:text-white font-mono">{advancedData.stochRsi.k}</span><span className="text-amber-600 dark:text-amber-400 font-bold w-16 text-right">Trung lập</span></div>
                       </div>
-                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
-                        <span className="text-slate-400">MACD</span>
-                        <div className="flex gap-4"><span className="text-white font-mono">1,256.32</span><span className="text-emerald-400 font-bold w-16 text-right">Mua</span></div>
+                      <div className="flex justify-between items-center border-b border-slate-200 dark:border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-500 dark:text-slate-400">MACD</span>
+                        <div className="flex gap-4"><span className="text-slate-900 dark:text-white font-mono">1,256.32</span><span className="text-emerald-600 dark:text-emerald-400 font-bold w-16 text-right">Mua</span></div>
                       </div>
-                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
-                        <span className="text-slate-400">MA (20)</span>
-                        <div className="flex gap-4"><span className="text-white font-mono">${(currentCoinPrice * 0.98).toLocaleString()}</span><span className="text-emerald-400 font-bold w-16 text-right">Mua</span></div>
+                      <div className="flex justify-between items-center border-b border-slate-200 dark:border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-500 dark:text-slate-400">MA (20)</span>
+                        <div className="flex gap-4"><span className="text-slate-900 dark:text-white font-mono">${(currentCoinPrice * 0.98).toLocaleString()}</span><span className="text-emerald-600 dark:text-emerald-400 font-bold w-16 text-right">Mua</span></div>
                       </div>
-                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
-                        <span className="text-slate-400">MA (50)</span>
-                        <div className="flex gap-4"><span className="text-white font-mono">${(currentCoinPrice * 0.96).toLocaleString()}</span><span className="text-emerald-400 font-bold w-16 text-right">Mua</span></div>
+                      <div className="flex justify-between items-center border-b border-slate-200 dark:border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-500 dark:text-slate-400">MA (50)</span>
+                        <div className="flex gap-4"><span className="text-slate-900 dark:text-white font-mono">${(currentCoinPrice * 0.96).toLocaleString()}</span><span className="text-emerald-600 dark:text-emerald-400 font-bold w-16 text-right">Mua</span></div>
                       </div>
-                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
-                        <span className="text-slate-400">MA (200)</span>
-                        <div className="flex gap-4"><span className="text-white font-mono">${(currentCoinPrice * 0.88).toLocaleString()}</span><span className="text-emerald-400 font-bold w-16 text-right">Mua</span></div>
+                      <div className="flex justify-between items-center border-b border-slate-200 dark:border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-500 dark:text-slate-400">MA (200)</span>
+                        <div className="flex gap-4"><span className="text-slate-900 dark:text-white font-mono">${(currentCoinPrice * 0.88).toLocaleString()}</span><span className="text-emerald-600 dark:text-emerald-400 font-bold w-16 text-right">Mua</span></div>
                       </div>
-                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
-                        <span className="text-slate-400">Bollinger Bands</span>
-                        <div className="flex gap-4"><span className="text-white font-mono">{advancedData.bollingerBands.middle}</span><span className="text-emerald-400 font-bold w-16 text-right">Mua</span></div>
+                      <div className="flex justify-between items-center border-b border-slate-200 dark:border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-500 dark:text-slate-400">Bollinger Bands</span>
+                        <div className="flex gap-4"><span className="text-slate-900 dark:text-white font-mono">{advancedData.bollingerBands.middle}</span><span className="text-emerald-600 dark:text-emerald-400 font-bold w-16 text-right">Mua</span></div>
                       </div>
                     </div>
                   </div>
 
                   {/* Thanh khoản */}
-                  <div className="p-4 bg-[#0b0e1b] border border-zinc-800 rounded-xl shadow-md space-y-3">
+                  <div className="p-4 bg-white dark:bg-[#0b0e1b] border border-slate-200 dark:border-zinc-800 rounded-xl shadow-md space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-bold text-white">Thanh khoản</span>
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">Tốt</span>
+                      <span className="text-sm font-bold text-slate-900 dark:text-white">Thanh khoản</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold">Tốt</span>
                     </div>
                     <div className="space-y-2.5 text-xs">
-                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
-                        <span className="text-slate-400">Khối lượng 24h</span>
-                        <div className="flex gap-2"><span className="text-white font-mono">${((selectedCoin?.total_volume || 0) / 1e9).toFixed(2)}B</span><span className="text-emerald-400 font-mono text-[10px] w-12 text-right">+{currentCoinChange.toFixed(2)}%</span></div>
+                      <div className="flex justify-between items-center border-b border-slate-200 dark:border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-500 dark:text-slate-400">Khối lượng 24h</span>
+                        <div className="flex gap-2"><span className="text-slate-900 dark:text-white font-mono">${((selectedCoin?.total_volume || 0) / 1e9).toFixed(2)}B</span><span className="text-emerald-600 dark:text-emerald-400 font-mono text-[10px] w-12 text-right">+{currentCoinChange.toFixed(2)}%</span></div>
                       </div>
-                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
-                        <span className="text-slate-400">Thanh khoản (CVD)</span>
-                        <div className="flex gap-2"><span className="text-white truncate max-w-[100px]">{coinglassData.cvdStatus}</span><span className="text-emerald-400 font-mono text-[10px] w-12 text-right">+32.5%</span></div>
+                      <div className="flex justify-between items-center border-b border-slate-200 dark:border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-500 dark:text-slate-400">Thanh khoản (CVD)</span>
+                        <div className="flex gap-2"><span className="text-slate-900 dark:text-white truncate max-w-[100px]">{coinglassData.cvdStatus}</span><span className="text-emerald-600 dark:text-emerald-400 font-mono text-[10px] w-12 text-right">+32.5%</span></div>
                       </div>
-                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
-                        <span className="text-slate-400">Độ sâu sổ lệnh (±2%)</span>
-                        <div className="flex gap-2"><span className="text-white font-mono">${((selectedCoin?.total_volume || 0) / 20e9).toFixed(2)}M</span><span className="text-emerald-400 w-12 text-right">Tốt</span></div>
+                      <div className="flex justify-between items-center border-b border-slate-200 dark:border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-500 dark:text-slate-400">Độ sâu sổ lệnh (±2%)</span>
+                        <div className="flex gap-2"><span className="text-slate-900 dark:text-white font-mono">${((selectedCoin?.total_volume || 0) / 20e9).toFixed(2)}M</span><span className="text-emerald-600 dark:text-emerald-400 w-12 text-right">Tốt</span></div>
                       </div>
-                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
-                        <span className="text-slate-400">Tỷ lệ mua/bán (L/S)</span>
-                        <div className="flex gap-2"><span className="text-white font-mono">{futureData.metrics.longShortRatio.ratioText}</span><span className="text-emerald-400 w-12 text-right">Tích cực</span></div>
+                      <div className="flex justify-between items-center border-b border-slate-200 dark:border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-500 dark:text-slate-400">Tỷ lệ mua/bán (L/S)</span>
+                        <div className="flex gap-2"><span className="text-slate-900 dark:text-white font-mono">{futureData.metrics.longShortRatio.ratioText}</span><span className="text-emerald-600 dark:text-emerald-400 w-12 text-right">Tích cực</span></div>
                       </div>
                     </div>
                   </div>
 
                   {/* Dữ liệu on-chain */}
-                  <div className="p-4 bg-[#0b0e1b] border border-zinc-800 rounded-xl shadow-md space-y-3">
+                  <div className="p-4 bg-white dark:bg-[#0b0e1b] border border-slate-200 dark:border-zinc-800 rounded-xl shadow-md space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-bold text-white flex items-center gap-1.5"><Shield className="w-3.5 h-3.5 text-indigo-400"/> Dữ liệu on-chain</span>
+                      <span className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5"><Shield className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400"/> Dữ liệu on-chain</span>
                     </div>
                     <div className="space-y-2.5 text-xs">
-                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
-                        <span className="text-slate-400">Số địa chỉ hoạt động</span>
-                        <div className="flex gap-2"><span className="text-white font-mono">845.2K</span><span className="text-emerald-400 font-mono text-[10px] w-12 text-right">+12.6%</span></div>
+                      <div className="flex justify-between items-center border-b border-slate-200 dark:border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-500 dark:text-slate-400">Số địa chỉ hoạt động</span>
+                        <div className="flex gap-2"><span className="text-slate-900 dark:text-white font-mono">845.2K</span><span className="text-emerald-600 dark:text-emerald-400 font-mono text-[10px] w-12 text-right">+12.6%</span></div>
                       </div>
-                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
-                        <span className="text-slate-400">Dòng tiền vào sàn</span>
-                        <div className="flex gap-2"><span className="text-white font-mono">$421.3M</span><span className="text-rose-400 font-mono text-[10px] w-12 text-right">-28.4%</span></div>
+                      <div className="flex justify-between items-center border-b border-slate-200 dark:border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-500 dark:text-slate-400">Dòng tiền vào sàn</span>
+                        <div className="flex gap-2"><span className="text-slate-900 dark:text-white font-mono">$421.3M</span><span className="text-rose-600 dark:text-rose-400 font-mono text-[10px] w-12 text-right">-28.4%</span></div>
                       </div>
-                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
-                        <span className="text-slate-400">Dòng tiền ra sàn</span>
-                        <div className="flex gap-2"><span className="text-white font-mono">$612.7M</span><span className="text-emerald-400 font-mono text-[10px] w-12 text-right">+15.2%</span></div>
+                      <div className="flex justify-between items-center border-b border-slate-200 dark:border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-500 dark:text-slate-400">Dòng tiền ra sàn</span>
+                        <div className="flex gap-2"><span className="text-slate-900 dark:text-white font-mono">$612.7M</span><span className="text-emerald-600 dark:text-emerald-400 font-mono text-[10px] w-12 text-right">+15.2%</span></div>
                       </div>
-                      <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
-                        <span className="text-slate-400">Tỷ lệ HODLer</span>
-                        <div className="flex gap-2"><span className="text-white font-mono">76.3%</span><span className="text-emerald-400 w-12 text-right">Tốt</span></div>
+                      <div className="flex justify-between items-center border-b border-slate-200 dark:border-zinc-800/50 pb-1.5">
+                        <span className="text-slate-500 dark:text-slate-400">Tỷ lệ HODLer</span>
+                        <div className="flex gap-2"><span className="text-slate-900 dark:text-white font-mono">76.3%</span><span className="text-emerald-600 dark:text-emerald-400 w-12 text-right">Tốt</span></div>
                       </div>
                     </div>
                   </div>
@@ -953,29 +953,29 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
                 
                 {/* Chỉ báo kỹ thuật (Mini Charts) - span 2 */}
-                <div className="xl:col-span-2 p-4 bg-[#0b0e1b] border border-zinc-800 rounded-xl shadow-md space-y-4">
-                  <div className="flex items-center gap-2 text-xs font-bold text-white overflow-x-auto pb-1 border-b border-zinc-800/50">
-                    <Activity className="w-4 h-4 text-indigo-400"/>
-                    <span className="text-white whitespace-nowrap">Chỉ báo kỹ thuật</span>
-                    <button className="px-2 py-1 bg-indigo-600/20 text-indigo-400 rounded border border-indigo-500/30">RSI</button>
-                    <button className="px-2 py-1 hover:bg-zinc-800/50 rounded text-slate-400">MACD</button>
-                    <button className="px-2 py-1 hover:bg-zinc-800/50 rounded text-slate-400">Stochastic</button>
-                    <button className="px-2 py-1 hover:bg-zinc-800/50 rounded text-slate-400">Bollinger Bands</button>
-                    <button className="px-2 py-1 hover:bg-zinc-800/50 rounded text-slate-400">MA</button>
+                <div className="xl:col-span-2 p-4 bg-white dark:bg-[#0b0e1b] border border-slate-200 dark:border-zinc-800 rounded-xl shadow-md space-y-4">
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white overflow-x-auto pb-1 border-b border-slate-200 dark:border-zinc-800/50">
+                    <Activity className="w-4 h-4 text-indigo-500 dark:text-indigo-400"/>
+                    <span className="text-slate-900 dark:text-white whitespace-nowrap">Chỉ báo kỹ thuật</span>
+                    <button className="px-2 py-1 bg-indigo-50 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 rounded border border-indigo-200 dark:border-indigo-500/30">RSI</button>
+                    <button className="px-2 py-1 hover:bg-slate-100 dark:hover:bg-zinc-800/50 rounded text-slate-600 dark:text-slate-400">MACD</button>
+                    <button className="px-2 py-1 hover:bg-slate-100 dark:hover:bg-zinc-800/50 rounded text-slate-600 dark:text-slate-400">Stochastic</button>
+                    <button className="px-2 py-1 hover:bg-slate-100 dark:hover:bg-zinc-800/50 rounded text-slate-600 dark:text-slate-400">Bollinger Bands</button>
+                    <button className="px-2 py-1 hover:bg-slate-100 dark:hover:bg-zinc-800/50 rounded text-slate-600 dark:text-slate-400">MA</button>
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="p-3 bg-[#111424] rounded-lg border border-zinc-800/50 flex flex-col justify-between h-28">
-                      <div className="text-[10px] font-bold text-white flex justify-between"><span>RSI (14)</span> <span className="text-amber-400 bg-amber-500/10 px-1 rounded">{advancedData.stochRsi.k} Trung lập</span></div>
-                      <div className="h-10 mt-2 bg-gradient-to-t from-indigo-900/40 to-transparent rounded border-b border-indigo-500/50 relative">
+                    <div className="p-3 bg-slate-50 dark:bg-[#111424] rounded-lg border border-slate-200 dark:border-zinc-800/50 flex flex-col justify-between h-28">
+                      <div className="text-[10px] font-bold text-slate-900 dark:text-white flex justify-between"><span>RSI (14)</span> <span className="text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1 rounded">{advancedData.stochRsi.k} Trung lập</span></div>
+                      <div className="h-10 mt-2 bg-gradient-to-t from-indigo-500/10 dark:from-indigo-900/40 to-transparent rounded border-b border-indigo-500/50 relative">
                         <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
                           <polyline fill="none" stroke="#6366f1" strokeWidth="2" points="0,30 20,10 40,25 60,15 80,35 100,20" />
                         </svg>
                       </div>
                       <div className="text-[9px] text-slate-500 mt-1 truncate" title={spotData.indicators.rsi.status}>{spotData.indicators.rsi.status}</div>
                     </div>
-                    <div className="p-3 bg-[#111424] rounded-lg border border-zinc-800/50 flex flex-col justify-between h-28">
-                      <div className="text-[10px] font-bold text-white flex justify-between"><span>MACD (12,26,9)</span> <span className="text-emerald-400 bg-emerald-500/10 px-1 rounded">1,256.32 Mua</span></div>
+                    <div className="p-3 bg-slate-50 dark:bg-[#111424] rounded-lg border border-slate-200 dark:border-zinc-800/50 flex flex-col justify-between h-28">
+                      <div className="text-[10px] font-bold text-slate-900 dark:text-white flex justify-between"><span>MACD (12,26,9)</span> <span className="text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1 rounded">1,256.32 Mua</span></div>
                       <div className="h-10 mt-2 relative flex items-end gap-[1px] px-1 justify-between">
                          <div className="w-1.5 bg-rose-500 h-[20%]"></div>
                          <div className="w-1.5 bg-rose-500 h-[15%]"></div>
@@ -984,13 +984,13 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
                          <div className="w-1.5 bg-emerald-500 h-[90%]"></div>
                          <div className="w-1.5 bg-emerald-500 h-[70%]"></div>
                          <div className="w-1.5 bg-emerald-500 h-[40%]"></div>
-                         <div className="absolute top-1/2 w-full h-[1px] bg-slate-600/50"></div>
+                         <div className="absolute top-1/2 w-full h-[1px] bg-slate-300 dark:bg-slate-600/50"></div>
                       </div>
                       <div className="text-[9px] text-slate-500 mt-1 truncate" title={spotData.indicators.macd}>{spotData.indicators.macd}</div>
                     </div>
-                    <div className="p-3 bg-[#111424] rounded-lg border border-zinc-800/50 flex flex-col justify-between h-28">
-                      <div className="text-[10px] font-bold text-white flex justify-between"><span>BB (20,2)</span> <span className="text-emerald-400 bg-emerald-500/10 px-1 rounded">{advancedData.bollingerBands.middle} Mua</span></div>
-                      <div className="h-10 mt-2 bg-gradient-to-t from-emerald-900/20 to-transparent rounded relative">
+                    <div className="p-3 bg-slate-50 dark:bg-[#111424] rounded-lg border border-slate-200 dark:border-zinc-800/50 flex flex-col justify-between h-28">
+                      <div className="text-[10px] font-bold text-slate-900 dark:text-white flex justify-between"><span>BB (20,2)</span> <span className="text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1 rounded">{advancedData.bollingerBands.middle} Mua</span></div>
+                      <div className="h-10 mt-2 bg-gradient-to-t from-emerald-500/10 dark:from-emerald-900/20 to-transparent rounded relative">
                         <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
                           <polyline fill="none" stroke="#10b981" strokeWidth="1.5" points="0,20 20,15 40,25 60,10 80,30 100,20" />
                           <polyline fill="none" stroke="#64748b" strokeWidth="1" strokeDasharray="2" points="0,10 20,5 40,15 60,2 80,20 100,10" />
@@ -1003,79 +1003,79 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
                 </div>
 
                 {/* Hỗ trợ kháng cự - span 1 */}
-                <div className="xl:col-span-1 p-4 bg-[#0b0e1b] border border-zinc-800 rounded-xl shadow-md space-y-3">
-                  <div className="text-sm font-bold text-white flex items-center gap-2 border-b border-zinc-800/50 pb-2"><Layers className="w-4 h-4 text-indigo-400"/> Mức hỗ trợ & kháng cự</div>
+                <div className="xl:col-span-1 p-4 bg-white dark:bg-[#0b0e1b] border border-slate-200 dark:border-zinc-800 rounded-xl shadow-md space-y-3">
+                  <div className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-200 dark:border-zinc-800/50 pb-2"><Layers className="w-4 h-4 text-indigo-500 dark:text-indigo-400"/> Mức hỗ trợ & kháng cự</div>
                   <div className="space-y-2 text-xs font-mono pt-1">
-                    <div className="flex justify-between items-center text-rose-400"><span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div> Kháng cự 3</span> <span>{(currentCoinPrice * 1.15).toLocaleString(undefined, {maximumFractionDigits: 2})}</span></div>
-                    <div className="flex justify-between items-center text-rose-400"><span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div> Kháng cự 2</span> <span>{(currentCoinPrice * 1.10).toLocaleString(undefined, {maximumFractionDigits: 2})}</span></div>
-                    <div className="flex justify-between items-center text-rose-400"><span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div> Kháng cự 1</span> <span>{spotData.indicators.supportResistance.resistance}</span></div>
-                    <div className="flex justify-between items-center text-indigo-200 bg-indigo-600/30 px-2 rounded-lg font-bold py-1.5 my-2 border border-indigo-500/50"><span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-indigo-400 shadow-[0_0_8px_rgba(99,102,241,0.8)]"></div> Giá hiện tại</span> <span>{currentCoinPrice.toLocaleString(undefined, {maximumFractionDigits: 2})}</span></div>
-                    <div className="flex justify-between items-center text-emerald-400"><span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Hỗ trợ 1</span> <span>{spotData.indicators.supportResistance.support}</span></div>
-                    <div className="flex justify-between items-center text-emerald-400"><span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Hỗ trợ 2</span> <span>{(currentCoinPrice * 0.90).toLocaleString(undefined, {maximumFractionDigits: 2})}</span></div>
-                    <div className="flex justify-between items-center text-emerald-400"><span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Hỗ trợ 3</span> <span>{(currentCoinPrice * 0.85).toLocaleString(undefined, {maximumFractionDigits: 2})}</span></div>
+                    <div className="flex justify-between items-center text-rose-500 dark:text-rose-400"><span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div> Kháng cự 3</span> <span>{(currentCoinPrice * 1.15).toLocaleString(undefined, {maximumFractionDigits: 2})}</span></div>
+                    <div className="flex justify-between items-center text-rose-500 dark:text-rose-400"><span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div> Kháng cự 2</span> <span>{(currentCoinPrice * 1.10).toLocaleString(undefined, {maximumFractionDigits: 2})}</span></div>
+                    <div className="flex justify-between items-center text-rose-500 dark:text-rose-400"><span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div> Kháng cự 1</span> <span>{spotData.indicators.supportResistance.resistance}</span></div>
+                    <div className="flex justify-between items-center text-indigo-700 dark:text-indigo-200 bg-indigo-50 dark:bg-indigo-600/30 px-2 rounded-lg font-bold py-1.5 my-2 border border-indigo-200 dark:border-indigo-500/50"><span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-indigo-500 dark:bg-indigo-400 shadow-[0_0_8px_rgba(99,102,241,0.8)]"></div> Giá hiện tại</span> <span>{currentCoinPrice.toLocaleString(undefined, {maximumFractionDigits: 2})}</span></div>
+                    <div className="flex justify-between items-center text-emerald-600 dark:text-emerald-400"><span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Hỗ trợ 1</span> <span>{spotData.indicators.supportResistance.support}</span></div>
+                    <div className="flex justify-between items-center text-emerald-600 dark:text-emerald-400"><span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Hỗ trợ 2</span> <span>{(currentCoinPrice * 0.90).toLocaleString(undefined, {maximumFractionDigits: 2})}</span></div>
+                    <div className="flex justify-between items-center text-emerald-600 dark:text-emerald-400"><span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Hỗ trợ 3</span> <span>{(currentCoinPrice * 0.85).toLocaleString(undefined, {maximumFractionDigits: 2})}</span></div>
                   </div>
                 </div>
 
                 {/* Tổng quan xu hướng - span 1 */}
-                <div className="xl:col-span-1 p-4 bg-[#0b0e1b] border border-zinc-800 rounded-xl shadow-md space-y-4 flex flex-col">
-                  <div className="text-sm font-bold text-white flex items-center gap-2 border-b border-zinc-800/50 pb-2"><TrendingUp className="w-4 h-4 text-indigo-400"/> Tổng quan xu hướng</div>
-                  <div className="flex justify-end gap-2 text-[9px] font-mono text-slate-500 -mt-2"><span>1D</span><span>1W</span><span>1M</span><span>3M</span><span>1Y</span></div>
+                <div className="xl:col-span-1 p-4 bg-white dark:bg-[#0b0e1b] border border-slate-200 dark:border-zinc-800 rounded-xl shadow-md space-y-4 flex flex-col">
+                  <div className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-200 dark:border-zinc-800/50 pb-2"><TrendingUp className="w-4 h-4 text-indigo-500 dark:text-indigo-400"/> Tổng quan xu hướng</div>
+                  <div className="flex justify-end gap-2 text-[9px] font-mono text-slate-400 -mt-2"><span>1D</span><span>1W</span><span>1M</span><span>3M</span><span>1Y</span></div>
                   <div className="flex-1 flex flex-col justify-center space-y-4">
                     <div className="flex gap-3">
-                      <div className="w-10 h-10 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
                         <ArrowUpRight className="w-6 h-6" />
                       </div>
                       <div className="flex flex-col justify-center">
-                        <div className="text-[10px] text-emerald-400/80 mb-0.5">Xu hướng hiện tại</div>
-                        <div className="text-base font-bold text-emerald-400 leading-none">{spotData.trend.split(' ')[0] || "Tăng"}</div>
+                        <div className="text-[10px] text-emerald-600/80 dark:text-emerald-400/80 mb-0.5">Xu hướng hiện tại</div>
+                        <div className="text-base font-bold text-emerald-600 dark:text-emerald-400 leading-none">{spotData.trend.split(' ')[0] || "Tăng"}</div>
                       </div>
                     </div>
                     <div className="space-y-3.5 text-xs font-semibold">
                       <div className="flex justify-between items-center gap-2">
-                        <span className="text-slate-400 text-[10px] shrink-0">Xu hướng ngắn hạn (1D)</span>
+                        <span className="text-slate-500 dark:text-slate-400 text-[10px] shrink-0">Xu hướng ngắn hạn (1D)</span>
                         <div className="flex-1 h-1 bg-emerald-500 rounded-full"></div>
-                        <span className="text-emerald-400 text-[10px] shrink-0">Tăng</span>
+                        <span className="text-emerald-600 dark:text-emerald-400 text-[10px] shrink-0">Tăng</span>
                       </div>
                       <div className="flex justify-between items-center gap-2">
-                        <span className="text-slate-400 text-[10px] shrink-0">Xu hướng trung hạn (1W)</span>
+                        <span className="text-slate-500 dark:text-slate-400 text-[10px] shrink-0">Xu hướng trung hạn (1W)</span>
                         <div className="flex-1 h-1 bg-emerald-500 rounded-full opacity-80"></div>
-                        <span className="text-emerald-400 text-[10px] shrink-0">Tăng</span>
+                        <span className="text-emerald-600 dark:text-emerald-400 text-[10px] shrink-0">Tăng</span>
                       </div>
                       <div className="flex justify-between items-center gap-2">
-                        <span className="text-slate-400 text-[10px] shrink-0">Xu hướng dài hạn (1M)</span>
+                        <span className="text-slate-500 dark:text-slate-400 text-[10px] shrink-0">Xu hướng dài hạn (1M)</span>
                         <div className="flex-1 h-1 bg-emerald-500 rounded-full opacity-60"></div>
-                        <span className="text-emerald-400 text-[10px] shrink-0">Tăng</span>
+                        <span className="text-emerald-600 dark:text-emerald-400 text-[10px] shrink-0">Tăng</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Đánh giá rủi ro - span 1 */}
-                <div className="xl:col-span-1 p-4 bg-[#0b0e1b] border border-zinc-800 rounded-xl shadow-md space-y-3 flex flex-col">
-                  <div className="text-sm font-bold text-white flex items-center gap-2 border-b border-zinc-800/50 pb-2"><ShieldAlert className="w-4 h-4 text-indigo-400"/> Đánh giá rủi ro</div>
+                <div className="xl:col-span-1 p-4 bg-white dark:bg-[#0b0e1b] border border-slate-200 dark:border-zinc-800 rounded-xl shadow-md space-y-3 flex flex-col">
+                  <div className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-200 dark:border-zinc-800/50 pb-2"><ShieldAlert className="w-4 h-4 text-indigo-500 dark:text-indigo-400"/> Đánh giá rủi ro</div>
                   <div className="flex justify-end -mt-2">
-                    <span className="px-2 py-0.5 text-[10px] rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">Trung bình</span>
+                    <span className="px-2 py-0.5 text-[10px] rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30">Trung bình</span>
                   </div>
                   <div className="flex-1 space-y-3 text-xs pt-1">
-                    <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
-                      <span className="text-slate-400">Biến động (Volatility)</span>
-                      <span className="text-white font-bold">{futureData.metrics.volatilityATR}%</span>
+                    <div className="flex justify-between items-center border-b border-slate-200 dark:border-zinc-800/50 pb-1.5">
+                      <span className="text-slate-500 dark:text-slate-400">Biến động (Volatility)</span>
+                      <span className="text-slate-900 dark:text-white font-bold">{futureData.metrics.volatilityATR}%</span>
                     </div>
-                    <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
-                      <span className="text-slate-400">Mức độ rủi ro</span>
-                      <span className="text-amber-400 font-bold">Trung bình</span>
+                    <div className="flex justify-between items-center border-b border-slate-200 dark:border-zinc-800/50 pb-1.5">
+                      <span className="text-slate-500 dark:text-slate-400">Mức độ rủi ro</span>
+                      <span className="text-amber-600 dark:text-amber-400 font-bold">Trung bình</span>
                     </div>
-                    <div className="flex justify-between items-center border-b border-zinc-800/50 pb-1.5">
-                      <span className="text-slate-400">Khối lượng</span>
-                      <span className="text-amber-400 font-bold">Cao</span>
+                    <div className="flex justify-between items-center border-b border-slate-200 dark:border-zinc-800/50 pb-1.5">
+                      <span className="text-slate-500 dark:text-slate-400">Khối lượng</span>
+                      <span className="text-amber-600 dark:text-amber-400 font-bold">Cao</span>
                     </div>
                     <div className="flex justify-between items-center pb-1.5">
-                      <span className="text-slate-400">Tâm lý thị trường</span>
-                      <span className="text-emerald-400 font-bold">{coinglassData.fearGreedIndex.label}</span>
+                      <span className="text-slate-500 dark:text-slate-400">Tâm lý thị trường</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold">{coinglassData.fearGreedIndex.label}</span>
                     </div>
                   </div>
-                  <div className="text-[9px] text-slate-500 flex gap-1 mt-auto leading-tight">
-                    <HelpCircle className="w-3 h-3 shrink-0" />
+                  <div className="text-[9px] text-slate-500 dark:text-slate-400 flex gap-1 mt-auto leading-tight">
+                    <HelpCircle className="w-3.5 h-3.5 shrink-0" />
                     Thị trường đang trong giai đoạn tích lũy, phù hợp với chiến lược giao dịch trung hạn.
                   </div>
                 </div>
@@ -1083,20 +1083,20 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
 
               {/* Bottom AI Box & Order Button */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="md:col-span-3 p-5 bg-[#0b0e1b] border border-zinc-800 rounded-xl shadow-md">
+                <div className="md:col-span-3 p-5 bg-white dark:bg-[#0b0e1b] border border-slate-200 dark:border-zinc-800 rounded-xl shadow-md">
                   <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2 text-sm font-bold text-white"><Sparkles className="w-4 h-4 text-indigo-400"/> Phân tích AI</div>
-                    <span className="px-3 py-1 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Tích cực</span>
+                    <div className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white"><Sparkles className="w-4 h-4 text-indigo-500 dark:text-indigo-400"/> Phân tích AI</div>
+                    <span className="px-3 py-1 rounded text-[11px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">Tích cực</span>
                   </div>
-                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-medium">
+                  <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
                     {spotData.finalVerdict.summaryText}
                   </p>
-                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-medium mt-2">
+                  <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium mt-2">
                     {spotData.strategyAdvice}
                   </p>
-                  <div className="mt-4 pt-3 border-t border-zinc-800/50">
-                    <p className="text-[11px] text-slate-400 flex items-start gap-1.5">
-                      <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-amber-400" />
+                  <div className="mt-4 pt-3 border-t border-slate-200 dark:border-zinc-800/50">
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 flex items-start gap-1.5">
+                      <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-amber-500" />
                       {spotData.riskWarning}
                     </p>
                   </div>
@@ -1116,8 +1116,8 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
                   onClick={() => setTradingMode("spot")}
                   className={`flex items-center justify-between p-3.5 rounded-xl border transition-all cursor-pointer text-left ${
                     tradingMode === "spot"
-                      ? "bg-[#131a38] border-emerald-500/50 shadow-md ring-1 ring-emerald-500/30 text-white"
-                      : "bg-[#0f1225] border-indigo-950/80 hover:bg-[#141830] text-slate-400"
+                      ? "bg-emerald-50 dark:bg-[#131a38] border-emerald-500/50 shadow-md ring-1 ring-emerald-500/30 text-emerald-950 dark:text-white"
+                      : "bg-white dark:bg-[#0f1225] border-slate-200 dark:border-indigo-950/80 hover:bg-slate-50 dark:hover:bg-[#141830] text-slate-600 dark:text-slate-400"
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
@@ -1125,14 +1125,14 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
                       className={`w-3 h-3 rounded-full border-2 ${
                         tradingMode === "spot"
                           ? "border-emerald-500 bg-emerald-500"
-                          : "border-slate-500 bg-transparent"
+                          : "border-slate-400 dark:border-slate-500 bg-transparent"
                       }`}
                     />
-                    <span className="font-bold text-xs sm:text-sm text-white">
+                    <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
                       GIAO DỊCH SPOT
                     </span>
                   </div>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/40">
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40">
                     {spotData.signalLabel || "MUA GOM"}
                   </span>
                 </button>
@@ -1141,8 +1141,8 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
                   onClick={() => setTradingMode("future")}
                   className={`flex items-center justify-between p-3.5 rounded-xl border transition-all cursor-pointer text-left ${
                     tradingMode === "future"
-                      ? "bg-[#131a38] border-cyan-500/50 shadow-md ring-1 ring-cyan-500/30 text-white"
-                      : "bg-[#0f1225] border-indigo-950/80 hover:bg-[#141830] text-slate-400"
+                      ? "bg-cyan-50 dark:bg-[#131a38] border-cyan-500/50 shadow-md ring-1 ring-cyan-500/30 text-cyan-950 dark:text-white"
+                      : "bg-white dark:bg-[#0f1225] border-slate-200 dark:border-indigo-950/80 hover:bg-slate-50 dark:hover:bg-[#141830] text-slate-600 dark:text-slate-400"
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
@@ -1150,14 +1150,14 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
                       className={`w-3 h-3 rounded-full border-2 ${
                         tradingMode === "future"
                           ? "border-cyan-500 bg-cyan-500"
-                          : "border-slate-500 bg-transparent"
+                          : "border-slate-400 dark:border-slate-500 bg-transparent"
                       }`}
                     />
-                    <span className="font-bold text-xs sm:text-sm text-white">
+                    <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
                       GIAO DỊCH FUTURE
                     </span>
                   </div>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/40">
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase font-mono bg-cyan-500/10 text-cyan-600 dark:text-cyan-300 border border-cyan-500/40">
                     {futureData.positionLabel || "LONG"}
                   </span>
                 </button>
@@ -1167,22 +1167,22 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
               {tradingMode === "future" ? (
                 /* ==================== FUTURE / MARGIN STREAM VIEW ==================== */
                 <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-xs font-bold text-slate-300 px-1 pt-1">
-                    <Target className="w-4 h-4 text-cyan-400" />
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 px-1 pt-1">
+                    <Target className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
                     <span className="uppercase tracking-wider">TỔNG QUAN PHÂN TÍCH PHÁI SINH</span>
                   </div>
 
                   {/* 3 KPI Cards */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-2">
-                      <div className="flex items-center gap-2 text-slate-400 text-xs">
-                        <Flame className="w-4 h-4 text-amber-400" />
+                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-2 shadow-sm">
+                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
+                        <Flame className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                         <span>Tỷ lệ Thắng (Winrate Futures)</span>
                       </div>
-                      <div className="text-2xl font-black text-cyan-400 font-mono">
+                      <div className="text-2xl font-black text-cyan-600 dark:text-cyan-400 font-mono">
                         {futureData.winRatePercent}%
                       </div>
-                      <div className="w-full h-1.5 bg-[#141830] rounded-full overflow-hidden">
+                      <div className="w-full h-1.5 bg-slate-100 dark:bg-[#141830] rounded-full overflow-hidden">
                         <div
                           className="h-full bg-gradient-to-r from-cyan-400 to-emerald-400 rounded-full"
                           style={{ width: `${futureData.winRatePercent}%` }}
@@ -1190,28 +1190,28 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
                       </div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-2 text-slate-400 text-xs">
-                        <Shield className="w-4 h-4 text-amber-400" />
+                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-1 shadow-sm">
+                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
+                        <Shield className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                         <span>Mức Rủi Ro Vốn (Risk per Trade)</span>
                       </div>
-                      <div className="text-2xl font-black text-amber-400 font-mono">
+                      <div className="text-2xl font-black text-amber-600 dark:text-amber-400 font-mono">
                         {futureData.capitalRiskPercent}
                       </div>
-                      <div className="text-[11px] text-slate-400">
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400">
                         Giới hạn tối đa không cháy tài khoản
                       </div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-2 text-slate-400 text-xs">
-                        <Scale className="w-4 h-4 text-emerald-400" />
+                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-1 shadow-sm">
+                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
+                        <Scale className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
                         <span>Tỷ lệ Risk / Reward (R:R)</span>
                       </div>
-                      <div className="text-2xl font-black text-emerald-400 font-mono">
+                      <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
                         {futureData.riskRewardRatio}
                       </div>
-                      <div className="text-[11px] text-slate-400">
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400">
                         Tỷ lệ kỳ vọng lợi nhuận trên vốn
                       </div>
                     </div>
@@ -1219,50 +1219,50 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
 
                   {/* 4 Execution Strategy Cards */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-1.5 text-xs text-cyan-400 font-bold">
+                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-1 shadow-sm">
+                      <div className="flex items-center gap-1.5 text-xs text-cyan-600 dark:text-cyan-400 font-bold">
                         <Target className="w-3.5 h-3.5" />
                         <span>VÙNG ENTRY LỆNH</span>
                       </div>
-                      <div className="text-base font-black text-white font-mono pt-1">
+                      <div className="text-base font-black text-slate-900 dark:text-white font-mono pt-1">
                         {futureData.entryZone}
                       </div>
-                      <div className="text-[11px] text-slate-400">Vào lệnh có kỷ luật</div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400">Vào lệnh có kỷ luật</div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-bold">
+                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-1 shadow-sm">
+                      <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold">
                         <TrendingUp className="w-3.5 h-3.5" />
                         <span>CHỐT LỜI TP1</span>
                       </div>
-                      <div className="text-base font-black text-emerald-400 font-mono pt-1">
+                      <div className="text-base font-black text-emerald-600 dark:text-emerald-400 font-mono pt-1">
                         {futureData.targetPrice1}
                       </div>
-                      <div className="text-[11px] text-slate-400">Đạt L1 về hòa vốn</div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400">Đạt L1 về hòa vốn</div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-bold">
+                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-1 shadow-sm">
+                      <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold">
                         <Crown className="w-3.5 h-3.5" />
                         <span>CHỐT LỜI TP2 / TP3</span>
                       </div>
-                      <div className="text-base font-black text-emerald-300 font-mono pt-1">
+                      <div className="text-base font-black text-emerald-600 dark:text-emerald-300 font-mono pt-1">
                         {futureData.targetPrice2}
                       </div>
-                      <div className="text-[11px] text-slate-400 font-mono">
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
                         {futureData.targetPrice3}
                       </div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-rose-950/60 space-y-1">
-                      <div className="flex items-center gap-1.5 text-xs text-rose-400 font-bold">
+                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-rose-200 dark:border-rose-950/60 space-y-1 shadow-sm">
+                      <div className="flex items-center gap-1.5 text-xs text-rose-600 dark:text-rose-400 font-bold">
                         <ShieldAlert className="w-3.5 h-3.5" />
                         <span>STOP LOSS / LIQ PRICE</span>
                       </div>
-                      <div className="text-base font-black text-rose-400 font-mono pt-1">
+                      <div className="text-base font-black text-rose-600 dark:text-rose-400 font-mono pt-1">
                         {futureData.stopLoss}
                       </div>
-                      <div className="text-[11px] text-slate-400 font-mono">
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
                         Giá thanh lý: {futureData.estLiquidationPrice}
                       </div>
                     </div>
@@ -1270,27 +1270,27 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
 
                   {/* 2 Wide Technical Modules */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-3">
+                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-3 shadow-sm">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-xs font-bold text-white">
-                          <BarChart2 className="w-4 h-4 text-cyan-400" />
+                        <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
+                          <BarChart2 className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
                           <span>Tỷ lệ Long / Short Ratio</span>
                         </div>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
                           {futureData.metrics.longShortRatio.sentiment || "Bullish"}
                         </span>
                       </div>
 
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs font-mono font-bold">
-                          <span className="text-emerald-400">
+                          <span className="text-emerald-600 dark:text-emerald-400">
                             LONG: {futureData.metrics.longShortRatio.longPercent}%
                           </span>
-                          <span className="text-rose-400">
+                          <span className="text-rose-600 dark:text-rose-400">
                             SHORT: {futureData.metrics.longShortRatio.shortPercent}%
                           </span>
                         </div>
-                        <div className="h-2 w-full flex rounded-full overflow-hidden bg-[#141830]">
+                        <div className="h-2 w-full flex rounded-full overflow-hidden bg-slate-100 dark:bg-[#141830]">
                           <div
                             className="h-full bg-emerald-500"
                             style={{ width: `${futureData.metrics.longShortRatio.longPercent}%` }}
@@ -1302,44 +1302,44 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between p-2.5 rounded-lg bg-[#141830] border border-indigo-950/60 text-xs">
+                      <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 dark:bg-[#141830] border border-slate-200 dark:border-indigo-950/60 text-xs">
                         <div className="flex items-center gap-2">
-                          <Droplets className="w-3.5 h-3.5 text-cyan-400" />
-                          <span className="text-slate-400">Funding Rate:</span>
+                          <Droplets className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
+                          <span className="text-slate-500 dark:text-slate-400">Funding Rate:</span>
                         </div>
                         <div className="flex items-center gap-2 font-mono">
-                          <span className="font-bold text-emerald-400">
+                          <span className="font-bold text-emerald-600 dark:text-emerald-400">
                             {futureData.metrics.fundingRate.rate}
                           </span>
-                          <span className="text-[10px] text-slate-400">
+                          <span className="text-[10px] text-slate-500 dark:text-slate-400">
                             ({futureData.metrics.fundingRate.status})
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-3">
+                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-3 shadow-sm">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-xs font-bold text-white">
-                          <Layers className="w-4 h-4 text-indigo-400" />
+                        <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
+                          <Layers className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
                           <span>Bản đồ Cụm Thanh Lý</span>
                         </div>
-                        <span className="text-[11px] text-slate-400">OI: {futureData.metrics.openInterest}</span>
+                        <span className="text-[11px] text-slate-500 dark:text-slate-400">OI: {futureData.metrics.openInterest}</span>
                       </div>
 
-                      <div className="p-2.5 rounded-lg bg-[#141830] border border-rose-950/40 space-y-1">
+                      <div className="p-2.5 rounded-lg bg-rose-50 dark:bg-[#141830] border border-rose-200 dark:border-rose-950/40 space-y-1">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-rose-300 text-[11px]">Thanh Lý Short</span>
-                          <span className="font-mono font-bold text-rose-400">
+                          <span className="text-rose-600 dark:text-rose-300 text-[11px] font-semibold">Thanh Lý Short</span>
+                          <span className="font-mono font-bold text-rose-600 dark:text-rose-400">
                             {futureData.metrics.liquidationHeatmap.shortLiquidationPool}
                           </span>
                         </div>
                       </div>
 
-                      <div className="p-2.5 rounded-lg bg-[#141830] border border-emerald-950/40 space-y-1">
+                      <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-[#141830] border border-emerald-200 dark:border-emerald-950/40 space-y-1">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-emerald-300 text-[11px]">Thanh Lý Long</span>
-                          <span className="font-mono font-bold text-emerald-400">
+                          <span className="text-emerald-600 dark:text-emerald-300 text-[11px] font-semibold">Thanh Lý Long</span>
+                          <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
                             {futureData.metrics.liquidationHeatmap.longLiquidationPool}
                           </span>
                         </div>
@@ -1348,19 +1348,19 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
                   </div>
 
                   {/* Final Verdict Banner (Futures) */}
-                  <div className="p-4 sm:p-5 rounded-xl bg-[#0c2221] border border-emerald-500/40 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="p-4 sm:p-5 rounded-xl bg-emerald-50 dark:bg-[#0c2221] border border-emerald-300 dark:border-emerald-500/40 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-start gap-3">
-                      <div className="p-2.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shrink-0 mt-0.5">
+                      <div className="p-2.5 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shrink-0 mt-0.5">
                         <Zap className="w-5 h-5" />
                       </div>
                       <div>
-                        <div className="text-[10px] uppercase font-bold tracking-wider text-emerald-400 font-mono">
+                        <div className="text-[10px] uppercase font-bold tracking-wider text-emerald-700 dark:text-emerald-400 font-mono">
                           KẾT LUẬN HIỆN TẠI (FUTURES & MARGIN)
                         </div>
-                        <h3 className="text-base font-bold text-white mt-0.5">
+                        <h3 className="text-base font-bold text-slate-900 dark:text-white mt-0.5">
                           Khuyến Nghị Vị Thế Phái Sinh
                         </h3>
-                        <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
+                        <p className="text-xs text-slate-700 dark:text-slate-300 mt-1 max-w-2xl leading-relaxed">
                           {futureData?.finalVerdict?.summaryText || "Đang cập nhật nhận định vị thế phái sinh chuyên sâu..."}
                         </p>
                       </div>
@@ -1384,15 +1384,15 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
 
                   {/* 3 KPI Cards */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-2">
-                      <div className="flex items-center gap-2 text-slate-400 text-xs">
-                        <Gauge className="w-4 h-4 text-emerald-400" />
+                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-2 shadow-sm">
+                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
+                        <Gauge className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
                         <span>Chỉ số Winrate Spot Kỳ Vọng</span>
                       </div>
-                      <div className="text-2xl font-black text-emerald-400 font-mono">
+                      <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
                         {spotData.winRatePercent}%
                       </div>
-                      <div className="w-full h-1.5 bg-[#141830] rounded-full overflow-hidden">
+                      <div className="w-full h-1.5 bg-slate-100 dark:bg-[#141830] rounded-full overflow-hidden">
                         <div
                           className="h-full bg-gradient-to-r from-emerald-400 to-teal-300 rounded-full"
                           style={{ width: `${spotData.winRatePercent}%` }}
@@ -1400,28 +1400,28 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
                       </div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-2 text-slate-400 text-xs">
-                        <TrendingUp className="w-4 h-4 text-cyan-400" />
+                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-1 shadow-sm">
+                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
+                        <TrendingUp className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
                         <span>Xu Hướng Chính (Trend)</span>
                       </div>
-                      <div className="text-base font-black text-cyan-300 pt-1">
+                      <div className="text-base font-black text-cyan-700 dark:text-cyan-300 pt-1">
                         {spotData.trend}
                       </div>
-                      <div className="text-[11px] text-slate-400">
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400">
                         {spotData.indicators.emaTrend}
                       </div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-2 text-slate-400 text-xs">
-                        <Scale className="w-4 h-4 text-amber-400" />
+                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-1 shadow-sm">
+                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
+                        <Scale className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                         <span>Tỷ lệ Risk / Reward (R:R)</span>
                       </div>
-                      <div className="text-2xl font-black text-amber-400 font-mono">
+                      <div className="text-2xl font-black text-amber-600 dark:text-amber-400 font-mono">
                         {spotData.riskRewardRatio}
                       </div>
-                      <div className="text-[11px] text-slate-400">
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400">
                         Được tính toán theo phân bổ DCA
                       </div>
                     </div>
@@ -1429,105 +1429,105 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
 
                   {/* 4 Spot Execution Strategy Cards */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-bold">
+                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-1 shadow-sm">
+                      <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold">
                         <Target className="w-3.5 h-3.5" />
                         <span>VÙNG MUA GOM (BUY)</span>
                       </div>
-                      <div className="text-base font-black text-white font-mono pt-1">
+                      <div className="text-base font-black text-slate-900 dark:text-white font-mono pt-1">
                         {spotData.entryZone}
                       </div>
-                      <div className="text-[11px] text-slate-400">Chia vốn mua 3 đợt</div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400">Chia vốn mua 3 đợt</div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-1.5 text-xs text-cyan-400 font-bold">
+                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-1 shadow-sm">
+                      <div className="flex items-center gap-1.5 text-xs text-cyan-600 dark:text-cyan-400 font-bold">
                         <TrendingUp className="w-3.5 h-3.5" />
                         <span>CHỐT LỜI TP1</span>
                       </div>
-                      <div className="text-base font-black text-cyan-400 font-mono pt-1">
+                      <div className="text-base font-black text-cyan-600 dark:text-cyan-400 font-mono pt-1">
                         {spotData.targetPrice1}
                       </div>
-                      <div className="text-[11px] text-slate-400">Chốt 30-40% gốc</div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400">Chốt 30-40% gốc</div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-1">
-                      <div className="flex items-center gap-1.5 text-xs text-cyan-300 font-bold">
+                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-1 shadow-sm">
+                      <div className="flex items-center gap-1.5 text-xs text-cyan-600 dark:text-cyan-300 font-bold">
                         <Crown className="w-3.5 h-3.5" />
                         <span>CHỐT LỜI TP2 / TP3</span>
                       </div>
-                      <div className="text-base font-black text-cyan-300 font-mono pt-1">
+                      <div className="text-base font-black text-cyan-700 dark:text-cyan-300 font-mono pt-1">
                         {spotData.targetPrice2}
                       </div>
-                      <div className="text-[11px] text-slate-400 font-mono">
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
                         {spotData.targetPrice3}
                       </div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-rose-950/60 space-y-1">
-                      <div className="flex items-center gap-1.5 text-xs text-rose-400 font-bold">
+                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-rose-200 dark:border-rose-950/60 space-y-1 shadow-sm">
+                      <div className="flex items-center gap-1.5 text-xs text-rose-600 dark:text-rose-400 font-bold">
                         <ShieldAlert className="w-3.5 h-3.5" />
                         <span>CẮT LỖ AN TOÀN (SL)</span>
                       </div>
-                      <div className="text-base font-black text-rose-400 font-mono pt-1">
+                      <div className="text-base font-black text-rose-600 dark:text-rose-400 font-mono pt-1">
                         {spotData.stopLoss}
                       </div>
-                      <div className="text-[11px] text-slate-400">Bảo toàn vốn danh mục</div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400">Bảo toàn vốn danh mục</div>
                     </div>
                   </div>
 
                   {/* 2 Spot Technical Modules */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-3">
+                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-3 shadow-sm">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-xs font-bold text-white">
-                          <BarChart2 className="w-4 h-4 text-emerald-400" />
+                        <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
+                          <BarChart2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                           <span>Vùng Thanh Khoản & Order Block</span>
                         </div>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30">
                           RSI: {spotData.indicators.rsi.value}
                         </span>
                       </div>
 
                       <div className="space-y-2">
-                        <div className="p-2.5 rounded-lg bg-[#141830] border border-emerald-950/40">
-                          <div className="text-[11px] text-emerald-400 font-semibold">Vùng Cầu Mua:</div>
-                          <div className="text-xs font-mono font-bold text-white mt-0.5">
+                        <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-[#141830] border border-emerald-200 dark:border-emerald-950/40">
+                          <div className="text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold">Vùng Cầu Mua:</div>
+                          <div className="text-xs font-mono font-bold text-slate-900 dark:text-white mt-0.5">
                             {spotData.liquidity.highLiquidityZone}
                           </div>
                         </div>
 
-                        <div className="p-2.5 rounded-lg bg-[#141830] border border-rose-950/40">
-                          <div className="text-[11px] text-rose-400 font-semibold">Vùng Cung Bán:</div>
-                          <div className="text-xs font-mono font-bold text-white mt-0.5">
+                        <div className="p-2.5 rounded-lg bg-rose-50 dark:bg-[#141830] border border-rose-200 dark:border-rose-950/40">
+                          <div className="text-[11px] text-rose-700 dark:text-rose-400 font-semibold">Vùng Cung Bán:</div>
+                          <div className="text-xs font-mono font-bold text-slate-900 dark:text-white mt-0.5">
                             {spotData.liquidity.supplyZone}
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 space-y-3">
+                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-3 shadow-sm">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-xs font-bold text-white">
-                          <Layers className="w-4 h-4 text-cyan-400" />
+                        <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
+                          <Layers className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
                           <span>Hỗ Trợ & Kháng Cự</span>
                         </div>
-                        <span className="text-xs text-emerald-400 font-mono font-bold">
+                        <span className="text-xs text-emerald-600 dark:text-emerald-400 font-mono font-bold">
                           {spotData.indicators.volumeProfile}
                         </span>
                       </div>
 
                       <div className="space-y-2">
-                        <div className="flex justify-between p-2.5 rounded-lg bg-[#141830] border border-indigo-950/60 text-xs">
-                          <span className="text-slate-400">Hỗ trợ quan trọng:</span>
-                          <span className="font-mono font-bold text-emerald-400">
+                        <div className="flex justify-between p-2.5 rounded-lg bg-slate-50 dark:bg-[#141830] border border-slate-200 dark:border-indigo-950/60 text-xs">
+                          <span className="text-slate-500 dark:text-slate-400">Hỗ trợ quan trọng:</span>
+                          <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
                             {spotData.indicators.supportResistance.support}
                           </span>
                         </div>
 
-                        <div className="flex justify-between p-2.5 rounded-lg bg-[#141830] border border-indigo-950/60 text-xs">
-                          <span className="text-slate-400">Kháng cự then chốt:</span>
-                          <span className="font-mono font-bold text-rose-400">
+                        <div className="flex justify-between p-2.5 rounded-lg bg-slate-50 dark:bg-[#141830] border border-slate-200 dark:border-indigo-950/60 text-xs">
+                          <span className="text-slate-500 dark:text-slate-400">Kháng cự then chốt:</span>
+                          <span className="font-mono font-bold text-rose-600 dark:text-rose-400">
                             {spotData.indicators.supportResistance.resistance}
                           </span>
                         </div>
@@ -1536,19 +1536,19 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
                   </div>
 
                   {/* Final Verdict Banner (Spot) */}
-                  <div className="p-4 sm:p-5 rounded-xl bg-[#0c2221] border border-emerald-500/40 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="p-4 sm:p-5 rounded-xl bg-emerald-50 dark:bg-[#0c2221] border border-emerald-300 dark:border-emerald-500/40 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-start gap-3">
-                      <div className="p-2.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shrink-0 mt-0.5">
+                      <div className="p-2.5 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shrink-0 mt-0.5">
                         <Zap className="w-5 h-5" />
                       </div>
                       <div>
-                        <div className="text-[10px] uppercase font-bold tracking-wider text-emerald-400 font-mono">
+                        <div className="text-[10px] uppercase font-bold tracking-wider text-emerald-700 dark:text-emerald-400 font-mono">
                           KẾT LUẬN HIỆN TẠI (SPOT TRADING)
                         </div>
-                        <h3 className="text-base font-bold text-white mt-0.5">
+                        <h3 className="text-base font-bold text-slate-900 dark:text-white mt-0.5">
                           Khuyến Nghị Tích Lũy Spot
                         </h3>
-                        <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
+                        <p className="text-xs text-slate-700 dark:text-slate-300 mt-1 max-w-2xl leading-relaxed">
                           {spotData?.finalVerdict?.summaryText || "Đang cập nhật nhận định tích lũy Spot chuyên sâu..."}
                         </p>
                       </div>

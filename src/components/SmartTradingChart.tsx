@@ -646,23 +646,23 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
 
   return (
     <div
-      className={`relative flex flex-col w-full rounded-2xl overflow-hidden border border-zinc-800 bg-[#090d1a] shadow-2xl transition-all ${
+      className={`relative flex flex-col w-full rounded-2xl overflow-hidden border border-slate-200 dark:border-zinc-800 bg-white dark:bg-[#090d1a] shadow-2xl transition-all ${
         isFullscreen ? "fixed inset-0 z-50 rounded-none border-none h-screen w-screen" : "h-[540px]"
       }`}
     >
       {/* ================= TOP TOOLBAR (Header) ================= */}
-      <div className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5 bg-[#0e1326] border-b border-zinc-800/80 text-xs select-none">
+      <div className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5 bg-slate-50 dark:bg-[#0e1326] border-b border-slate-200 dark:border-zinc-800/80 text-xs select-none">
         {/* Left: Coin Badge & Timeframe selector */}
         <div className="flex items-center gap-2 flex-wrap">
           {/* Symbol Badge */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-600/20 text-indigo-300 font-bold border border-indigo-500/30">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-500/10 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-300 font-bold border border-indigo-500/30">
             {coinImage && <img src={coinImage} alt="" className="w-4 h-4 rounded-full" />}
             <span>{cleanSymbol.replace("USDT", "")}</span>
-            <span className="text-[10px] text-indigo-400 font-mono">USDT</span>
+            <span className="text-[10px] text-indigo-500 dark:text-indigo-400 font-mono">USDT</span>
           </div>
 
           {/* Timeframe Buttons */}
-          <div className="flex items-center bg-zinc-900/80 p-0.5 rounded-lg border border-zinc-800/80">
+          <div className="flex items-center bg-slate-200/80 dark:bg-zinc-900/80 p-0.5 rounded-lg border border-slate-300 dark:border-zinc-800/80">
             {TIMEFRAMES.map((tf) => (
               <button
                 key={tf.value}
@@ -670,7 +670,7 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
                 className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
                   timeframe === tf.value
                     ? "bg-gradient-to-r from-teal-500 to-emerald-600 text-white shadow-sm"
-                    : "text-slate-400 hover:text-white hover:bg-zinc-800/60"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-300/60 dark:hover:bg-zinc-800/60"
                 }`}
                 title={tf.desc}
               >
@@ -684,8 +684,8 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
             onClick={() => setShowZones(!showZones)}
             className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-semibold transition cursor-pointer ${
               showZones
-                ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
-                : "bg-zinc-900/60 text-slate-400 border-zinc-800 hover:text-white"
+                ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                : "bg-slate-100 dark:bg-zinc-900/60 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-zinc-800 hover:text-slate-900 dark:hover:text-white"
             }`}
           >
             {showZones ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
@@ -696,8 +696,8 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
             onClick={() => setShowSignals(!showSignals)}
             className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-semibold transition cursor-pointer ${
               showSignals
-                ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
-                : "bg-zinc-900/60 text-slate-400 border-zinc-800 hover:text-white"
+                ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30"
+                : "bg-slate-100 dark:bg-zinc-900/60 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-zinc-800 hover:text-slate-900 dark:hover:text-white"
             }`}
           >
             <Sparkles className="w-3.5 h-3.5" />
@@ -707,15 +707,15 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
 
         {/* Right: Live Status & Controls */}
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span>
             <span>Trực tiếp (Live)</span>
           </div>
 
           <button
             onClick={() => fetchKlinesAndComputeZones()}
             disabled={isLoading}
-            className="p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-slate-400 hover:text-white hover:bg-zinc-800 transition cursor-pointer disabled:opacity-50"
+            className="p-1.5 rounded-lg bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-800 transition cursor-pointer disabled:opacity-50"
             title="Làm mới nến"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
@@ -723,7 +723,7 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
 
           <button
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-slate-400 hover:text-white hover:bg-zinc-800 transition cursor-pointer"
+            className="p-1.5 rounded-lg bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-800 transition cursor-pointer"
             title={isFullscreen ? "Thu nhỏ" : "Toàn màn hình"}
           >
             {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
@@ -733,28 +733,28 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
 
       {/* ================= CANDLESTICK STATS BAR ================= */}
       {currentCandle && (
-        <div className="flex items-center justify-between gap-4 px-3.5 py-1.5 bg-[#0b0f1e]/90 border-b border-zinc-800/40 text-[11px] font-mono select-none overflow-x-auto">
+        <div className="flex items-center justify-between gap-4 px-3.5 py-1.5 bg-slate-100/90 dark:bg-[#0b0f1e]/90 border-b border-slate-200 dark:border-zinc-800/40 text-[11px] font-mono select-none overflow-x-auto">
           <div className="flex items-center gap-3 shrink-0">
-            <span className="font-bold text-white">
-              {cleanSymbol} <span className="text-slate-400 font-normal">{timeframe}</span>
+            <span className="font-bold text-slate-900 dark:text-white">
+              {cleanSymbol} <span className="text-slate-500 dark:text-slate-400 font-normal">{timeframe}</span>
             </span>
             <div className="flex items-center gap-2">
-              <span className="text-slate-400">
-                O: <span className="text-white">${currentCandle.open.toLocaleString("en-US", { maximumFractionDigits: currentCandle.open < 1 ? 4 : 2 })}</span>
+              <span className="text-slate-500 dark:text-slate-400">
+                O: <span className="text-slate-800 dark:text-white">${currentCandle.open.toLocaleString("en-US", { maximumFractionDigits: currentCandle.open < 1 ? 4 : 2 })}</span>
               </span>
-              <span className="text-slate-400">
-                H: <span className="text-white">${currentCandle.high.toLocaleString("en-US", { maximumFractionDigits: currentCandle.high < 1 ? 4 : 2 })}</span>
+              <span className="text-slate-500 dark:text-slate-400">
+                H: <span className="text-slate-800 dark:text-white">${currentCandle.high.toLocaleString("en-US", { maximumFractionDigits: currentCandle.high < 1 ? 4 : 2 })}</span>
               </span>
-              <span className="text-slate-400">
-                L: <span className="text-white">${currentCandle.low.toLocaleString("en-US", { maximumFractionDigits: currentCandle.low < 1 ? 4 : 2 })}</span>
+              <span className="text-slate-500 dark:text-slate-400">
+                L: <span className="text-slate-800 dark:text-white">${currentCandle.low.toLocaleString("en-US", { maximumFractionDigits: currentCandle.low < 1 ? 4 : 2 })}</span>
               </span>
-              <span className="text-slate-400">
-                C: <span className="text-white font-bold">${currentCandle.close.toLocaleString("en-US", { maximumFractionDigits: currentCandle.close < 1 ? 4 : 2 })}</span>
+              <span className="text-slate-500 dark:text-slate-400">
+                C: <span className="text-slate-800 dark:text-white font-bold">${currentCandle.close.toLocaleString("en-US", { maximumFractionDigits: currentCandle.close < 1 ? 4 : 2 })}</span>
               </span>
             </div>
             <span
               className={`font-bold px-1.5 py-0.2 rounded text-[10px] ${
-                currentCandle.change >= 0 ? "text-emerald-400 bg-emerald-500/10" : "text-rose-400 bg-rose-500/10"
+                currentCandle.change >= 0 ? "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10" : "text-rose-600 dark:text-rose-400 bg-rose-500/10"
               }`}
             >
               {currentCandle.change >= 0 ? "+" : ""}
@@ -762,16 +762,16 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
             </span>
           </div>
 
-          <div className="flex items-center gap-3 text-slate-400 shrink-0">
+          <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400 shrink-0">
             <span>
-              Vol: <span className="text-slate-200 font-semibold">{currentCandle.volume.toFixed(2)}</span>
+              Vol: <span className="text-slate-700 dark:text-slate-200 font-semibold">{currentCandle.volume.toFixed(2)}</span>
             </span>
           </div>
         </div>
       )}
 
       {/* ================= MAIN CHART AREA + OVERLAYS ================= */}
-      <div className="relative flex-1 w-full h-full min-h-[360px] overflow-hidden">
+      <div className="relative flex-1 w-full h-full min-h-[360px] overflow-hidden bg-white dark:bg-[#090d1a]">
         {/* Lightweight Charts Canvas Container */}
         <div ref={chartContainerRef} className="w-full h-full" />
 
@@ -783,7 +783,7 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
           >
             <defs>
               <pattern id="diagonalHatch" width="8" height="8" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
-                <line x1="0" y1="0" x2="0" y2="8" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+                <line x1="0" y1="0" x2="0" y2="8" stroke="rgba(100,100,100,0.08)" strokeWidth="1" />
               </pattern>
             </defs>
 
@@ -900,64 +900,11 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
           </svg>
         )}
 
-        {/* ================= FLOATING PERFORMANCE CARD (AI Liquidity Widget) ================= */}
-        {showMetricsPanel && (
-          <div className="absolute top-3 right-4 z-20 w-52 sm:w-56 rounded-xl bg-[#121833]/90 border border-indigo-900/80 backdrop-blur-md p-3 shadow-2xl space-y-2 select-none">
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-indigo-950 pb-1.5">
-              <div className="flex items-center gap-1.5 text-xs font-black text-indigo-300">
-                <span className="p-1 rounded bg-indigo-600/30 text-indigo-400">
-                  <Zap className="w-3.5 h-3.5" />
-                </span>
-                <span>AI Liquidity & SMC</span>
-              </div>
-              <button
-                onClick={() => setShowMetricsPanel(false)}
-                className="text-slate-500 hover:text-white text-xs cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Metrics List */}
-            <div className="space-y-1.5 text-[11px]">
-              <div className="flex justify-between items-center">
-                <span className="text-slate-400 flex items-center gap-1">🏆 Win rate</span>
-                <span className="font-bold text-emerald-400 font-mono">{aiMetrics.winRate}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-slate-400 flex items-center gap-1">📉 Max DD</span>
-                <span className="font-bold text-amber-400 font-mono">{aiMetrics.maxDD}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-slate-400 flex items-center gap-1">💰 Net R (R:R)</span>
-                <span className="font-bold text-emerald-300 font-mono">{aiMetrics.netR}</span>
-              </div>
-            </div>
-
-            {/* Layer Stats */}
-            <div className="pt-1.5 border-t border-indigo-950/80 text-[10px] space-y-1">
-              <div className="flex justify-between text-slate-400">
-                <span>WR / Layer L1:</span>
-                <span className="text-slate-300 font-mono">{aiMetrics.layer1}</span>
-              </div>
-              <div className="flex justify-between text-slate-400">
-                <span>WR / Layer L3:</span>
-                <span className="text-emerald-400 font-mono font-bold">{aiMetrics.layer3}</span>
-              </div>
-            </div>
-
-            <div className="text-[8px] text-slate-500 italic pt-1 border-t border-indigo-950/60 leading-tight">
-              ⚠️ Số liệu quá khứ không đảm bảo kết quả tương lai.
-            </div>
-          </div>
-        )}
-
         {/* Loading Spinner */}
         {isLoading && (
-          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#090d1a]/80 backdrop-blur-xs">
+          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-white/80 dark:bg-[#090d1a]/80 backdrop-blur-xs">
             <RefreshCw className="w-8 h-8 text-indigo-500 animate-spin mb-2" />
-            <span className="text-xs font-bold text-slate-300">Đang quét nến & vẽ vùng SMC...</span>
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Đang quét nến & vẽ vùng SMC...</span>
           </div>
         )}
       </div>
