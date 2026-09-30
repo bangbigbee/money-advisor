@@ -56,11 +56,11 @@ interface SmartZone {
 }
 
 const TIMEFRAMES = [
-  { label: "15m", value: "15m", desc: "15 Phút" },
-  { label: "1h", value: "1h", desc: "1 Giờ" },
-  { label: "4h", value: "4h", desc: "4 Giờ" },
-  { label: "1D", value: "1d", desc: "1 Ngày" },
-  { label: "1W", value: "1w", desc: "1 Tuần" },
+  { label: "15m", value: "15m", desc: "15 Phút", seconds: 900 },
+  { label: "1h", value: "1h", desc: "1 Giờ", seconds: 3600 },
+  { label: "4h", value: "4h", desc: "4 Giờ", seconds: 14400 },
+  { label: "1D", value: "1d", desc: "1 Ngày", seconds: 86400 },
+  { label: "1W", value: "1w", desc: "1 Tuần", seconds: 604800 },
 ];
 
 export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
@@ -76,6 +76,7 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
   const chartRef = useRef<IChartApi | null>(null);
   const candleSeriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
   const volumeSeriesRef = useRef<ISeriesApi<"Histogram"> | null>(null);
+  const seriesMarkersRef = useRef<any>(null);
 
   const [timeframe, setTimeframe] = useState("15m");
   const [isLoading, setIsLoading] = useState(true);
@@ -93,9 +94,6 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
     change: number;
     volume: number;
   } | null>(null);
-
-  const currentCandleRef = useRef(currentCandle);
-  currentCandleRef.current = currentCandle;
 
   const [zones, setZones] = useState<SmartZone[]>([]);
   const zonesRef = useRef<SmartZone[]>([]);
@@ -219,6 +217,7 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
 
     const container = chartContainerRef.current;
     container.innerHTML = "";
+    seriesMarkersRef.current = null;
 
     const isDark = theme !== "light";
     const bg = isDark ? "#090d1a" : "#ffffff";
@@ -261,7 +260,7 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
         borderColor: isDark ? "#1e293b" : "#cbd5e1",
         timeVisible: true,
         secondsVisible: false,
-        rightOffset: 12,
+        rightOffset: 8,
         barSpacing: 9,
       },
       handleScroll: {
@@ -343,23 +342,25 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
       chartRef.current = null;
       candleSeriesRef.current = null;
       volumeSeriesRef.current = null;
+      seriesMarkersRef.current = null;
     };
   }, [theme]);
 
-  // Generate synthetic candles if Binance returns 400/offline
-  const generateFallbackKlines = (basePrice = 100): KlineData[] => {
+  // Generate synthetic candles if Binance returns offline
+  const generateFallbackKlines = (basePrice = 100, tf = "15m"): KlineData[] => {
     const list: KlineData[] = [];
     const now = Math.floor(Date.now() / 1000);
-    const intervalSeconds = 900; // 15m
+    const intervalObj = TIMEFRAMES.find((t) => t.value === tf) || TIMEFRAMES[0];
+    const stepSeconds = intervalObj.seconds;
     let price = basePrice;
 
     for (let i = 80; i >= 0; i--) {
-      const time = (now - i * intervalSeconds) as UTCTimestamp;
-      const changePercent = (Math.sin(i * 0.3) * 0.8 + (Math.random() - 0.48) * 1.5) / 100;
+      const time = (now - i * stepSeconds) as UTCTimestamp;
+      const changePercent = (Math.sin(i * 0.25) * 0.8 + (Math.random() - 0.48) * 1.5) / 100;
       const open = price;
       const close = price * (1 + changePercent);
-      const high = Math.max(open, close) * (1 + Math.random() * 0.005);
-      const low = Math.min(open, close) * (1 - Math.random() * 0.005);
+      const high = Math.max(open, close) * (1 + Math.random() * 0.004);
+      const low = Math.min(open, close) * (1 - Math.random() * 0.004);
       const volume = Math.floor(Math.random() * 50000) + 10000;
       price = close;
       list.push({ time, open, high, low, close, volume });
@@ -395,7 +396,7 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
 
       // Fallback if Binance endpoint had issues
       if (klines.length === 0) {
-        klines = generateFallbackKlines(cleanSymbol.includes("BTC") ? 83500 : 50);
+        klines = generateFallbackKlines(cleanSymbol.includes("BTC") ? 83500 : cleanSymbol.includes("SUI") ? 3.4 : 50, timeframe);
       }
 
       // Set Candlestick data
@@ -436,7 +437,7 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
 
       // ================= COMPUTE SMART MONEY CONCEPT (SMC) ZONES =================
       const calculatedZones: SmartZone[] = [];
-      const markersList: any[] = [];
+      const markersMap = new Map<number, any>();
 
       // Find Swing Highs and Swing Lows (Fractals)
       const swingHighs: { index: number; price: number; time: number }[] = [];
@@ -444,7 +445,6 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
 
       for (let i = 3; i < klines.length - 3; i++) {
         const curr = klines[i];
-        // Swing high
         if (
           curr.high >= klines[i - 1].high &&
           curr.high >= klines[i - 2].high &&
@@ -453,7 +453,6 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
         ) {
           swingHighs.push({ index: i, price: curr.high, time: curr.time });
         }
-        // Swing low
         if (
           curr.low <= klines[i - 1].low &&
           curr.low <= klines[i - 2].low &&
@@ -467,7 +466,7 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
       // 1. DISTRIBUTION ZONE (VÙNG PHÂN PHỐI - ĐỎ)
       if (swingHighs.length > 0) {
         const topHigh = swingHighs.reduce((prev, curr) => (curr.price > prev.price ? curr : prev));
-        const zoneHeight = topHigh.price * 0.005;
+        const zoneHeight = topHigh.price * 0.006;
 
         calculatedZones.push({
           id: "dist-zone-1",
@@ -485,7 +484,7 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
       // 2. ACCUMULATION ZONE (VÙNG TÍCH LŨY - XANH)
       if (swingLows.length > 0) {
         const bottomLow = swingLows.reduce((prev, curr) => (curr.price < prev.price ? curr : prev));
-        const zoneHeight = bottomLow.price * 0.005;
+        const zoneHeight = bottomLow.price * 0.006;
 
         calculatedZones.push({
           id: "accum-zone-1",
@@ -500,9 +499,9 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
         });
       }
 
-      // 3. RISK-REWARD ACTIVE TRADE SETUP (R:R LONG SETUP)
+      // 3. RISK-REWARD ACTIVE TRADE SETUP (R:R SETUP)
       if (klines.length > 15) {
-        const recentLow = klines[klines.length - 12];
+        const recentLow = klines[klines.length - 10];
         const entryPrice = recentLow.close;
         const slPrice = recentLow.low * 0.993;
         const tpPrice = entryPrice + (entryPrice - slPrice) * 1.6;
@@ -523,45 +522,58 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
         });
       }
 
-      // 4. CANDLESTICK SIGNAL MARKERS
+      // 4. CLEAN, HIGH-CONVICTION SIGNAL MARKERS (No duplicate markers per candle)
       if (showSignals) {
-        swingLows.slice(-3).forEach((low, idx) => {
-          markersList.push({
+        // Last 2 Swing Lows -> Bullish Signals
+        swingLows.slice(-2).forEach((low, idx) => {
+          markersMap.set(low.time, {
             time: low.time,
             position: "belowBar",
             color: "#10b981",
             shape: "arrowUp",
-            text: idx === 2 ? "B ★★★" : "B D+30%",
+            text: idx === 1 ? "B ★★★" : "B D+30%",
             size: 1.2,
           });
         });
 
-        swingHighs.slice(-3).forEach((high, idx) => {
-          markersList.push({
+        // Last 2 Swing Highs -> Bearish Signals
+        swingHighs.slice(-2).forEach((high, idx) => {
+          markersMap.set(high.time, {
             time: high.time,
             position: "aboveBar",
             color: "#f59e0b",
             shape: "arrowDown",
-            text: idx === 2 ? "S ★★★" : "S D-35%",
+            text: idx === 1 ? "S ★★★" : "S D-35%",
             size: 1.2,
           });
         });
 
+        // One Take Profit target marker on recent breakout
         if (klines.length > 8) {
           const targetCandle = klines[klines.length - 6];
-          markersList.push({
-            time: targetCandle.time,
-            position: "aboveBar",
-            color: "#fbbf24",
-            shape: "circle",
-            text: "TP 🔔 +1.6R",
-            size: 1.4,
-          });
+          if (!markersMap.has(targetCandle.time)) {
+            markersMap.set(targetCandle.time, {
+              time: targetCandle.time,
+              position: "aboveBar",
+              color: "#fbbf24",
+              shape: "circle",
+              text: "TP 🔔 +1.6R",
+              size: 1.3,
+            });
+          }
         }
 
+        const uniqueMarkers = Array.from(markersMap.values()).sort((a, b) => a.time - b.time);
+
         if (candleSeriesRef.current) {
-          createSeriesMarkers(candleSeriesRef.current, markersList);
+          if (!seriesMarkersRef.current) {
+            seriesMarkersRef.current = createSeriesMarkers(candleSeriesRef.current, uniqueMarkers);
+          } else {
+            seriesMarkersRef.current.setMarkers(uniqueMarkers);
+          }
         }
+      } else if (seriesMarkersRef.current) {
+        seriesMarkersRef.current.setMarkers([]);
       }
 
       setZones(calculatedZones);
@@ -586,31 +598,51 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
     fetchKlinesAndComputeZones();
   }, [fetchKlinesAndComputeZones]);
 
-  // Live price ticker (updates the current candle without causing re-renders)
+  // Real-time live candle update (Fetches the official live candle directly from Binance Klines)
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${cleanSymbol}`);
+        const endpoint = `https://api.binance.com/api/v3/klines?symbol=${cleanSymbol}&interval=${timeframe}&limit=1`;
+        const res = await fetch(endpoint);
         if (!res.ok) return;
-        const data = await res.json();
-        const livePrice = parseFloat(data.price);
-        const candle = currentCandleRef.current;
 
-        if (candleSeriesRef.current && candle) {
-          const nowSeconds = (Math.floor(Date.now() / 1000) - ((Date.now() / 1000) % 900)) as UTCTimestamp;
-          candleSeriesRef.current.update({
-            time: nowSeconds,
-            open: candle.open,
-            high: Math.max(candle.high, livePrice),
-            low: Math.min(candle.low, livePrice),
-            close: livePrice,
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          const d = data[0];
+          const liveCandle: KlineData = {
+            time: Math.floor(d[0] / 1000) as UTCTimestamp,
+            open: parseFloat(d[1]),
+            high: parseFloat(d[2]),
+            low: parseFloat(d[3]),
+            close: parseFloat(d[4]),
+            volume: parseFloat(d[5]),
+          };
+
+          if (candleSeriesRef.current) {
+            candleSeriesRef.current.update({
+              time: liveCandle.time,
+              open: liveCandle.open,
+              high: liveCandle.high,
+              low: liveCandle.low,
+              close: liveCandle.close,
+            });
+          }
+
+          const change = ((liveCandle.close - liveCandle.open) / liveCandle.open) * 100;
+          setCurrentCandle({
+            open: liveCandle.open,
+            high: liveCandle.high,
+            low: liveCandle.low,
+            close: liveCandle.close,
+            change: change,
+            volume: liveCandle.volume,
           });
         }
       } catch {}
-    }, 4000);
+    }, 3000);
 
     return () => clearInterval(interval);
-  }, [cleanSymbol]);
+  }, [cleanSymbol, timeframe]);
 
   return (
     <div
@@ -708,16 +740,16 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
             </span>
             <div className="flex items-center gap-2">
               <span className="text-slate-400">
-                O: <span className="text-white">${currentCandle.open.toLocaleString("en-US", { maximumFractionDigits: 2 })}</span>
+                O: <span className="text-white">${currentCandle.open.toLocaleString("en-US", { maximumFractionDigits: currentCandle.open < 1 ? 4 : 2 })}</span>
               </span>
               <span className="text-slate-400">
-                H: <span className="text-white">${currentCandle.high.toLocaleString("en-US", { maximumFractionDigits: 2 })}</span>
+                H: <span className="text-white">${currentCandle.high.toLocaleString("en-US", { maximumFractionDigits: currentCandle.high < 1 ? 4 : 2 })}</span>
               </span>
               <span className="text-slate-400">
-                L: <span className="text-white">${currentCandle.low.toLocaleString("en-US", { maximumFractionDigits: 2 })}</span>
+                L: <span className="text-white">${currentCandle.low.toLocaleString("en-US", { maximumFractionDigits: currentCandle.low < 1 ? 4 : 2 })}</span>
               </span>
               <span className="text-slate-400">
-                C: <span className="text-white font-bold">${currentCandle.close.toLocaleString("en-US", { maximumFractionDigits: 2 })}</span>
+                C: <span className="text-white font-bold">${currentCandle.close.toLocaleString("en-US", { maximumFractionDigits: currentCandle.close < 1 ? 4 : 2 })}</span>
               </span>
             </div>
             <span
@@ -779,7 +811,7 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
                         <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-ping" />
                         <span>🔴 {box.title}</span>
                         <span className="text-[8px] opacity-75 font-mono">
-                          (${box.highPrice.toLocaleString("en-US", { maximumFractionDigits: 1 })})
+                          (${box.highPrice.toLocaleString("en-US", { maximumFractionDigits: box.highPrice < 1 ? 4 : 2 })})
                         </span>
                       </div>
                     </foreignObject>
@@ -810,7 +842,7 @@ export const SmartTradingChart: React.FC<SmartTradingChartProps> = ({
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
                         <span>🟢 {box.title}</span>
                         <span className="text-[8px] opacity-75 font-mono">
-                          (${box.lowPrice.toLocaleString("en-US", { maximumFractionDigits: 1 })})
+                          (${box.lowPrice.toLocaleString("en-US", { maximumFractionDigits: box.lowPrice < 1 ? 4 : 2 })})
                         </span>
                       </div>
                     </foreignObject>
