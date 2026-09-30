@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import {
+  ChevronDown,
   Scan,
   Sparkles,
   Search,
@@ -137,7 +138,20 @@ export function ScannerPage({
   const [showLimitReached, setShowLimitReached] = useState(false);
 
   // Analysis History State
-  const [history, setHistory] = useState<AnalysisHistoryItem[]>([]);
+    const [history, setHistory] = useState<AnalysisHistoryItem[]>([]);
+  const [isCoinDropdownOpen, setIsCoinDropdownOpen] = useState(false);
+  const [coinSearchQuery, setCoinSearchQuery] = useState("");
+  const coinDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (coinDropdownRef.current && !coinDropdownRef.current.contains(event.target as Node)) {
+        setIsCoinDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
   // Set default selected coin
@@ -356,6 +370,14 @@ export function ScannerPage({
 
   // Dynamic calculations
   const currentCoinPrice = selectedCoin?.current_price ?? 0;
+    const filteredDropdownCoins = useMemo(() => {
+    if (!coinSearchQuery.trim()) return cryptos.slice(0, 30);
+    const q = coinSearchQuery.toLowerCase();
+    return cryptos.filter(
+      (c) => c.symbol.toLowerCase().includes(q) || c.name.toLowerCase().includes(q)
+    ).slice(0, 30);
+  }, [cryptos, coinSearchQuery]);
+
   const currentCoinChange = selectedCoin?.price_change_percentage_24h ?? 0;
   const isPositive = currentCoinChange >= 0;
 
@@ -562,254 +584,242 @@ export function ScannerPage({
 
   return (
     <div className="space-y-6 min-h-screen text-slate-100 p-2 sm:p-4">
-      {/* Top Header Banner */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 sm:p-5 rounded-xl bg-[#0f1225] border border-indigo-950/80 shadow-md">
-        <div className="flex items-center gap-3.5">
-          <div className="p-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shadow-sm shrink-0">
-            <BarChart2 className="w-6 h-6 text-indigo-400" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-base sm:text-lg font-black text-white tracking-tight">
-                AI Crypto Scanner 2.0 Pro
-              </h1>
-              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/30">
-                Sóng Elliott, Coinglass & Multi-Indicators
-              </span>
+      {/* Top Header Banner with Integrated Coin Selector & Actions */}
+      <div className="flex flex-col gap-4 p-4 sm:p-5 rounded-2xl bg-[#0f1225] border border-indigo-950/80 shadow-lg">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 text-indigo-400 border border-indigo-500/30 shadow-sm shrink-0">
+              <BarChart2 className="w-6 h-6 text-indigo-400" />
             </div>
-            <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
-              Phân tích kỹ thuật chuyên sâu: SuperTrend, ADX, StochRSI, Bollinger Bands, Ichimoku, MFI, Volume Profile & Fibo Golden Pocket
-            </p>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-lg sm:text-xl font-black text-white tracking-tight">
+                  AI Crypto Scanner 2.0 Pro
+                </h1>
+                <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+                  SMC, Vùng Tích Lũy / Phân Phối & Sóng Elliott
+                </span>
+              </div>
+              <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
+                Nhận diện trực tiếp vùng gom hàng (Demand/Order Block), vùng xả hàng (Supply) và tín hiệu Mua/Bán AI thời gian thực
+              </p>
+            </div>
+          </div>
+
+          {/* User Account / Role Pill Badge & History Button */}
+          <div className="flex items-center gap-2.5 self-start lg:self-center flex-wrap">
+            {user ? (
+              <>
+                {/* Scan Quota Card */}
+                <div className="flex items-center gap-3 bg-[#141830] px-3.5 py-2 rounded-xl border border-indigo-900/50 shadow-sm">
+                  <div className="w-7 h-7 rounded-full bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-xs border border-indigo-500/30">
+                    {role === "ADMIN" ? "👑" : "👤"}
+                  </div>
+                  <div className="text-xs">
+                    <div className="flex items-center gap-1.5 font-bold text-white">
+                      <span>{isUnlimited ? "Không giới hạn" : `Còn ${remainingScans}/${scansLimit} lượt`}</span>
+                      <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-black bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                        {role === "ADMIN" ? "+ ADMIN" : role}
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-slate-400">Đã đăng nhập</div>
+                  </div>
+                </div>
+
+                {/* Personal Analysis History Button beside Quota Card */}
+                <button
+                  onClick={() => {
+                    const el = document.getElementById("analysis-history-section");
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  title="Xem Lịch sử Phân tích cá nhân"
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#141830] hover:bg-[#1a2040] border border-indigo-900/40 text-slate-200 transition cursor-pointer shadow-sm group"
+                >
+                  <div className="p-1 rounded-lg bg-amber-500/10 text-amber-400 group-hover:scale-110 transition-transform">
+                    <History className="w-4 h-4" />
+                  </div>
+                  <div className="text-left hidden sm:block">
+                    <div className="text-[11px] font-bold flex items-center gap-1.5 text-white">
+                      <span>Lịch sử</span>
+                      <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                        {history.length}
+                      </span>
+                    </div>
+                  </div>
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => signInWithGoogle()}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition cursor-pointer"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Đăng nhập Google</span>
+              </button>
+            )}
           </div>
         </div>
 
-        {/* User Account / Role Pill Badge & History Button */}
-        <div className="flex items-center gap-2.5 self-start lg:self-center flex-wrap">
-          {user ? (
-            <>
-              {/* Scan Quota Card */}
-              <div className="flex items-center gap-3 bg-[#141830] px-3.5 py-2 rounded-xl border border-indigo-900/40">
-                <div className="w-7 h-7 rounded-full bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-xs border border-indigo-500/30">
-                  {role === "ADMIN" ? "👑" : "👤"}
-                </div>
-                <div className="text-xs">
-                  <div className="flex items-center gap-1.5 font-bold text-white">
-                    <span>{isUnlimited ? "Không giới hạn" : `Còn ${remainingScans}/${scansLimit} lượt`}</span>
-                    <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-black bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                      {role === "ADMIN" ? "+ ADMIN" : role}
-                    </span>
-                  </div>
-                  <div className="text-[10px] text-slate-400">Đã đăng nhập</div>
-                </div>
-              </div>
-
-              {/* Personal Analysis History Button beside Quota Card */}
+        {/* Compact Coin Selector & Quick Chips Bar */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pt-3 border-t border-indigo-950/80">
+          <div className="flex items-center gap-3 flex-1 flex-wrap">
+            {/* Custom Dropdown Selector */}
+            <div ref={coinDropdownRef} className="relative min-w-[240px] sm:min-w-[280px]">
               <button
-                onClick={() => {
-                  const el = document.getElementById("analysis-history-section");
-                  if (el) el.scrollIntoView({ behavior: "smooth" });
-                }}
-                title="Xem Lịch sử Phân tích cá nhân"
-                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#141830] hover:bg-[#1a2040] border border-indigo-900/40 text-slate-200 transition cursor-pointer shadow-sm group"
+                type="button"
+                onClick={() => setIsCoinDropdownOpen(!isCoinDropdownOpen)}
+                className="w-full flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl bg-[#141830] border border-indigo-900/60 hover:border-indigo-500 text-left transition cursor-pointer shadow-sm"
               >
-                <div className="p-1 rounded-lg bg-amber-500/10 text-amber-400 group-hover:scale-110 transition-transform">
-                  <History className="w-4 h-4" />
-                </div>
-                <div className="text-left hidden sm:block">
-                  <div className="text-[11px] font-bold flex items-center gap-1.5 text-white">
-                    <span>Lịch sử phân tích</span>
-                    <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                      {history.length}
-                    </span>
+                <div className="flex items-center gap-2.5">
+                  {selectedCoin?.image && (
+                    <img
+                      src={selectedCoin.image}
+                      alt={selectedCoin.name}
+                      className="w-6 h-6 rounded-full shrink-0 border border-zinc-700"
+                    />
+                  )}
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-black text-sm text-white">
+                        {selectedCoin?.symbol.toUpperCase() || "CHỌN COIN"}
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-normal">
+                        ({selectedCoin?.name || "Chọn mã coin"})
+                      </span>
+                    </div>
                   </div>
-                  <div className="text-[9px] text-slate-400">Xem lại các lệnh đã quét</div>
                 </div>
-                <div className="sm:hidden flex items-center">
-                  <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                    {history.length}
-                  </span>
+
+                <div className="flex items-center gap-2">
+                  {selectedCoin?.current_price && (
+                    <span className="font-mono font-bold text-xs text-indigo-300">
+                      ${selectedCoin.current_price.toLocaleString("en-US", { maximumFractionDigits: selectedCoin.current_price < 1 ? 4 : 2 })}
+                    </span>
+                  )}
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isCoinDropdownOpen ? "rotate-180" : ""}`} />
                 </div>
               </button>
-            </>
-          ) : (
+
+              {/* Dropdown Menu */}
+              {isCoinDropdownOpen && (
+                <div className="absolute top-full left-0 mt-1.5 w-full sm:w-[340px] max-h-80 rounded-xl bg-[#101428] border border-indigo-900/90 shadow-2xl z-50 overflow-hidden flex flex-col backdrop-blur-xl">
+                  {/* Search inside dropdown */}
+                  <div className="p-2 border-b border-indigo-950 flex items-center gap-2 bg-[#0d1020]">
+                    <Search className="w-4 h-4 text-slate-400 shrink-0 ml-1" />
+                    <input
+                      type="text"
+                      placeholder="Tìm theo tên hoặc mã coin (BTC, ETH...)"
+                      value={coinSearchQuery}
+                      onChange={(e) => setCoinSearchQuery(e.target.value)}
+                      autoFocus
+                      className="w-full bg-transparent text-xs text-white placeholder-slate-500 focus:outline-none py-1"
+                    />
+                  </div>
+
+                  {/* Coin List */}
+                  <div className="overflow-y-auto max-h-64 p-1.5 space-y-1">
+                    {filteredDropdownCoins.map((coin) => {
+                      const isSelected = selectedCoin?.id === coin.id;
+                      const isGain = (coin.price_change_percentage_24h || 0) >= 0;
+                      return (
+                        <div
+                          key={coin.id}
+                          onClick={() => {
+                            setSelectedCoin(coin);
+                            setIsCoinDropdownOpen(false);
+                            setCoinSearchQuery("");
+                          }}
+                          className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-all ${
+                            isSelected
+                              ? "bg-indigo-600/30 border border-indigo-500/50 text-white font-bold"
+                              : "hover:bg-[#181e3d] text-slate-300 border border-transparent"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <img src={coin.image} alt={coin.name} className="w-5 h-5 rounded-full" />
+                            <div>
+                              <span className="text-xs font-bold text-white block leading-tight">
+                                {coin.symbol.toUpperCase()}
+                              </span>
+                              <span className="text-[10px] text-slate-400 block leading-tight">
+                                {coin.name}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="text-right font-mono">
+                            <div className="text-xs font-semibold text-white">
+                              ${coin.current_price?.toLocaleString("en-US", { maximumFractionDigits: coin.current_price < 1 ? 4 : 2 })}
+                            </div>
+                            <div className={`text-[10px] ${isGain ? "text-emerald-400" : "text-rose-400"}`}>
+                              {isGain ? "+" : ""}{(coin.price_change_percentage_24h || 0).toFixed(2)}%
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {filteredDropdownCoins.length === 0 && (
+                      <div className="p-4 text-center text-xs text-slate-400">
+                        Không tìm thấy đồng coin phù hợp
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Quick Coin Select Chips */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-[11px] text-slate-400 font-semibold hidden lg:inline mr-1">Phổ biến:</span>
+              {["BTC", "ETH", "SOL", "BNB", "XRP", "DOGE", "SUI", "PEPE"].map((sym) => {
+                const isSelected = selectedCoin?.symbol.toUpperCase() === sym;
+                const matchCoin = cryptos.find((c) => c.symbol.toUpperCase() === sym);
+                return (
+                  <button
+                    key={sym}
+                    onClick={() => {
+                      if (matchCoin) setSelectedCoin(matchCoin);
+                    }}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                      isSelected
+                        ? "bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-sm border border-indigo-400/40"
+                        : "bg-[#141830] text-slate-400 hover:text-white hover:bg-[#1c2244] border border-indigo-950"
+                    }`}
+                  >
+                    {sym}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Direct CTA Scan Action Button */}
+          <div className="flex items-center gap-2">
             <button
-              onClick={() => signInWithGoogle()}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition cursor-pointer"
+              onClick={() => handleStartScan(selectedCoin)}
+              disabled={!selectedCoin || isScanning}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-900/30 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
             >
-              <LogIn className="w-4 h-4" />
-              <span>Đăng nhập Google để Phân tích</span>
+              {isScanning ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>Đang phân tích {selectedCoin?.symbol.toUpperCase()}...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 text-emerald-200" />
+                  <span>Phân tích {selectedCoin?.symbol.toUpperCase() || "Coin"}</span>
+                </>
+              )}
             </button>
-          )}
+          </div>
         </div>
       </div>
 
-      {/* Main Grid: Left Column (Coins List) & Right Column (Analysis & Engine) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-        {/* ================= LEFT COLUMN: COIN WATCHLIST & SELECTOR (3 Cols) ================= */}
-        <div className="lg:col-span-3 xl:col-span-3 bg-[#0f1225] border border-indigo-950/80 rounded-xl p-4 space-y-3.5 shadow-sm">
-          {/* Search Box */}
-          <div className="relative flex items-center">
-            <Search className="absolute left-3.5 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Tìm mã coin (BTC, ETH, SOL...)"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-9 py-2 bg-[#141830] border border-indigo-900/40 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-            />
-            <SlidersHorizontal className="absolute right-3.5 w-3.5 h-3.5 text-slate-400" />
-          </div>
-
-          {/* Quick Filter Pill Buttons */}
-          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1">
-            <button
-              onClick={() => setActiveFilter("all")}
-              className={`px-3 py-1 rounded-lg text-[11px] font-bold transition whitespace-nowrap cursor-pointer ${
-                activeFilter === "all"
-                  ? "bg-indigo-600 text-white shadow-sm"
-                  : "bg-[#141830] text-slate-400 hover:text-white border border-indigo-900/50"
-              }`}
-            >
-              Tất cả ({cryptos.length})
-            </button>
-            <button
-              onClick={() => setActiveFilter("gainers")}
-              className={`px-3 py-1 rounded-lg text-[11px] font-bold transition whitespace-nowrap cursor-pointer ${
-                activeFilter === "gainers"
-                  ? "bg-emerald-600 text-white shadow-sm"
-                  : "bg-[#141830] text-slate-400 hover:text-white border border-indigo-900/50"
-              }`}
-            >
-              Top Gainer
-            </button>
-            <button
-              onClick={() => setActiveFilter("losers")}
-              className={`px-3 py-1 rounded-lg text-[11px] font-bold transition whitespace-nowrap cursor-pointer ${
-                activeFilter === "losers"
-                  ? "bg-rose-600 text-white shadow-sm"
-                  : "bg-[#141830] text-slate-400 hover:text-white border border-indigo-900/50"
-              }`}
-            >
-              Top Loser
-            </button>
-            <button
-              onClick={() => setActiveFilter("watchlist")}
-              className={`px-3 py-1 rounded-lg text-[11px] font-bold transition whitespace-nowrap cursor-pointer ${
-                activeFilter === "watchlist"
-                  ? "bg-amber-600 text-white shadow-sm"
-                  : "bg-[#141830] text-slate-400 hover:text-white border border-indigo-900/50"
-              }`}
-            >
-              Watchlist +
-            </button>
-          </div>
-
-          {/* Table Header */}
-          <div className="grid grid-cols-12 text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-2 py-1 border-b border-indigo-950/60">
-            <span className="col-span-1">#</span>
-            <span className="col-span-5 flex items-center gap-1">Coin ▾</span>
-            <span className="col-span-3 text-right">Giá (USD)</span>
-            <span className="col-span-3 text-right">24h %</span>
-          </div>
-
-          {/* Coins List Table Body */}
-          <div className="space-y-1 max-h-[580px] overflow-y-auto scrollbar-thin pr-1">
-            {filteredCoins.length === 0 ? (
-              <div className="py-8 text-center text-xs text-slate-500">
-                Không tìm thấy coin phù hợp
-              </div>
-            ) : (
-              filteredCoins.map((coin, index) => {
-                const isSelected = selectedCoin?.id === coin.id;
-                const change = coin.price_change_percentage_24h ?? 0;
-                const isGain = change >= 0;
-                const isStarred = watchlist.includes(coin.symbol.toUpperCase());
-
-                return (
-                  <div
-                    key={coin.id}
-                    onClick={() => setSelectedCoin(coin)}
-                    className={`grid grid-cols-12 items-center px-2 py-2.5 rounded-lg cursor-pointer transition-all ${
-                      isSelected
-                        ? "bg-[#191f42] border border-indigo-500/50 shadow-sm"
-                        : "hover:bg-[#141830]/80 border border-transparent"
-                    }`}
-                  >
-                    <span className="col-span-1 text-[11px] font-mono text-slate-500">
-                      {index + 1}
-                    </span>
-
-                    <div className="col-span-5 flex items-center gap-2">
-                      <img
-                        src={coin.image}
-                        alt={coin.name}
-                        className="w-5 h-5 rounded-full shrink-0"
-                      />
-                      <div className="truncate">
-                        <div className="font-bold text-xs text-white leading-tight">
-                          {coin.symbol.toUpperCase()}
-                        </div>
-                        <div className="text-[10px] text-slate-400 truncate leading-tight">
-                          {coin.name}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="col-span-3 text-right font-mono text-xs font-semibold text-white">
-                      ${coin.current_price?.toLocaleString("en-US", {
-                        maximumFractionDigits: coin.current_price < 1 ? 4 : 2,
-                      })}
-                    </div>
-
-                    <div className="col-span-3 flex items-center justify-end gap-1.5">
-                      <span
-                        className={`font-mono text-xs font-bold ${
-                          isGain ? "text-emerald-400" : "text-rose-400"
-                        }`}
-                      >
-                        {isGain ? `+${change.toFixed(2)}%` : `${change.toFixed(2)}%`}
-                      </span>
-                      <button
-                        onClick={(e) => toggleWatchlist(coin.symbol, e)}
-                        className="text-slate-400 hover:text-amber-400 transition cursor-pointer"
-                      >
-                        <Star
-                          className={`w-3.5 h-3.5 ${
-                            isStarred ? "text-amber-400 fill-amber-400" : ""
-                          }`}
-                        />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-
-          {/* Bottom Summary Bar */}
-          <div className="flex items-center justify-between pt-3 border-t border-indigo-950/80 px-1">
-            <div className="flex items-center gap-2 text-xs">
-              <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-400">
-                <Coins className="w-4 h-4" />
-              </div>
-              <span className="text-slate-400 text-[11px]">Tổng số coin</span>
-              <span className="font-mono font-bold text-white text-xs">
-                {cryptos.length}
-              </span>
-            </div>
-            <button
-              onClick={() => setActiveFilter("watchlist")}
-              className="px-3 py-1 rounded-lg bg-[#141830] hover:bg-[#1a2040] text-indigo-300 text-xs font-semibold border border-indigo-900/50 transition cursor-pointer"
-            >
-              Watchlist ({watchlist.length})
-            </button>
-          </div>
-        </div>
-
-        {/* ================= RIGHT COLUMN: MAIN ANALYSIS ENGINE (9 Cols) ================= */}
-        {/* ================= RIGHT COLUMN: MAIN ANALYSIS ENGINE (8 Cols) ================= */}
-        <div className="lg:col-span-9 xl:col-span-9 space-y-4">
-          {!scanResult && !isScanning ? (
+      {/* Main Analysis Engine (Full Width Layout) */}
+      <div className="w-full space-y-5">
+{!scanResult && !isScanning ? (
             <div className="flex flex-col items-center justify-center py-24 px-4 rounded-xl bg-[#0f1225] border border-indigo-950/80 text-center shadow-md h-full min-h-[600px]">
               <div className="w-20 h-20 rounded-full bg-indigo-500/10 flex items-center justify-center mb-6 border border-indigo-500/20">
                 <Sparkles className="w-10 h-10 text-indigo-400" />
@@ -1654,7 +1664,6 @@ export function ScannerPage({
 
             </div>
           )}
-        </div>
       </div>
 
       {/* ================= VÀNG & NGOẠI TỆ ================= */}
