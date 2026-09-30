@@ -56,6 +56,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { GoldForexList } from "./GoldForexList";
 import { TradingViewWidget } from "@/components/TradingViewWidget";
+import { SmartTradingChart } from "@/components/SmartTradingChart";
 import { useTheme } from "@/context/ThemeContext";
 
 export interface AnalysisHistoryItem {
@@ -126,6 +127,7 @@ export function ScannerPage({
   const [activeFilter, setActiveFilter] = useState<string>("all");
   const [timeframe, setTimeframe] = useState<"short" | "medium" | "long">("medium");
   const [tradingMode, setTradingMode] = useState<"spot" | "future">("future");
+  const [chartMode, setChartMode] = useState<"smart" | "tradingview">("smart");
   const [chartViewMode, setChartViewMode] = useState<"wave" | "tradingview">("wave");
   const [watchlist, setWatchlist] = useState<string[]>(["BTC", "ETH", "SOL"]);
 
@@ -877,11 +879,51 @@ export function ScannerPage({
               <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
                 {/* Left Area: Chart */}
                 <div className="xl:col-span-8 bg-[#0b0e1b] border border-zinc-800 rounded-xl overflow-hidden shadow-md flex flex-col">
-                  <div className="flex items-center gap-2 text-xs font-bold text-white p-3 border-b border-zinc-800">
-                    <Radio className="w-4 h-4 text-indigo-400" /> Sơ đồ AI Phân tích trực tuyến
+                  <div className="flex items-center justify-between gap-2 p-2.5 sm:p-3 border-b border-zinc-800/80 bg-[#0e1222] text-xs font-bold text-white">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-indigo-400 animate-pulse" />
+                      <span>Biểu đồ Phân tích SMC & Vùng Tích Lũy / Phân Phối Live</span>
+                    </div>
+
+                    {/* Chart Mode Toggle */}
+                    <div className="flex items-center bg-zinc-900/90 p-0.5 rounded-lg border border-zinc-800">
+                      <button
+                        onClick={() => setChartMode("smart")}
+                        className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
+                          chartMode === "smart"
+                            ? "bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-sm"
+                            : "text-slate-400 hover:text-white"
+                        }`}
+                      >
+                        ⚡ AI SMC Chart
+                      </button>
+                      <button
+                        onClick={() => setChartMode("tradingview")}
+                        className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
+                          chartMode === "tradingview"
+                            ? "bg-zinc-800 text-white shadow-sm"
+                            : "text-slate-400 hover:text-white"
+                        }`}
+                      >
+                        TradingView Gốc
+                      </button>
+                    </div>
                   </div>
-                  <div className="h-[450px] w-full bg-[#0b0e1b]">
-                    <TradingViewWidget symbol={tradingViewSymbol} theme={theme === "light" ? "light" : "dark"} />
+
+                  <div className="w-full bg-[#090d1a]">
+                    {chartMode === "smart" ? (
+                      <SmartTradingChart
+                        symbol={selectedCoin?.symbol || "BTC"}
+                        theme={theme === "light" ? "light" : "dark"}
+                        scanResult={scanResult}
+                        coinName={selectedCoin?.name}
+                        coinImage={selectedCoin?.image}
+                      />
+                    ) : (
+                      <div className="h-[540px] w-full">
+                        <TradingViewWidget symbol={tradingViewSymbol} theme={theme === "light" ? "light" : "dark"} />
+                      </div>
+                    )}
                   </div>
                 </div>
 
