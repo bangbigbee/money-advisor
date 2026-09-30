@@ -1111,459 +1111,485 @@ const { user, signInWithGoogle, role, remainingScans, scansLimit, useScanQuota, 
               </div>
 
               {/* ================= DUAL-STREAM SWITCHER (SPOT vs FUTURE) ================= */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <button
-                  onClick={() => setTradingMode("spot")}
-                  className={`flex items-center justify-between p-3.5 rounded-xl border transition-all cursor-pointer text-left ${
-                    tradingMode === "spot"
-                      ? "bg-emerald-50 dark:bg-[#131a38] border-emerald-500/50 shadow-md ring-1 ring-emerald-500/30 text-emerald-950 dark:text-white"
-                      : "bg-white dark:bg-[#0f1225] border-slate-200 dark:border-indigo-950/80 hover:bg-slate-50 dark:hover:bg-[#141830] text-slate-600 dark:text-slate-400"
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div
-                      className={`w-3 h-3 rounded-full border-2 ${
+              <div className="mt-8 space-y-0">
+                {/* 1. Elevated Folder Tabs Header */}
+                <div className="flex items-end gap-1.5 sm:gap-3 px-1 sm:px-4 relative z-10 -mb-[1px]">
+                  {/* Tab 1: SPOT */}
+                  <button
+                    type="button"
+                    onClick={() => setTradingMode("spot")}
+                    className={`group relative flex items-center justify-between gap-3 px-4 sm:px-8 py-3.5 sm:py-4 rounded-t-2xl font-bold text-xs sm:text-sm transition-all duration-200 cursor-pointer ${
+                      tradingMode === "spot"
+                        ? "bg-white dark:bg-[#091122] border-t-2 border-l border-r border-t-emerald-500 border-l-emerald-500/40 border-r-emerald-500/40 border-b-transparent text-emerald-950 dark:text-emerald-300 shadow-[-2px_-6px_16px_rgba(16,185,129,0.15)] -translate-y-2 z-20"
+                        : "bg-slate-100 dark:bg-[#070b18] border border-slate-200 dark:border-indigo-950/80 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 translate-y-0 opacity-70 hover:opacity-100"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div
+                        className={`w-3 h-3 rounded-full border-2 transition-all ${
+                          tradingMode === "spot"
+                            ? "border-emerald-500 bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)] scale-110"
+                            : "border-slate-400 dark:border-slate-600 bg-transparent"
+                        }`}
+                      />
+                      <span className="tracking-wide font-black">GIAO DỊCH SPOT</span>
+                    </div>
+                    <span
+                      className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase font-mono ${
                         tradingMode === "spot"
-                          ? "border-emerald-500 bg-emerald-500"
-                          : "border-slate-400 dark:border-slate-500 bg-transparent"
+                          ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
+                          : "bg-slate-200 dark:bg-zinc-800 text-slate-500 dark:text-slate-400"
                       }`}
-                    />
-                    <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
-                      GIAO DỊCH SPOT
+                    >
+                      {spotData.signalLabel || "MUA GOM"}
                     </span>
-                  </div>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40">
-                    {spotData.signalLabel || "MUA GOM"}
-                  </span>
-                </button>
+                  </button>
 
-                <button
-                  onClick={() => setTradingMode("future")}
-                  className={`flex items-center justify-between p-3.5 rounded-xl border transition-all cursor-pointer text-left ${
-                    tradingMode === "future"
-                      ? "bg-cyan-50 dark:bg-[#131a38] border-cyan-500/50 shadow-md ring-1 ring-cyan-500/30 text-cyan-950 dark:text-white"
-                      : "bg-white dark:bg-[#0f1225] border-slate-200 dark:border-indigo-950/80 hover:bg-slate-50 dark:hover:bg-[#141830] text-slate-600 dark:text-slate-400"
+                  {/* Tab 2: FUTURE */}
+                  <button
+                    type="button"
+                    onClick={() => setTradingMode("future")}
+                    className={`group relative flex items-center justify-between gap-3 px-4 sm:px-8 py-3.5 sm:py-4 rounded-t-2xl font-bold text-xs sm:text-sm transition-all duration-200 cursor-pointer ${
+                      tradingMode === "future"
+                        ? "bg-white dark:bg-[#091326] border-t-2 border-l border-r border-t-cyan-500 border-l-cyan-500/40 border-r-cyan-500/40 border-b-transparent text-cyan-950 dark:text-cyan-300 shadow-[2px_-6px_16px_rgba(6,182,212,0.15)] -translate-y-2 z-20"
+                        : "bg-slate-100 dark:bg-[#070b18] border border-slate-200 dark:border-indigo-950/80 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 translate-y-0 opacity-70 hover:opacity-100"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div
+                        className={`w-3 h-3 rounded-full border-2 transition-all ${
+                          tradingMode === "future"
+                            ? "border-cyan-500 bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.8)] scale-110"
+                            : "border-slate-400 dark:border-slate-600 bg-transparent"
+                        }`}
+                      />
+                      <span className="tracking-wide font-black">GIAO DỊCH FUTURE</span>
+                    </div>
+                    <span
+                      className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase font-mono ${
+                        tradingMode === "future"
+                          ? "bg-cyan-500/15 text-cyan-600 dark:text-cyan-300 border border-cyan-500/30"
+                          : "bg-slate-200 dark:bg-zinc-800 text-slate-500 dark:text-slate-400"
+                      }`}
+                    >
+                      {futureData.positionLabel || "LONG"}
+                    </span>
+                  </button>
+                </div>
+
+                {/* 2. Unified Connected Content Container */}
+                <div
+                  className={`p-4 sm:p-6 rounded-2xl border shadow-xl relative z-0 transition-all duration-200 ${
+                    tradingMode === "spot"
+                      ? "bg-white dark:bg-[#091122] border-emerald-500/40 shadow-emerald-950/20"
+                      : "bg-white dark:bg-[#091326] border-cyan-500/40 shadow-cyan-950/20"
                   }`}
                 >
-                  <div className="flex items-center gap-2.5">
-                    <div
-                      className={`w-3 h-3 rounded-full border-2 ${
-                        tradingMode === "future"
-                          ? "border-cyan-500 bg-cyan-500"
-                          : "border-slate-400 dark:border-slate-500 bg-transparent"
-                      }`}
-                    />
-                    <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
-                      GIAO DỊCH FUTURE
-                    </span>
-                  </div>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase font-mono bg-cyan-500/10 text-cyan-600 dark:text-cyan-300 border border-cyan-500/40">
-                    {futureData.positionLabel || "LONG"}
-                  </span>
-                </button>
+                  {tradingMode === "future" ? (
+                    /* ==================== FUTURE / MARGIN STREAM VIEW ==================== */
+                    <div className="space-y-4 sm:space-y-5">
+                      <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-cyan-300 px-1 pt-1">
+                        <Target className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                        <span className="uppercase tracking-wider">TỔNG QUAN PHÂN TÍCH PHÁI SINH</span>
+                      </div>
+
+                      {/* 3 KPI Cards */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0e1c38] border border-slate-200/80 dark:border-cyan-900/40 space-y-2 shadow-sm">
+                          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-medium">
+                            <Flame className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+                            <span>Tỷ lệ Thắng (Winrate Futures)</span>
+                          </div>
+                          <div className="text-2xl sm:text-3xl font-black text-cyan-600 dark:text-cyan-400 font-mono">
+                            {futureData.winRatePercent}%
+                          </div>
+                          <div className="w-full h-1.5 bg-slate-200 dark:bg-[#15274d] rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-cyan-400 to-emerald-400 rounded-full"
+                              style={{ width: `${futureData.winRatePercent}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0e1c38] border border-slate-200/80 dark:border-cyan-900/40 space-y-1 shadow-sm">
+                          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-medium">
+                            <Shield className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+                            <span>Mức Rủi Ro Vốn (Risk per Trade)</span>
+                          </div>
+                          <div className="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400 font-mono">
+                            {futureData.capitalRiskPercent}
+                          </div>
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                            Giới hạn tối đa không cháy tài khoản
+                          </div>
+                        </div>
+
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0e1c38] border border-slate-200/80 dark:border-cyan-900/40 space-y-1 shadow-sm">
+                          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-medium">
+                            <Scale className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+                            <span>Tỷ lệ Risk / Reward (R:R)</span>
+                          </div>
+                          <div className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
+                            {futureData.riskRewardRatio}
+                          </div>
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                            Tỷ lệ kỳ vọng lợi nhuận trên vốn
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 4 Execution Strategy Cards */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0e1c38] border border-slate-200/80 dark:border-cyan-900/40 space-y-1 shadow-sm">
+                          <div className="flex items-center gap-1.5 text-xs text-cyan-600 dark:text-cyan-400 font-bold">
+                            <Target className="w-3.5 h-3.5" />
+                            <span>VÙNG ENTRY LỆNH</span>
+                          </div>
+                          <div className="text-sm sm:text-base font-black text-slate-900 dark:text-white font-mono pt-1">
+                            {futureData.entryZone?.includes("-") || futureData.entryZone?.includes("–")
+                              ? futureData.entryZone
+                              : `$${(currentCoinPrice * 0.985).toLocaleString("en-US", { maximumFractionDigits: currentCoinPrice < 1 ? 4 : 2 })} - $${currentCoinPrice.toLocaleString("en-US", { maximumFractionDigits: currentCoinPrice < 1 ? 4 : 2 })}`}
+                          </div>
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400">Vào lệnh có kỷ luật</div>
+                        </div>
+
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0e1c38] border border-slate-200/80 dark:border-cyan-900/40 space-y-1 shadow-sm">
+                          <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold">
+                            <TrendingUp className="w-3.5 h-3.5" />
+                            <span>CHỐT LỜI TP1</span>
+                          </div>
+                          <div className="text-sm sm:text-base font-black text-emerald-600 dark:text-emerald-400 font-mono pt-1">
+                            {futureData.targetPrice1}
+                          </div>
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400">Đạt L1 về hòa vốn</div>
+                        </div>
+
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0e1c38] border border-slate-200/80 dark:border-cyan-900/40 space-y-1 shadow-sm">
+                          <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold">
+                            <Crown className="w-3.5 h-3.5" />
+                            <span>CHỐT LỜI TP2 / TP3</span>
+                          </div>
+                          <div className="text-sm sm:text-base font-black text-emerald-600 dark:text-emerald-300 font-mono pt-1">
+                            {futureData.targetPrice2}
+                          </div>
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+                            {futureData.targetPrice3}
+                          </div>
+                        </div>
+
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0e1c38] border border-rose-200 dark:border-rose-950/60 space-y-1 shadow-sm">
+                          <div className="flex items-center gap-1.5 text-xs text-rose-600 dark:text-rose-400 font-bold">
+                            <ShieldAlert className="w-3.5 h-3.5" />
+                            <span>STOP LOSS / LIQ PRICE</span>
+                          </div>
+                          <div className="text-sm sm:text-base font-black text-rose-600 dark:text-rose-400 font-mono pt-1">
+                            {futureData.stopLoss}
+                          </div>
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+                            Giá thanh lý: {futureData.estLiquidationPrice}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 2 Wide Technical Modules */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0e1c38] border border-slate-200/80 dark:border-cyan-900/40 space-y-3 shadow-sm">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
+                              <BarChart2 className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                              <span>Tỷ lệ Long / Short Ratio</span>
+                            </div>
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                              {futureData.metrics.longShortRatio.sentiment || "Bullish"}
+                            </span>
+                          </div>
+
+                          <div className="space-y-1">
+                            <div className="flex justify-between text-xs font-mono font-bold">
+                              <span className="text-emerald-600 dark:text-emerald-400">
+                                LONG: {futureData.metrics.longShortRatio.longPercent}%
+                              </span>
+                              <span className="text-rose-600 dark:text-rose-400">
+                                SHORT: {futureData.metrics.longShortRatio.shortPercent}%
+                              </span>
+                            </div>
+                            <div className="h-2 w-full flex rounded-full overflow-hidden bg-slate-200 dark:bg-[#15274d]">
+                              <div
+                                className="h-full bg-emerald-500"
+                                style={{ width: `${futureData.metrics.longShortRatio.longPercent}%` }}
+                              />
+                              <div
+                                className="h-full bg-rose-500"
+                                style={{ width: `${futureData.metrics.longShortRatio.shortPercent}%` }}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between p-2.5 rounded-lg bg-white dark:bg-[#132448] border border-slate-200/80 dark:border-indigo-950/60 text-xs">
+                            <div className="flex items-center gap-2">
+                              <Droplets className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
+                              <span className="text-slate-500 dark:text-slate-400">Funding Rate:</span>
+                            </div>
+                            <div className="flex items-center gap-2 font-mono">
+                              <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                                {futureData.metrics.fundingRate.rate}
+                              </span>
+                              <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                                ({futureData.metrics.fundingRate.status})
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0e1c38] border border-slate-200/80 dark:border-cyan-900/40 space-y-3 shadow-sm">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
+                              <Layers className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+                              <span>Bản đồ Cụm Thanh Lý</span>
+                            </div>
+                            <span className="text-[11px] text-slate-500 dark:text-slate-400">OI: {futureData.metrics.openInterest}</span>
+                          </div>
+
+                          <div className="p-2.5 rounded-lg bg-rose-50 dark:bg-[#1a1b32] border border-rose-200 dark:border-rose-950/40 space-y-1">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-rose-600 dark:text-rose-300 text-[11px] font-semibold">Thanh Lý Short</span>
+                              <span className="font-mono font-bold text-rose-600 dark:text-rose-400">
+                                {futureData.metrics.liquidationHeatmap.shortLiquidationPool}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-[#10242b] border border-emerald-200 dark:border-emerald-950/40 space-y-1">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-emerald-600 dark:text-emerald-300 text-[11px] font-semibold">Thanh Lý Long</span>
+                              <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                                {futureData.metrics.liquidationHeatmap.longLiquidationPool}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Final Verdict Banner (Futures) */}
+                      <div className="p-4 sm:p-5 rounded-xl bg-emerald-50 dark:bg-[#0c2221] border border-emerald-300 dark:border-emerald-500/40 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex items-start gap-3">
+                          <div className="p-2.5 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shrink-0 mt-0.5">
+                            <Zap className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <div className="text-[10px] uppercase font-bold tracking-wider text-emerald-700 dark:text-emerald-400 font-mono">
+                              KẾT LUẬN HIỆN TẠI (FUTURES & MARGIN)
+                            </div>
+                            <h3 className="text-base font-bold text-slate-900 dark:text-white mt-0.5">
+                              Khuyến Nghị Vị Thế Phái Sinh
+                            </h3>
+                            <p className="text-xs text-slate-700 dark:text-slate-300 mt-1 max-w-2xl leading-relaxed font-medium">
+                              {futureData?.finalVerdict?.summaryText || "Đang cập nhật nhận định vị thế phái sinh chuyên sâu..."}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="shrink-0 self-start sm:self-center">
+                          <button className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-600 text-white font-black text-xs sm:text-sm shadow-md tracking-wider uppercase cursor-default">
+                            <TrendingUp className="w-4 h-4" />
+                            <span>{futureData?.finalVerdict?.action || futureData?.positionLabel || "LONG"}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    /* ==================== SPOT TRADING STREAM VIEW ==================== */
+                    <div className="space-y-4 sm:space-y-5">
+                      <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-emerald-300 px-1 pt-1">
+                        <Target className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                        <span className="uppercase tracking-wider">TỔNG QUAN PHÂN TÍCH SPOT (NẮM GIỮ DÀI HẠN)</span>
+                      </div>
+
+                      {/* 3 KPI Cards */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0e1a2f] border border-slate-200/80 dark:border-emerald-900/40 space-y-2 shadow-sm">
+                          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-medium">
+                            <Gauge className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+                            <span>Chỉ số Winrate Spot Kỳ Vọng</span>
+                          </div>
+                          <div className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
+                            {spotData.winRatePercent}%
+                          </div>
+                          <div className="w-full h-1.5 bg-slate-200 dark:bg-[#142642] rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-emerald-400 to-teal-300 rounded-full"
+                              style={{ width: `${spotData.winRatePercent}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0e1a2f] border border-slate-200/80 dark:border-emerald-900/40 space-y-1 shadow-sm">
+                          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-medium">
+                            <TrendingUp className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                            <span>Xu Hướng Chính (Trend)</span>
+                          </div>
+                          <div className="text-base sm:text-lg font-black text-cyan-700 dark:text-cyan-300 pt-1">
+                            {spotData.trend}
+                          </div>
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                            {spotData.indicators.emaTrend}
+                          </div>
+                        </div>
+
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0e1a2f] border border-slate-200/80 dark:border-emerald-900/40 space-y-1 shadow-sm">
+                          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-medium">
+                            <Scale className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+                            <span>Tỷ lệ Risk / Reward (R:R)</span>
+                          </div>
+                          <div className="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400 font-mono">
+                            {spotData.riskRewardRatio}
+                          </div>
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                            Được tính toán theo phân bổ DCA
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 4 Spot Execution Strategy Cards */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0e1a2f] border border-slate-200/80 dark:border-emerald-900/40 space-y-1 shadow-sm">
+                          <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold">
+                            <Target className="w-3.5 h-3.5" />
+                            <span>VÙNG MUA GOM (BUY)</span>
+                          </div>
+                          <div className="text-sm sm:text-base font-black text-slate-900 dark:text-white font-mono pt-1">
+                            {spotData.entryZone?.includes("-") || spotData.entryZone?.includes("–")
+                              ? spotData.entryZone
+                              : `$${(currentCoinPrice * 0.97).toLocaleString("en-US", { maximumFractionDigits: currentCoinPrice < 1 ? 4 : 2 })} - $${(currentCoinPrice * 0.99).toLocaleString("en-US", { maximumFractionDigits: currentCoinPrice < 1 ? 4 : 2 })}`}
+                          </div>
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400">Chia vốn mua 3 đợt</div>
+                        </div>
+
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0e1a2f] border border-slate-200/80 dark:border-emerald-900/40 space-y-1 shadow-sm">
+                          <div className="flex items-center gap-1.5 text-xs text-cyan-600 dark:text-cyan-400 font-bold">
+                            <TrendingUp className="w-3.5 h-3.5" />
+                            <span>CHỐT LỜI TP1</span>
+                          </div>
+                          <div className="text-sm sm:text-base font-black text-cyan-600 dark:text-cyan-400 font-mono pt-1">
+                            {spotData.targetPrice1}
+                          </div>
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400">Chốt 30-40% gốc</div>
+                        </div>
+
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0e1a2f] border border-slate-200/80 dark:border-emerald-900/40 space-y-1 shadow-sm">
+                          <div className="flex items-center gap-1.5 text-xs text-cyan-600 dark:text-cyan-300 font-bold">
+                            <Crown className="w-3.5 h-3.5" />
+                            <span>CHỐT LỜI TP2 / TP3</span>
+                          </div>
+                          <div className="text-sm sm:text-base font-black text-cyan-700 dark:text-cyan-300 font-mono pt-1">
+                            {spotData.targetPrice2}
+                          </div>
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+                            {spotData.targetPrice3}
+                          </div>
+                        </div>
+
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0e1a2f] border border-rose-200 dark:border-rose-950/60 space-y-1 shadow-sm">
+                          <div className="flex items-center gap-1.5 text-xs text-rose-600 dark:text-rose-400 font-bold">
+                            <ShieldAlert className="w-3.5 h-3.5" />
+                            <span>CẮT LỖ AN TOÀN (SL)</span>
+                          </div>
+                          <div className="text-sm sm:text-base font-black text-rose-600 dark:text-rose-400 font-mono pt-1">
+                            {spotData.stopLoss}
+                          </div>
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400">Bảo toàn vốn danh mục</div>
+                        </div>
+                      </div>
+
+                      {/* 2 Spot Technical Modules */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0e1a2f] border border-slate-200/80 dark:border-emerald-900/40 space-y-3 shadow-sm">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
+                              <BarChart2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                              <span>Vùng Thanh Khoản & Order Block</span>
+                            </div>
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30">
+                              RSI: {spotData.indicators.rsi.value}
+                            </span>
+                          </div>
+
+                          <div className="space-y-2">
+                            <div className="p-2.5 rounded-lg bg-white dark:bg-[#132440] border border-emerald-200 dark:border-emerald-950/40">
+                              <div className="text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold">Vùng Cầu Mua:</div>
+                              <div className="text-xs font-mono font-bold text-slate-900 dark:text-white mt-0.5">
+                                {spotData.liquidity.highLiquidityZone}
+                              </div>
+                            </div>
+
+                            <div className="p-2.5 rounded-lg bg-white dark:bg-[#132440] border border-rose-200 dark:border-rose-950/40">
+                              <div className="text-[11px] text-rose-700 dark:text-rose-400 font-semibold">Vùng Cung Bán:</div>
+                              <div className="text-xs font-mono font-bold text-slate-900 dark:text-white mt-0.5">
+                                {spotData.liquidity.supplyZone}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0e1a2f] border border-slate-200/80 dark:border-emerald-900/40 space-y-3 shadow-sm">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
+                              <Layers className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                              <span>Hỗ Trợ & Kháng Cự</span>
+                            </div>
+                            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-mono font-bold">
+                              {spotData.indicators.volumeProfile}
+                            </span>
+                          </div>
+
+                          <div className="space-y-2">
+                            <div className="flex justify-between p-2.5 rounded-lg bg-white dark:bg-[#132440] border border-slate-200/80 dark:border-indigo-950/60 text-xs">
+                              <span className="text-slate-500 dark:text-slate-400">Hỗ trợ quan trọng:</span>
+                              <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                                {spotData.indicators.supportResistance.support}
+                              </span>
+                            </div>
+
+                            <div className="flex justify-between p-2.5 rounded-lg bg-white dark:bg-[#132440] border border-slate-200/80 dark:border-indigo-950/60 text-xs">
+                              <span className="text-slate-500 dark:text-slate-400">Kháng cự then chốt:</span>
+                              <span className="font-mono font-bold text-rose-600 dark:text-rose-400">
+                                {spotData.indicators.supportResistance.resistance}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Final Verdict Banner (Spot) */}
+                      <div className="p-4 sm:p-5 rounded-xl bg-emerald-50 dark:bg-[#0c2221] border border-emerald-300 dark:border-emerald-500/40 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex items-start gap-3">
+                          <div className="p-2.5 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shrink-0 mt-0.5">
+                            <Zap className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <div className="text-[10px] uppercase font-bold tracking-wider text-emerald-700 dark:text-emerald-400 font-mono">
+                              KẾT LUẬN HIỆN TẠI (SPOT TRADING)
+                            </div>
+                            <h3 className="text-base font-bold text-slate-900 dark:text-white mt-0.5">
+                              Khuyến Nghị Tích Lũy Spot
+                            </h3>
+                            <p className="text-xs text-slate-700 dark:text-slate-300 mt-1 max-w-2xl leading-relaxed font-medium">
+                              {spotData?.finalVerdict?.summaryText || "Đang cập nhật nhận định tích lũy Spot chuyên sâu..."}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="shrink-0 self-start sm:self-center">
+                          <button className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-600 text-white font-black text-xs sm:text-sm shadow-md tracking-wider uppercase cursor-default">
+                            <TrendingUp className="w-4 h-4" />
+                            <span>{spotData?.finalVerdict?.action || spotData?.signalLabel || "NÊN MUA"}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-
-              {/* ================= DETAILED STREAM VIEW ================= */}
-              {tradingMode === "future" ? (
-                /* ==================== FUTURE / MARGIN STREAM VIEW ==================== */
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 px-1 pt-1">
-                    <Target className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
-                    <span className="uppercase tracking-wider">TỔNG QUAN PHÂN TÍCH PHÁI SINH</span>
-                  </div>
-
-                  {/* 3 KPI Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-2 shadow-sm">
-                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
-                        <Flame className="w-4 h-4 text-amber-500 dark:text-amber-400" />
-                        <span>Tỷ lệ Thắng (Winrate Futures)</span>
-                      </div>
-                      <div className="text-2xl font-black text-cyan-600 dark:text-cyan-400 font-mono">
-                        {futureData.winRatePercent}%
-                      </div>
-                      <div className="w-full h-1.5 bg-slate-100 dark:bg-[#141830] rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-cyan-400 to-emerald-400 rounded-full"
-                          style={{ width: `${futureData.winRatePercent}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-1 shadow-sm">
-                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
-                        <Shield className="w-4 h-4 text-amber-500 dark:text-amber-400" />
-                        <span>Mức Rủi Ro Vốn (Risk per Trade)</span>
-                      </div>
-                      <div className="text-2xl font-black text-amber-600 dark:text-amber-400 font-mono">
-                        {futureData.capitalRiskPercent}
-                      </div>
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                        Giới hạn tối đa không cháy tài khoản
-                      </div>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-1 shadow-sm">
-                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
-                        <Scale className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-                        <span>Tỷ lệ Risk / Reward (R:R)</span>
-                      </div>
-                      <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
-                        {futureData.riskRewardRatio}
-                      </div>
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                        Tỷ lệ kỳ vọng lợi nhuận trên vốn
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 4 Execution Strategy Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-1 shadow-sm">
-                      <div className="flex items-center gap-1.5 text-xs text-cyan-600 dark:text-cyan-400 font-bold">
-                        <Target className="w-3.5 h-3.5" />
-                        <span>VÙNG ENTRY LỆNH</span>
-                      </div>
-                      <div className="text-base font-black text-slate-900 dark:text-white font-mono pt-1">
-                        {futureData.entryZone}
-                      </div>
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400">Vào lệnh có kỷ luật</div>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-1 shadow-sm">
-                      <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold">
-                        <TrendingUp className="w-3.5 h-3.5" />
-                        <span>CHỐT LỜI TP1</span>
-                      </div>
-                      <div className="text-base font-black text-emerald-600 dark:text-emerald-400 font-mono pt-1">
-                        {futureData.targetPrice1}
-                      </div>
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400">Đạt L1 về hòa vốn</div>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-1 shadow-sm">
-                      <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold">
-                        <Crown className="w-3.5 h-3.5" />
-                        <span>CHỐT LỜI TP2 / TP3</span>
-                      </div>
-                      <div className="text-base font-black text-emerald-600 dark:text-emerald-300 font-mono pt-1">
-                        {futureData.targetPrice2}
-                      </div>
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
-                        {futureData.targetPrice3}
-                      </div>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-rose-200 dark:border-rose-950/60 space-y-1 shadow-sm">
-                      <div className="flex items-center gap-1.5 text-xs text-rose-600 dark:text-rose-400 font-bold">
-                        <ShieldAlert className="w-3.5 h-3.5" />
-                        <span>STOP LOSS / LIQ PRICE</span>
-                      </div>
-                      <div className="text-base font-black text-rose-600 dark:text-rose-400 font-mono pt-1">
-                        {futureData.stopLoss}
-                      </div>
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
-                        Giá thanh lý: {futureData.estLiquidationPrice}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 2 Wide Technical Modules */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-3 shadow-sm">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
-                          <BarChart2 className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
-                          <span>Tỷ lệ Long / Short Ratio</span>
-                        </div>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
-                          {futureData.metrics.longShortRatio.sentiment || "Bullish"}
-                        </span>
-                      </div>
-
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs font-mono font-bold">
-                          <span className="text-emerald-600 dark:text-emerald-400">
-                            LONG: {futureData.metrics.longShortRatio.longPercent}%
-                          </span>
-                          <span className="text-rose-600 dark:text-rose-400">
-                            SHORT: {futureData.metrics.longShortRatio.shortPercent}%
-                          </span>
-                        </div>
-                        <div className="h-2 w-full flex rounded-full overflow-hidden bg-slate-100 dark:bg-[#141830]">
-                          <div
-                            className="h-full bg-emerald-500"
-                            style={{ width: `${futureData.metrics.longShortRatio.longPercent}%` }}
-                          />
-                          <div
-                            className="h-full bg-rose-500"
-                            style={{ width: `${futureData.metrics.longShortRatio.shortPercent}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 dark:bg-[#141830] border border-slate-200 dark:border-indigo-950/60 text-xs">
-                        <div className="flex items-center gap-2">
-                          <Droplets className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
-                          <span className="text-slate-500 dark:text-slate-400">Funding Rate:</span>
-                        </div>
-                        <div className="flex items-center gap-2 font-mono">
-                          <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                            {futureData.metrics.fundingRate.rate}
-                          </span>
-                          <span className="text-[10px] text-slate-500 dark:text-slate-400">
-                            ({futureData.metrics.fundingRate.status})
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-3 shadow-sm">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
-                          <Layers className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
-                          <span>Bản đồ Cụm Thanh Lý</span>
-                        </div>
-                        <span className="text-[11px] text-slate-500 dark:text-slate-400">OI: {futureData.metrics.openInterest}</span>
-                      </div>
-
-                      <div className="p-2.5 rounded-lg bg-rose-50 dark:bg-[#141830] border border-rose-200 dark:border-rose-950/40 space-y-1">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-rose-600 dark:text-rose-300 text-[11px] font-semibold">Thanh Lý Short</span>
-                          <span className="font-mono font-bold text-rose-600 dark:text-rose-400">
-                            {futureData.metrics.liquidationHeatmap.shortLiquidationPool}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-[#141830] border border-emerald-200 dark:border-emerald-950/40 space-y-1">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-emerald-600 dark:text-emerald-300 text-[11px] font-semibold">Thanh Lý Long</span>
-                          <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                            {futureData.metrics.liquidationHeatmap.longLiquidationPool}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Final Verdict Banner (Futures) */}
-                  <div className="p-4 sm:p-5 rounded-xl bg-emerald-50 dark:bg-[#0c2221] border border-emerald-300 dark:border-emerald-500/40 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex items-start gap-3">
-                      <div className="p-2.5 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shrink-0 mt-0.5">
-                        <Zap className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <div className="text-[10px] uppercase font-bold tracking-wider text-emerald-700 dark:text-emerald-400 font-mono">
-                          KẾT LUẬN HIỆN TẠI (FUTURES & MARGIN)
-                        </div>
-                        <h3 className="text-base font-bold text-slate-900 dark:text-white mt-0.5">
-                          Khuyến Nghị Vị Thế Phái Sinh
-                        </h3>
-                        <p className="text-xs text-slate-700 dark:text-slate-300 mt-1 max-w-2xl leading-relaxed">
-                          {futureData?.finalVerdict?.summaryText || "Đang cập nhật nhận định vị thế phái sinh chuyên sâu..."}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="shrink-0 self-start sm:self-center">
-                      <button className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-600 text-white font-black text-xs sm:text-sm shadow-md tracking-wider uppercase cursor-default">
-                        <TrendingUp className="w-4 h-4" />
-                        <span>{futureData?.finalVerdict?.action || futureData?.positionLabel || "LONG"}</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                /* ==================== SPOT TRADING STREAM VIEW ==================== */
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 px-1 pt-1">
-                    <Target className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                    <span className="uppercase tracking-wider">TỔNG QUAN PHÂN TÍCH SPOT (NẮM GIỮ DÀI HẠN)</span>
-                  </div>
-
-                  {/* 3 KPI Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-2 shadow-sm">
-                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
-                        <Gauge className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-                        <span>Chỉ số Winrate Spot Kỳ Vọng</span>
-                      </div>
-                      <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
-                        {spotData.winRatePercent}%
-                      </div>
-                      <div className="w-full h-1.5 bg-slate-100 dark:bg-[#141830] rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-emerald-400 to-teal-300 rounded-full"
-                          style={{ width: `${spotData.winRatePercent}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-1 shadow-sm">
-                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
-                        <TrendingUp className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
-                        <span>Xu Hướng Chính (Trend)</span>
-                      </div>
-                      <div className="text-base font-black text-cyan-700 dark:text-cyan-300 pt-1">
-                        {spotData.trend}
-                      </div>
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                        {spotData.indicators.emaTrend}
-                      </div>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-1 shadow-sm">
-                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
-                        <Scale className="w-4 h-4 text-amber-500 dark:text-amber-400" />
-                        <span>Tỷ lệ Risk / Reward (R:R)</span>
-                      </div>
-                      <div className="text-2xl font-black text-amber-600 dark:text-amber-400 font-mono">
-                        {spotData.riskRewardRatio}
-                      </div>
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                        Được tính toán theo phân bổ DCA
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 4 Spot Execution Strategy Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-1 shadow-sm">
-                      <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold">
-                        <Target className="w-3.5 h-3.5" />
-                        <span>VÙNG MUA GOM (BUY)</span>
-                      </div>
-                      <div className="text-base font-black text-slate-900 dark:text-white font-mono pt-1">
-                        {spotData.entryZone}
-                      </div>
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400">Chia vốn mua 3 đợt</div>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-1 shadow-sm">
-                      <div className="flex items-center gap-1.5 text-xs text-cyan-600 dark:text-cyan-400 font-bold">
-                        <TrendingUp className="w-3.5 h-3.5" />
-                        <span>CHỐT LỜI TP1</span>
-                      </div>
-                      <div className="text-base font-black text-cyan-600 dark:text-cyan-400 font-mono pt-1">
-                        {spotData.targetPrice1}
-                      </div>
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400">Chốt 30-40% gốc</div>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-1 shadow-sm">
-                      <div className="flex items-center gap-1.5 text-xs text-cyan-600 dark:text-cyan-300 font-bold">
-                        <Crown className="w-3.5 h-3.5" />
-                        <span>CHỐT LỜI TP2 / TP3</span>
-                      </div>
-                      <div className="text-base font-black text-cyan-700 dark:text-cyan-300 font-mono pt-1">
-                        {spotData.targetPrice2}
-                      </div>
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
-                        {spotData.targetPrice3}
-                      </div>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-rose-200 dark:border-rose-950/60 space-y-1 shadow-sm">
-                      <div className="flex items-center gap-1.5 text-xs text-rose-600 dark:text-rose-400 font-bold">
-                        <ShieldAlert className="w-3.5 h-3.5" />
-                        <span>CẮT LỖ AN TOÀN (SL)</span>
-                      </div>
-                      <div className="text-base font-black text-rose-600 dark:text-rose-400 font-mono pt-1">
-                        {spotData.stopLoss}
-                      </div>
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400">Bảo toàn vốn danh mục</div>
-                    </div>
-                  </div>
-
-                  {/* 2 Spot Technical Modules */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-3 shadow-sm">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
-                          <BarChart2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                          <span>Vùng Thanh Khoản & Order Block</span>
-                        </div>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30">
-                          RSI: {spotData.indicators.rsi.value}
-                        </span>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-[#141830] border border-emerald-200 dark:border-emerald-950/40">
-                          <div className="text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold">Vùng Cầu Mua:</div>
-                          <div className="text-xs font-mono font-bold text-slate-900 dark:text-white mt-0.5">
-                            {spotData.liquidity.highLiquidityZone}
-                          </div>
-                        </div>
-
-                        <div className="p-2.5 rounded-lg bg-rose-50 dark:bg-[#141830] border border-rose-200 dark:border-rose-950/40">
-                          <div className="text-[11px] text-rose-700 dark:text-rose-400 font-semibold">Vùng Cung Bán:</div>
-                          <div className="text-xs font-mono font-bold text-slate-900 dark:text-white mt-0.5">
-                            {spotData.liquidity.supplyZone}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-white dark:bg-[#0f1225] border border-slate-200 dark:border-indigo-950/80 space-y-3 shadow-sm">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
-                          <Layers className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
-                          <span>Hỗ Trợ & Kháng Cự</span>
-                        </div>
-                        <span className="text-xs text-emerald-600 dark:text-emerald-400 font-mono font-bold">
-                          {spotData.indicators.volumeProfile}
-                        </span>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex justify-between p-2.5 rounded-lg bg-slate-50 dark:bg-[#141830] border border-slate-200 dark:border-indigo-950/60 text-xs">
-                          <span className="text-slate-500 dark:text-slate-400">Hỗ trợ quan trọng:</span>
-                          <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                            {spotData.indicators.supportResistance.support}
-                          </span>
-                        </div>
-
-                        <div className="flex justify-between p-2.5 rounded-lg bg-slate-50 dark:bg-[#141830] border border-slate-200 dark:border-indigo-950/60 text-xs">
-                          <span className="text-slate-500 dark:text-slate-400">Kháng cự then chốt:</span>
-                          <span className="font-mono font-bold text-rose-600 dark:text-rose-400">
-                            {spotData.indicators.supportResistance.resistance}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Final Verdict Banner (Spot) */}
-                  <div className="p-4 sm:p-5 rounded-xl bg-emerald-50 dark:bg-[#0c2221] border border-emerald-300 dark:border-emerald-500/40 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex items-start gap-3">
-                      <div className="p-2.5 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shrink-0 mt-0.5">
-                        <Zap className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <div className="text-[10px] uppercase font-bold tracking-wider text-emerald-700 dark:text-emerald-400 font-mono">
-                          KẾT LUẬN HIỆN TẠI (SPOT TRADING)
-                        </div>
-                        <h3 className="text-base font-bold text-slate-900 dark:text-white mt-0.5">
-                          Khuyến Nghị Tích Lũy Spot
-                        </h3>
-                        <p className="text-xs text-slate-700 dark:text-slate-300 mt-1 max-w-2xl leading-relaxed">
-                          {spotData?.finalVerdict?.summaryText || "Đang cập nhật nhận định tích lũy Spot chuyên sâu..."}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="shrink-0 self-start sm:self-center">
-                      <button className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-600 text-white font-black text-xs sm:text-sm shadow-md tracking-wider uppercase cursor-default">
-                        <TrendingUp className="w-4 h-4" />
-                        <span>{spotData?.finalVerdict?.action || spotData?.signalLabel || "NÊN MUA"}</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
             </div>
           )}
       </div>
