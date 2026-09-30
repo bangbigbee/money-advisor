@@ -47,7 +47,7 @@ export default function Home() {
 
   const loadCryptoData = async () => {
     setIsLoading(true);
-    const data = await fetchTopCryptos(250);
+    const data = await fetchTopCryptos(300);
     setCryptos(data);
     if (!selectedAsset && data.length > 0) {
       setSelectedAsset(data[0]);

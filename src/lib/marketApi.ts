@@ -263,7 +263,7 @@ export const initialGoldForexData: GoldForexItem[] = [
   },
 ];
 
-const KNOWN_NAMES: Record<string, string> = {
+const KNOWN_COIN_NAMES: Record<string, string> = {
   BTC: "Bitcoin",
   ETH: "Ethereum",
   SOL: "Solana",
@@ -326,20 +326,115 @@ const KNOWN_NAMES: Record<string, string> = {
   VET: "VeChain",
   FTM: "Fantom",
   THETA: "Theta Network",
+  ZEC: "Zcash",
+  NEO: "NEO",
+  EOS: "EOS",
+  IOTA: "IOTA",
+  ETC: "Ethereum Classic",
+  XMR: "Monero",
+  KSM: "Kusama",
+  EGLD: "MultiversX",
+  TWT: "Trust Wallet Token",
+  CFX: "Conflux",
+  ORDI: "ORDI",
+  SATS: "SATS (Ordinals)",
+  MEME: "Memecoin",
+  BLUR: "Blur",
+  ARKM: "Arkham",
+  ALT: "Altlayer",
+  STRK: "Starknet",
+  W: "Wormhole",
+  ETHFI: "Ether.fi",
+  BB: "BounceBit",
+  NOT: "Notcoin",
+  IO: "io.net",
+  ZK: "ZKsync",
+  ZRO: "LayerZero",
+  DOGS: "DOGS",
+  HMSTR: "Hamster Kombat",
+  CATI: "Catizen",
+  NEIRO: "Neiro",
+  TURBO: "Turbo",
+  BABYDOGE: "Baby Doge Coin",
+  "1000SATS": "1000SATS",
 };
 
-export async function fetchTopCryptos(count: number = 250): Promise<CryptoItem[]> {
+export async function fetchTopCryptos(count: number = 300): Promise<CryptoItem[]> {
+  // 1. Try internal Next.js API route first (runs on server or client)
+  if (typeof window !== "undefined") {
+    try {
+      const res = await fetch(`/api/market/cryptos?count=${count}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.cryptos) && data.cryptos.length > 50) {
+          return data.cryptos;
+        }
+      }
+    } catch (apiErr) {
+      console.warn("Internal cryptos API route error, trying direct Binance...", apiErr);
+    }
+  }
+
+  // 2. Direct Binance 24hr Ticker (High Throughput & No 429 Rate Limits)
   try {
-    // 1. Try CoinGecko API first
+    const binanceRes = await fetch("https://api.binance.com/api/v3/ticker/24hr", {
+      next: { revalidate: 30 },
+    });
+    if (binanceRes.ok) {
+      const binanceData = await binanceRes.json();
+      if (Array.isArray(binanceData) && binanceData.length > 0) {
+        const usdtPairs = binanceData
+          .filter(
+            (item: any) =>
+              item.symbol.endsWith("USDT") &&
+              !item.symbol.includes("UP") &&
+              !item.symbol.includes("DOWN") &&
+              !item.symbol.includes("BEAR") &&
+              !item.symbol.includes("BULL") &&
+              parseFloat(item.lastPrice) > 0 &&
+              parseFloat(item.quoteVolume) > 10000
+          )
+          .sort((a: any, b: any) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume))
+          .slice(0, count);
+
+        return usdtPairs.map((item: any, index: number) => {
+          const rawSymbol = item.symbol.replace("USDT", "").toUpperCase();
+          const cleanName = KNOWN_COIN_NAMES[rawSymbol] || rawSymbol;
+          const price = parseFloat(item.lastPrice);
+          const volume = parseFloat(item.quoteVolume);
+          const change = parseFloat(item.priceChangePercent);
+
+          return {
+            id: rawSymbol.toLowerCase(),
+            symbol: rawSymbol,
+            name: cleanName,
+            current_price: price,
+            price_change_percentage_24h: change,
+            total_volume: volume,
+            market_cap: volume * 18,
+            market_cap_rank: index + 1,
+            high_24h: parseFloat(item.highPrice) || price * 1.05,
+            low_24h: parseFloat(item.lowPrice) || price * 0.95,
+            image: `https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${rawSymbol.toLowerCase()}.png`,
+            category: "crypto",
+            chartSymbol: `BINANCE:${rawSymbol}USDT`,
+          };
+        });
+      }
+    }
+  } catch (binanceErr) {
+    console.warn("Direct Binance ticker fetch failed", binanceErr);
+  }
+
+  // 3. Fallback to CoinGecko if possible
+  try {
     const perPage = Math.min(250, count);
     const res = await fetch(
-      `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=${perPage}&page=1&sparkline=true&price_change_percentage=24h`,
-      { next: { revalidate: 60 } }
+      `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=${perPage}&page=1&sparkline=true&price_change_percentage=24h`
     );
-
     if (res.ok) {
       const rawData = await res.json();
-      if (Array.isArray(rawData) && rawData.length > 20) {
+      if (Array.isArray(rawData) && rawData.length > 10) {
         return rawData.map((c: any) => ({
           id: c.id || c.symbol?.toLowerCase() || "",
           symbol: (c.symbol || "").toUpperCase(),
@@ -356,56 +451,11 @@ export async function fetchTopCryptos(count: number = 250): Promise<CryptoItem[]
         }));
       }
     }
-  } catch (err) {
-    console.warn("CoinGecko API unavailable, loading full Binance market tickers...");
+  } catch (cgErr) {
+    console.warn("CoinGecko fallback failed");
   }
 
-  // 2. Comprehensive Binance Fallback: Fetch ALL 350+ active USDT pairs sorted by 24h volume
-  try {
-    const binanceRes = await fetch("https://api.binance.com/api/v3/ticker/24hr", { next: { revalidate: 30 } });
-    if (binanceRes.ok) {
-      const binanceData = await binanceRes.json();
-      if (Array.isArray(binanceData) && binanceData.length > 0) {
-        const usdtPairs = binanceData
-          .filter(
-            (item: any) =>
-              item.symbol.endsWith("USDT") &&
-              !item.symbol.includes("UP") &&
-              !item.symbol.includes("DOWN") &&
-              !item.symbol.includes("BEAR") &&
-              !item.symbol.includes("BULL")
-          )
-          .sort((a: any, b: any) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume))
-          .slice(0, count);
-
-        return usdtPairs.map((item: any, index: number) => {
-          const rawSymbol = item.symbol.replace("USDT", "").toUpperCase();
-          const cleanName = KNOWN_NAMES[rawSymbol] || rawSymbol;
-          const price = parseFloat(item.lastPrice);
-          const volume = parseFloat(item.quoteVolume);
-          const change = parseFloat(item.priceChangePercent);
-
-          return {
-            id: rawSymbol.toLowerCase(),
-            symbol: rawSymbol,
-            name: cleanName,
-            current_price: price,
-            price_change_percentage_24h: change,
-            total_volume: volume,
-            market_cap: volume * 15,
-            market_cap_rank: index + 1,
-            image: `https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${rawSymbol.toLowerCase()}.png`,
-            category: "crypto",
-            chartSymbol: `BINANCE:${rawSymbol}USDT`,
-          };
-        });
-      }
-    }
-  } catch (binanceErr) {
-    console.warn("Binance ticker fetch failed", binanceErr);
-  }
-
-  // 3. Static Essential Fallback
+  // 4. Static Essential Fallback
   return [
     { id: "btc", symbol: "BTC", name: "Bitcoin", current_price: 83500, price_change_percentage_24h: 2.4, total_volume: 38000000000, market_cap: 1650000000000, market_cap_rank: 1, image: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png", category: "crypto" },
     { id: "eth", symbol: "ETH", name: "Ethereum", current_price: 3420, price_change_percentage_24h: 1.8, total_volume: 2100000000, market_cap: 410000000000, market_cap_rank: 2, image: "https://assets.coingecko.com/coins/images/279/large/ethereum.png", category: "crypto" },

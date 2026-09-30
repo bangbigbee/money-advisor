@@ -132,15 +132,15 @@ export function Navbar({
           </div>
 
           {/* 2. Middle: Integrated Compact Asset Dropdown + Quick Chips */}
-          <div className="flex items-center gap-2 flex-1 justify-center max-w-4xl mx-auto overflow-hidden">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 flex-1 justify-center max-w-5xl mx-auto min-w-0">
             {/* Dropdown Selector */}
-            <div ref={dropdownRef} className="relative min-w-[200px] sm:min-w-[250px] shrink-0">
+            <div ref={dropdownRef} className="relative w-[175px] sm:w-[220px] md:w-[240px] shrink-0">
               <button
                 type="button"
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="w-full flex items-center justify-between gap-2 px-3 py-1.5 sm:py-2 rounded-xl bg-slate-100 dark:bg-[#12162e] border border-slate-200 dark:border-indigo-900/60 hover:border-indigo-500 text-left transition cursor-pointer shadow-sm"
+                className="w-full flex items-center justify-between gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-slate-100 dark:bg-[#12162e] border border-slate-200 dark:border-indigo-900/60 hover:border-indigo-500 text-left transition cursor-pointer shadow-sm"
               >
-                <div className="flex items-center gap-2 overflow-hidden">
+                <div className="flex items-center gap-1.5 sm:gap-2 overflow-hidden">
                   {selectedAsset?.image && (
                     <img
                       src={selectedAsset.image}
@@ -149,20 +149,20 @@ export function Navbar({
                     />
                   )}
                   <div className="truncate">
-                    <div className="flex items-center gap-1.5 leading-tight">
-                      <span className="font-black text-xs sm:text-sm text-slate-900 dark:text-white">
+                    <div className="flex items-center gap-1 sm:gap-1.5 leading-tight">
+                      <span className="font-black text-xs sm:text-sm text-slate-900 dark:text-white truncate">
                         {selectedAsset?.symbol?.toUpperCase() || "CHỌN TÀI SẢN"}
                       </span>
-                      <span className="text-[8px] px-1 py-0.2 rounded font-bold uppercase bg-indigo-500/20 text-indigo-600 dark:text-indigo-300">
+                      <span className="text-[8px] px-1 py-0.2 rounded font-bold uppercase bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 shrink-0">
                         {selectedAsset?.category === "gold" ? "VÀNG" : selectedAsset?.category === "forex" ? "FOREX" : "CRYPTO"}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 shrink-0 font-mono">
+                <div className="flex items-center gap-1 shrink-0 font-mono">
                   {selectedAsset?.current_price && (
-                    <span className="font-bold text-[11px] sm:text-xs text-emerald-600 dark:text-emerald-400">
+                    <span className="font-bold text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400">
                       {selectedAsset.unit?.includes("VND")
                         ? `${(selectedAsset.current_price / 1e6).toFixed(1)}M đ`
                         : `$${selectedAsset.current_price.toLocaleString("en-US", { maximumFractionDigits: selectedAsset.current_price < 1 ? 4 : 2 })}`}
@@ -174,37 +174,37 @@ export function Navbar({
 
               {/* Dropdown Menu Modal */}
               {isDropdownOpen && (
-                <div className="absolute top-full left-0 mt-1.5 w-[320px] sm:w-[380px] max-h-96 rounded-2xl bg-white dark:bg-[#101428] border border-slate-200 dark:border-indigo-900/90 shadow-2xl z-50 overflow-hidden flex flex-col backdrop-blur-2xl">
+                <div className="absolute top-full left-0 mt-1.5 w-[320px] sm:w-[400px] max-h-[460px] rounded-2xl bg-white dark:bg-[#101428] border border-slate-200 dark:border-indigo-900/90 shadow-2xl z-50 overflow-hidden flex flex-col backdrop-blur-2xl">
                   {/* Category Filter Tabs */}
                   <div className="flex items-center gap-1 p-2 bg-slate-50 dark:bg-[#0c0f1f] border-b border-slate-200 dark:border-indigo-950 overflow-x-auto text-[10px] sm:text-[11px] font-bold">
                     <button
                       onClick={() => setCategoryFilter("all")}
-                      className={`px-2 py-1 rounded-lg transition cursor-pointer ${
-                        categoryFilter === "all" ? "bg-indigo-600 text-white" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                      className={`px-2.5 py-1 rounded-lg transition cursor-pointer whitespace-nowrap ${
+                        categoryFilter === "all" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                       }`}
                     >
                       🔥 Tất cả ({allMarketAssets.length})
                     </button>
                     <button
                       onClick={() => setCategoryFilter("crypto")}
-                      className={`px-2 py-1 rounded-lg transition cursor-pointer ${
-                        categoryFilter === "crypto" ? "bg-indigo-600 text-white" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                      className={`px-2.5 py-1 rounded-lg transition cursor-pointer whitespace-nowrap ${
+                        categoryFilter === "crypto" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                       }`}
                     >
-                      🪙 Crypto ({cryptos.length})
+                      🪙 Top Crypto ({cryptos.length})
                     </button>
                     <button
                       onClick={() => setCategoryFilter("gold")}
-                      className={`px-2 py-1 rounded-lg transition cursor-pointer ${
-                        categoryFilter === "gold" ? "bg-amber-600 text-white" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                      className={`px-2.5 py-1 rounded-lg transition cursor-pointer whitespace-nowrap ${
+                        categoryFilter === "gold" ? "bg-amber-600 text-white shadow-sm" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                       }`}
                     >
                       🥇 Vàng
                     </button>
                     <button
                       onClick={() => setCategoryFilter("forex")}
-                      className={`px-2 py-1 rounded-lg transition cursor-pointer ${
-                        categoryFilter === "forex" ? "bg-teal-600 text-white" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                      className={`px-2.5 py-1 rounded-lg transition cursor-pointer whitespace-nowrap ${
+                        categoryFilter === "forex" ? "bg-teal-600 text-white shadow-sm" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                       }`}
                     >
                       💱 Ngoại Tệ
@@ -212,20 +212,28 @@ export function Navbar({
                   </div>
 
                   {/* Search inside dropdown */}
-                  <div className="p-2 border-b border-slate-200 dark:border-indigo-950 flex items-center gap-2 bg-slate-50 dark:bg-[#0d1020]">
-                    <Search className="w-3.5 h-3.5 text-slate-400 shrink-0 ml-1" />
+                  <div className="p-2.5 border-b border-slate-200 dark:border-indigo-950 flex items-center gap-2 bg-slate-50 dark:bg-[#0d1020]">
+                    <Search className="w-4 h-4 text-slate-400 shrink-0 ml-1" />
                     <input
                       type="text"
-                      placeholder="Tìm mã hoặc tên (BTC, ETH, XAU/USD, SJC...)"
+                      placeholder="Tìm kiếm 300+ mã (BTC, ETH, SOL, SUI, XAU, SJC, EUR...)"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       autoFocus
                       className="w-full bg-transparent text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none py-0.5"
                     />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery("")}
+                        className="text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-white px-1.5 py-0.5 rounded"
+                      >
+                        Xóa
+                      </button>
+                    )}
                   </div>
 
                   {/* Asset List */}
-                  <div className="overflow-y-auto max-h-64 p-1 space-y-0.5">
+                  <div className="overflow-y-auto max-h-72 p-1.5 space-y-1">
                     {filteredAssets.map((asset) => {
                       const isSelected = selectedAsset?.symbol?.toUpperCase() === asset.symbol?.toUpperCase();
                       const isGain = (asset.price_change_percentage_24h || 0) >= 0;
@@ -237,34 +245,41 @@ export function Navbar({
                             setIsDropdownOpen(false);
                             setSearchQuery("");
                           }}
-                          className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg cursor-pointer transition-all ${
+                          className={`flex items-center justify-between px-2.5 py-2 rounded-xl cursor-pointer transition-all ${
                             isSelected
-                              ? "bg-indigo-600/20 border border-indigo-500/50 text-indigo-600 dark:text-white font-bold"
+                              ? "bg-indigo-600/20 border border-indigo-500/50 text-indigo-600 dark:text-white font-bold shadow-sm"
                               : "hover:bg-slate-100 dark:hover:bg-[#181e3d] text-slate-700 dark:text-slate-300 border border-transparent"
                           }`}
                         >
-                          <div className="flex items-center gap-2">
-                            <img src={asset.image} alt="" className="w-5 h-5 rounded-full shrink-0" />
-                            <div>
-                              <div className="flex items-center gap-1 leading-none">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <img
+                              src={asset.image}
+                              alt=""
+                              className="w-6 h-6 rounded-full shrink-0 border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-0.5"
+                              onError={(e: any) => {
+                                e.target.src = "https://assets.coingecko.com/coins/images/1/large/bitcoin.png";
+                              }}
+                            />
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5 leading-none">
                                 <span className="text-xs font-bold text-slate-900 dark:text-white">{asset.symbol.toUpperCase()}</span>
-                                <span className="text-[8px] px-1 rounded uppercase font-bold text-slate-500 dark:text-slate-400 bg-slate-200 dark:bg-zinc-800">
+                                <span className="text-[8px] px-1 py-0.2 rounded uppercase font-bold text-slate-500 dark:text-slate-400 bg-slate-200 dark:bg-zinc-800">
                                   {asset.category}
                                 </span>
                               </div>
-                              <span className="text-[9px] text-slate-500 dark:text-slate-400 block truncate max-w-[140px]">
+                              <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate max-w-[150px] mt-0.5">
                                 {asset.name}
                               </span>
                             </div>
                           </div>
 
-                          <div className="text-right font-mono">
+                          <div className="text-right font-mono shrink-0 pl-2">
                             <div className="text-xs font-semibold text-slate-900 dark:text-white">
                               {asset.unit?.includes("VND")
                                 ? `${asset.current_price?.toLocaleString("vi-VN")} đ`
                                 : `$${asset.current_price?.toLocaleString("en-US", { maximumFractionDigits: asset.current_price < 1 ? 4 : 2 })}`}
                             </div>
-                            <div className={`text-[9px] font-bold ${isGain ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
+                            <div className={`text-[10px] font-bold ${isGain ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
                               {isGain ? "+" : ""}{(asset.price_change_percentage_24h || 0).toFixed(2)}%
                             </div>
                           </div>
@@ -273,8 +288,8 @@ export function Navbar({
                     })}
 
                     {filteredAssets.length === 0 && (
-                      <div className="p-4 text-center text-xs text-slate-500 dark:text-slate-400">
-                        Không tìm thấy tài sản phù hợp
+                      <div className="p-5 text-center text-xs text-slate-500 dark:text-slate-400">
+                        Không tìm thấy tài sản khớp với &quot;{searchQuery}&quot;
                       </div>
                     )}
                   </div>
@@ -282,9 +297,11 @@ export function Navbar({
               )}
             </div>
 
-            {/* Quick Selection Chips */}
-            <div className="hidden md:flex items-center gap-1 overflow-x-auto scrollbar-none">
-              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold hidden lg:inline mr-0.5 shrink-0">Phổ biến:</span>
+            {/* Quick Selection Chips (Always permanently visible & scrollable) */}
+            <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto scrollbar-none py-1 shrink min-w-0">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold hidden xl:inline mr-0.5 shrink-0">
+                Phổ biến:
+              </span>
               {[
                 { sym: "BTC", label: "BTC" },
                 { sym: "ETH", label: "ETH" },
@@ -301,9 +318,18 @@ export function Navbar({
                   <button
                     key={item.sym}
                     onClick={() => {
-                      if (matchAsset) onSelectAsset(matchAsset);
+                      if (matchAsset) {
+                        onSelectAsset(matchAsset);
+                      } else {
+                        onSelectAsset({
+                          symbol: item.sym,
+                          name: item.label,
+                          category: item.sym.includes("XAU") || item.sym.includes("SJC") ? "gold" : item.sym.includes("USD") ? "forex" : "crypto",
+                          chartSymbol: item.sym.includes("XAU") || item.sym.includes("SJC") ? "OANDA:XAUUSD" : item.sym.includes("USD") ? `FX:${item.sym}` : `BINANCE:${item.sym}USDT`,
+                        });
+                      }
                     }}
-                    className={`px-2 py-1 rounded-lg text-[11px] font-bold transition cursor-pointer whitespace-nowrap ${
+                    className={`px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-bold transition cursor-pointer shrink-0 whitespace-nowrap ${
                       isSelected
                         ? "bg-indigo-600 text-white shadow-sm border border-indigo-400/40"
                         : "bg-slate-100 dark:bg-[#12162e] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-[#1a2040] border border-slate-200 dark:border-indigo-950"
